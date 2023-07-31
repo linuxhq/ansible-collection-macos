@@ -2,7 +2,7 @@
 - name: Ensure liquidprompt package is present
   tags:
     - liquidprompt
-  community.general.homebrew_cask:
+  community.general.homebrew:
     name: liquidprompt
     state: present
     update_homebrew: false
