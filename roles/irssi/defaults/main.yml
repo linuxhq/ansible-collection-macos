@@ -3,13 +3,13 @@ irssi_config_dir: "{{ lookup('env', 'HOME') }}/.irssi"
 irssi_config_file: "{{ irssi_config_dir }}/config"
 irssi_channels:
   - name: '#linuxhq'
-    autojoin: true
+    autojoin: 'yes'
     chatnet: linuxhq
 irssi_chatnets:
   linuxhq:
     type: IRC
 irssi_ignores:
-  - exception: false
+  - exception: 'no'
     level:
       - CTCPS
       - DCC
@@ -17,11 +17,11 @@ irssi_ignores:
       - '*'
 irssi_servers:
   - address: irc.linuxhq.org
-    autoconnect: true
+    autoconnect: 'yes'
     chatnet: linuxhq
     port: 6697
-    ssl_verify: true
-    use_ssl: true
+    ssl_verify: 'yes'
+    use_ssl: 'yes'
 irssi_settings:
   core:
     nick: linuxhq
