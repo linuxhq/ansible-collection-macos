@@ -1,0 +1,5 @@
+---
+adguard_defaults: []
+adguard_domain: com.adguard.Adguard
+adguard_package: adguard
+...
