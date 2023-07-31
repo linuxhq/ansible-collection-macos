@@ -25,6 +25,10 @@ An example playbook utilizing all roles available in this collection
       connection: local
 
       vars:
+        adguard_defaults:
+          - key: PopupBlockerEnabled
+            type: bool
+            value: true
         appzapper_defaults:
           - key: 'Registration Code'
             type: string
@@ -42,6 +46,7 @@ An example playbook utilizing all roles available in this collection
             value: true
 
       roles:
+        - linuxhq.macos.adguard
         - linuxhq.macos.appzapper
         - linuxhq.macos.monitorcontrol
         - linuxhq.macos.protonvpn
