@@ -16,5 +16,5 @@
     mode: 0640
     src: config.j2
   notify:
-    - restart privoxy
+    - Restart privoxy
 ...

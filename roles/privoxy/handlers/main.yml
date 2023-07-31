@@ -1,6 +1,9 @@
 ---
-- name: restart privoxy
+- name: Restart privoxy
+  tags:
+    - privoxy
   ansible.builtin.command:
     cmd: >
       brew services restart privoxy
+  chagned_when: false
 ...
