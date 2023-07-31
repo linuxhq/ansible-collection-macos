@@ -1,6 +1,6 @@
 # monitorcontrol
 
-[![License](https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat)]
+![License](https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat)
 
 Control your external monitor brightness, contrast or volume
 
