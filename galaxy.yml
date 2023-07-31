@@ -6,7 +6,7 @@ build_ignore:
 description: A collection of macos roles
 dependencies:
   community.general: '*'
-documentation: https://github.com/linuxhq/ansible-collection-macos/README.md
+documentation: https://github.com/linuxhq/ansible-collection-macos/blob/main/README.md
 homepage: https://www.linuxhq.org
 issues: https://github.com/linuxhq/ansible-collection-macos/issues
 license:
