@@ -52,6 +52,10 @@ An example playbook utilizing all roles available in this collection
           - key: AutoConnect
             type: bool
             value: true
+        sizeup_defaults:
+          - key: MultiMonitorResizeWindowProportionally
+            type: bool
+            value: true
 
       roles:
         - linuxhq.macos.adguard
@@ -60,3 +64,4 @@ An example playbook utilizing all roles available in this collection
         - linuxhq.macos.iterm2
         - linuxhq.macos.monitorcontrol
         - linuxhq.macos.protonvpn
+        - linuxhq.macos.sizeup
