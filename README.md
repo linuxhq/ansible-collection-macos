@@ -56,6 +56,10 @@ An example playbook utilizing all roles available in this collection
           - key: MultiMonitorResizeWindowProportionally
             type: bool
             value: true
+        textual_defaults:
+          - key: CopyTextSelectionOnMouseUp
+            type: bool
+            value: true
 
       roles:
         - linuxhq.macos.adguard
@@ -65,3 +69,4 @@ An example playbook utilizing all roles available in this collection
         - linuxhq.macos.monitorcontrol
         - linuxhq.macos.protonvpn
         - linuxhq.macos.sizeup
+        - linuxhq.macos.textual
