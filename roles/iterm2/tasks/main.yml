@@ -21,7 +21,7 @@
     value: "{{ _default.value }}"
   loop: "{{ iterm2_defaults }}"
   loop_control:
-    label: "{{ _default.name | default(none) }}"
+    label: "{{ _default.key | default(none) }}"
     loop_var: _default
   when:
     - _default.key is defined
