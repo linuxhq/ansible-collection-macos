@@ -1,0 +1,64 @@
+# {{ ansible_managed }}
+
+{% if liquidprompt_source | length > 0 %}
+{%   for source in liquidprompt_source %}
+source {{ source }}
+{%   endfor %}
+{% endif %}
+
+{% if liquidprompt_ps1_file is not none %}
+LP_PS1_FILE={{ liquidprompt_ps1_file }}
+{% endif %}
+
+LP_BATTERY_THRESHOLD={{ liquidprompt_battery_threshold }}
+LP_DISABLED_VCS_PATH="{{ liquidprompt_disabled_vcs_path | join(':') }}"
+LP_ENABLE_AWS_PROFILE={{ '1' if liquidprompt_enable_aws_profile | bool else '0' }}
+LP_ENABLE_BATT={{ '1' if liquidprompt_enable_batt | bool else '0' }}
+LP_ENABLE_BZR={{ '1' if liquidprompt_enable_bzr | bool else '0' }}
+LP_ENABLE_COLOR={{ '1' if liquidprompt_enable_color | bool else '0' }}
+LP_ENABLE_CONTAINER={{ '1' if liquidprompt_enable_container | bool else '0' }}
+LP_ENABLE_DETACHED_SESSIONS={{ '1' if liquidprompt_enable_detached_sessions | bool else '0' }}
+LP_ENABLE_DIRSTACK={{ '1' if liquidprompt_enable_dirstack | bool else '0' }}
+LP_ENABLE_ERROR={{ '1' if liquidprompt_enable_error | bool else '0' }}
+LP_ENABLE_FOSSIL={{ '1' if liquidprompt_enable_fossil | bool else '0' }}
+LP_ENABLE_FQDN={{ '1' if liquidprompt_enable_fqdn | bool else '0' }}
+LP_ENABLE_GIT={{ '1' if liquidprompt_enable_git | bool else '0' }}
+LP_ENABLE_HG={{ '1' if liquidprompt_enable_hg | bool else '0' }}
+LP_ENABLE_JOBS={{ '1' if liquidprompt_enable_jobs | bool else '0' }}
+LP_ENABLE_KUBECONTEXT={{ '1' if liquidprompt_enable_kubecontext | bool else '0' }}
+LP_ENABLE_KUBE_NAMESPACE={{ '1' if liquidprompt_enable_kube_namespace | bool else '0' }}
+LP_ENABLE_LOAD={{ '1' if liquidprompt_enable_load | bool else '0' }}
+LP_ENABLE_NODE_VENV={{ '1' if liquidprompt_enable_node_venv | bool else '0' }}
+LP_ENABLE_PERM={{ '1' if liquidprompt_enable_perm | bool else '0' }}
+LP_ENABLE_PROXY={{ '1' if liquidprompt_enable_proxy | bool else '0' }}
+LP_ENABLE_RUBY_VENV={{ '1' if liquidprompt_enable_ruby_venv | bool else '0' }}
+LP_ENABLE_RUNTIME={{ '1' if liquidprompt_enable_runtime | bool else '0' }}
+LP_ENABLE_RUNTIME_BELL={{ '1' if liquidprompt_enable_runtime_bell | bool else '0' }}
+LP_ENABLE_SCLS={{ '1' if liquidprompt_enable_scls | bool else '0' }}
+LP_ENABLE_SCREEN_TITLE={{ '1' if liquidprompt_enable_screen_title | bool else '0' }}
+LP_ENABLE_SHLVL={{ '1' if liquidprompt_enable_shlvl | bool else '0' }}
+LP_ENABLE_SHORTEN_PATH={{ '1' if liquidprompt_enable_shorten_path | bool else '0' }}
+LP_ENABLE_SSH_COLORS={{ '1' if liquidprompt_enable_ssh_colors | bool else '0' }}
+LP_ENABLE_SUDO={{ '1' if liquidprompt_enable_sudo | bool else '0' }}
+LP_ENABLE_SVN={{ '1' if liquidprompt_enable_svn | bool else '0' }}
+LP_ENABLE_TEMP={{ '1' if liquidprompt_enable_temp | bool else '0' }}
+LP_ENABLE_TERRAFORM={{ '1' if liquidprompt_enable_terraform | bool else '0' }}
+LP_ENABLE_TIME={{ '1' if liquidprompt_enable_time | bool else '0' }}
+LP_ENABLE_TITLE={{ '1' if liquidprompt_enable_title | bool else '0' }}
+LP_ENABLE_TITLE_COMMAND={{ '1' if liquidprompt_enable_title_command | bool else '0' }}
+LP_ENABLE_VCS_ROOT={{ '1' if liquidprompt_enable_vcs_root | bool else '0' }}
+LP_ENABLE_VIRTUALENV={{ '1' if liquidprompt_enable_virtualenv | bool else '0' }}
+LP_ENABLE_WIFI_STRENGTH={{ '1' if liquidprompt_enable_wifi_strength | bool else '0' }}
+
+LP_HOSTNAME_ALWAYS={{ liquidprompt_hostname_always }}
+LP_LOAD_THRESHOLD={{ liquidprompt_load_threshold }}
+LP_PATH_CHARACTER_KEEP={{ liquidprompt_path_character_keep }}
+LP_PATH_KEEP={{ liquidprompt_path_keep }}
+LP_PATH_LENGTH={{ liquidprompt_path_length }}
+LP_PERCENTS_ALWAYS={{ '1' if liquidprompt_percents_always | bool else '0' }}
+LP_RUNTIME_THRESHOLD={{ liquidprompt_runtime_threshold }}
+LP_TEMP_THRESHOLD={{ liquidprompt_temp_threshold }}
+LP_TIME_ANALOG={{ '1' if liquidprompt_time_analog | bool else '0' }}
+LP_USER_ALWAYS={{ '1' if liquidprompt_user_always | bool else '0' }}
+
+# vim: set et sts=4 sw=4 tw=120 ft=sh:
