@@ -40,6 +40,10 @@ An example playbook utilizing all roles available in this collection
           - key: statusBarIconBlackWhite
             type: bool
             value: false
+        iterm2_defaults:
+          - key: PromptOnQuit
+            type: bool
+            value: false
         monitorcontrol_defaults:
           - key: allScreens
             type: bool
@@ -53,5 +57,6 @@ An example playbook utilizing all roles available in this collection
         - linuxhq.macos.adguard
         - linuxhq.macos.appzapper
         - linuxhq.macos.hermes
+        - linuxhq.macos.iterm2
         - linuxhq.macos.monitorcontrol
         - linuxhq.macos.protonvpn

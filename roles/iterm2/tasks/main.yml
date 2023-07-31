@@ -1,0 +1,29 @@
+---
+- name: Ensure iterm2 package is present
+  tags:
+    - iterm2
+  community.general.homebrew_cask:
+    name: "{{ iterm2_package }}"
+    state: present
+    update_homebrew: false
+    upgrade_all: false
+
+- name: Ensure iterm2 defaults are present
+  tags:
+    - iterm2
+  community.general.osx_defaults:
+    array_add: "{{ _default.array_add | default(omit) }}"
+    domain: "{{ iterm2_domain }}"
+    host: "{{ _default.host | default(omit) }}"
+    key: "{{ _default.key }}"
+    state: present
+    type: "{{ _default.type | default('string') }}"
+    value: "{{ _default.value }}"
+  loop: "{{ iterm2_defaults }}"
+  loop_control:
+    label: "{{ _default.name | default(none) }}"
+    loop_var: _default
+  when:
+    - _default.key is defined
+    - _default.value is defined
+...
