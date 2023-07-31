@@ -1,0 +1,5 @@
+---
+monitorcontrol_defaults: []
+monitorcontrol_domain: me.guillaumeb.MonitorControl
+monitorcontrol_package: monitorcontrol
+...
