@@ -1,0 +1,6 @@
+---
+- name: restart privoxy
+  ansible.builtin.command:
+    cmd: >
+      brew services restart privoxy
+...
