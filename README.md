@@ -1,8 +1,6 @@
 # linuxhq.macos
 
-[![MIT licensed][badge-license]][link-license]
-[![Galaxy Collection][badge-collection]][link-galaxy]
-[![CI][badge-gh-actions]][link-gh-actions]
+[![Ansible Galaxy](https://img.shields.io/badge/collection-linuxhq.macos-blue)](https://galaxy.ansible.com/linuxhq/macos)
 
 A collection of macos roles
 
