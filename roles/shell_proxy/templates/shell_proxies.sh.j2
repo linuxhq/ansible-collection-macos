@@ -1,0 +1,41 @@
+# {{ shell_proxy_file | basename }}
+
+{% if shell_proxy_noproxy | length > 0 %}
+export no_proxy="{{ shell_proxy_noproxy | join(',') }}"
+{% endif %}
+{% if shell_proxy_ftp | bool %}
+{%   set shell_proxy_ftp_credentials = '' %}
+{%   if shell_proxy_ftp_username is not none and shell_proxy_ftp_password is not none %}
+{%     set shell_proxy_ftp_credentials = [ shell_proxy_ftp_username,
+                                           shell_proxy_ftp_password + '@' ]
+                                         | join(':') %}
+{%   endif %}
+export ftp_proxy="{{ shell_proxy_ftp_protocol + "://" +
+                     shell_proxy_ftp_credentials +
+                     shell_proxy_ftp_hostname + ':' +
+                     shell_proxy_ftp_port | string }}"
+{% endif %}
+{% if shell_proxy_http | bool %}
+{%   set shell_proxy_http_credentials = '' %}
+{%   if shell_proxy_http_username is not none and shell_proxy_http_password is not none %}
+{%     set shell_proxy_http_credentials = [ shell_proxy_http_username,
+                                            shell_proxy_http_password + '@' ]
+                                          | join(':') %}
+{%   endif %}
+export http_proxy="{{ shell_proxy_http_protocol + "://" +
+                      shell_proxy_http_credentials +
+                      shell_proxy_http_hostname + ':' +
+                      shell_proxy_http_port | string }}"
+{% endif %}
+{% if shell_proxy_https | bool %}
+{%   set shell_proxy_https_credentials = '' %}
+{%   if shell_proxy_https_username is not none and shell_proxy_https_password is not none %}
+{%     set shell_proxy_https_credentials = [ shell_proxy_https_username,
+                                             shell_proxy_https_password + '@' ]
+                                           | join(':') %}
+{%   endif %}
+export https_proxy="{{ shell_proxy_https_protocol + "://" +
+                       shell_proxy_https_credentials +
+                       shell_proxy_https_hostname + ':' +
+                       shell_proxy_https_port | string }}"
+{% endif %}
