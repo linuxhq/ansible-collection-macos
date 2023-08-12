@@ -16,6 +16,8 @@ namespace: linuxhq
 readme: README.md
 repository: https://github.com/linuxhq/ansible-collection-macos
 tags:
+  - application
   - macos
+  - tools
 version: 1.0.0
 ...
