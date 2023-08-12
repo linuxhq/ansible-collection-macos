@@ -19,7 +19,7 @@ A collection of macos roles
 
 # Playbook
 
-An example playbook utilizing all roles available in this collection
+An example playbook utilizing roles available in this collection
 
     - hosts: localhost
       connection: local

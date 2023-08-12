@@ -1,0 +1,80 @@
+# {{ ansible_managed }}
+
+{% if irssi_channels | length > 0 %}
+channels = (
+{%   for c in irssi_channels | sort %}
+{%     if c.name is defined and c.chatnet is defined %}
+{%       set autojoin = 'yes' if c.autojoin is defined and c.autojoin else 'no' %}
+  { name = "{{ c.name }}"; chatnet = "{{ c.chatnet }}"; autojoin = "{{ autojoin }}"; }{% if not loop.last %},{% endif %}
+
+{%     endif %}
+{%   endfor -%}
+);
+{% endif %}
+
+{% if irssi_chatnets | length > 0 %}
+chatnets = {
+{%   for c in irssi_chatnets.keys() | sort %}
+{%     if irssi_chatnets[c].type is defined %}
+  {{ c }} = {
+    autosendcmd = "{{ irssi_chatnets[c].autosendcmd or '' }}";
+    cmdmax = "{{ irssi_chatnets[c].cmdmax or '5' }}";
+    cmdspeed = "{{ irssi_chatnets[c].cmdspeed or '2200msec' }}";
+    host = "{{ irssi_chatnets[c].host or '' }}";
+    max_kicks = "{{ irssi_chatnets[c].max_kicks or '1' }}";
+    max_modes = "{{ irssi_chatnets[c].max_modes or '3' }}";
+    max_msgs = "{{ irssi_chatnets[c].max_msgs or '1' }}";
+    max_whois = "{{ irssi_chatnets[c].max_whois or '4' }}";
+    nick = "{{ irssi_chatnets[c].nick or irssi_settings.core.nick }}";
+    realname = "{{ irssi_chatnets[c].realname or irssi_settings.core.real_name }}";
+    username = "{{ irssi_chatnets[c].username or irssi_settings.core.user_name }}";
+    type = "{{ irssi_chatnets[c].type }}";
+  };
+{%     endif %}
+{%   endfor %}
+};
+{% endif %}
+
+{% if irssi_ignores | length > 0 %}
+ignores = (
+{%   for i in irssi_ignores | sort %}
+{%     if i.level is defined %}
+{%      set exception = 'yes' if i.exception is defined and i.exception | bool else 'no' %}
+{%      set level = i.level | join(' ') %}
+{%      set mask = i.mask | join(',') if i.mask is defined else '*' %}
+  { exception = "{{ exception }}"; level = "{{ level }}"; mask = "{{ mask }}"; }{% if not loop.last %},{% endif %}
+
+{%     endif %}
+{%   endfor -%}
+);
+{% endif %}
+
+{% if irssi_servers | length > 0 %}
+servers = (
+{%   for s in irssi_servers | sort %}
+{%     if s.address is defined and s.chatnet is defined %}
+  {
+    address = "{{ s.address }}";
+    autoconnect = "{{ 'yes' if s.autoconnect is defined and s.autoconnect | bool else 'no' }}";
+    chatnet = "{{ s.chatnet }}";
+    port = "{{ s.port or '6667' }}";
+    ssl_verify = "{{ 'yes' if s.ssl_verify is defined and s.ssl_verify | bool else 'no' }}";
+    use_ssl = "{{ 'yes' if s.use_ssl is defined and s.use_ssl | bool else 'no' }}";
+  }{% if not loop.last %},{% endif %}
+
+{%     endif %}
+{%   endfor -%}
+);
+{% endif %}
+
+settings = {
+  core = {
+    nick = "{{ irssi_settings.core.nick }}";
+    real_name = "{{ irssi_settings.core.real_name }}";
+    user_name = "{{ irssi_settings.core.user_name }}";
+  };
+  "fe-text" = { actlist_sort = "refnum"; };
+{% if irssi_theme is not none %}
+  "fe-common/core" = { theme = "{{ irssi_theme|basename|splitext|first }}"; };
+{% endif %}
+};
