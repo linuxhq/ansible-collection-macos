@@ -12,7 +12,7 @@
   tags:
     - liquidprompt
   ansible.builtin.template:
-    dest: "{{ liquidprompt_dst }}/.liquidpromptrc"
+    dest: "{{ liquidprompt_dest }}/.liquidpromptrc"
     mode: 0644
     src: liquidpromptrc.j2
 ...
