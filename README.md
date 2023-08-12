@@ -44,6 +44,8 @@ An example playbook utilizing all roles available in this collection
           - key: PromptOnQuit
             type: bool
             value: false
+        liquidprompt_battery_threshold: 50
+        liquidprompt_enable_time: true
         monitorcontrol_defaults:
           - key: allScreens
             type: bool
@@ -66,6 +68,7 @@ An example playbook utilizing all roles available in this collection
         - linuxhq.macos.appzapper
         - linuxhq.macos.hermes
         - linuxhq.macos.iterm2
+        - linuxhq.macos.liquidprompt
         - linuxhq.macos.monitorcontrol
         - linuxhq.macos.protonvpn
         - linuxhq.macos.sizeup
