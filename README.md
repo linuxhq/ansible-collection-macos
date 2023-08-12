@@ -1,6 +1,6 @@
 # linuxhq.macos
 
-![License](https://img.shields.io/badge/license-GPLv3-lightgreen)
+[![License](https://img.shields.io/badge/license-GPLv3-lightgreen)](https://www.gnu.org/licenses/gpl-3.0.en.html#license-text)
 [![Ansible Galaxy](https://img.shields.io/badge/collection-linuxhq.macos-blue)](https://galaxy.ansible.com/linuxhq/macos)
 [![Lint](https://github.com/linuxhq/ansible-collection-macos/actions/workflows/linting.yml/badge.svg)](https://github.com/linuxhq/ansible-collection-macos/actions/workflows/linting.yml)
 [![Release](https://github.com/linuxhq/ansible-collection-macos/actions/workflows/release.yml/badge.svg)](https://github.com/linuxhq/ansible-collection-macos/actions/workflows/release.yml)
