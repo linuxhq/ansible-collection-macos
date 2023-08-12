@@ -1,6 +1,6 @@
 # adguard
 
-[![License](https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat)]
+![License](https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat)
 
 The world's most advanced ad blocker
 
