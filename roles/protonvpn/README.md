@@ -1,6 +1,6 @@
 # protonvpn
 
-[![License](https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat)](COPYING)
+[![License](https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat)]
 
 Secure internet anywhere
 

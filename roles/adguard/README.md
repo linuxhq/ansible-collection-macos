@@ -1,8 +1,8 @@
-# appzapper
+# adguard
 
 [![License](https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat)]
 
-The uninstaller Apple forgot
+The world's most advanced ad blocker
 
 ## Requirements
 
@@ -12,9 +12,9 @@ The uninstaller Apple forgot
 
 Available variables are listed below, along with default values:
 
-    appzapper_defaults: []
-    appzapper_domain: com.appzapper.AppZapper
-    appzapper_package: appzapper
+    adguard_defaults: []
+    adguard_domain: com.adguard.Adguard
+    adguard_package: adguard
 
 ## Dependencies
 
@@ -25,21 +25,33 @@ None
     - hosts: workstation
       connection: local
       roles:
-        - role: linuxhq.macos.appzapper
-          appzapper_defaults:
-            - key: AppleAppsSafe
+        - role: linuxhq.macos.adguard
+          adguard_defaults:
+            - key: FilteringEnabled
               type: bool
               value: true
-            - key: DefaultsSet
+            - key: FirstRun
+              type: bool
+              value: false
+            - key: KextAllowed
               type: bool
               value: true
-            - key: 'Registration Code'
-              type: string
-              value: APZP-000-000-000-000
-            - key: 'Registration Name'
-              type: string
-              value: 'Taylor Kimball'
-            - key: ZapEffects
+            - key: PopupBlockerEnabled
+              type: bool
+              value: true
+            - key: PrivacyProtectionEnabled
+              type: bool
+              value: true
+            - key: SUHasLaunchedBefore
+              type: bool
+              value: true
+            - key: SafebrowsingEnabled
+              type: bool
+              value: true
+            - key: StartAtLogin
+              type: bool
+              value: true
+            - key: WebOfTrustEnabled
               type: bool
               value: true
 
