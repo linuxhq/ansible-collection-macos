@@ -50,6 +50,10 @@ An example playbook utilizing all roles available in this collection
           - key: allScreens
             type: bool
             value: true
+        privoxy_forward_socks5t:
+          - target_pattern: /
+            socks_proxy: 127.0.0.1:9050
+            http_parent: '.'
         protonvpn_defaults:
           - key: AutoConnect
             type: bool
@@ -70,6 +74,7 @@ An example playbook utilizing all roles available in this collection
         - linuxhq.macos.iterm2
         - linuxhq.macos.liquidprompt
         - linuxhq.macos.monitorcontrol
+        - linuxhq.macos.privoxy
         - linuxhq.macos.protonvpn
         - linuxhq.macos.sizeup
         - linuxhq.macos.textual
