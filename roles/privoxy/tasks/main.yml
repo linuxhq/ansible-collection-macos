@@ -2,7 +2,7 @@
 - name: Ensure privoxy package is present
   tags:
     - privoxy
-  community.general.homebrew_cask:
+  community.general.homebrew:
     name: privoxy
     state: present
     update_homebrew: false

@@ -1,0 +1,58 @@
+---
+- name: Ensure irssi package is present
+  tags:
+    - irssi
+  community.general.homebrew:
+    name: irssi
+    state: present
+    update_homebrew: false
+    upgrade_all: false
+
+- name: Ensure irssi configuration directories are present
+  tags:
+    - irssi
+  ansible.builtin.file:
+    mode: '0700'
+    path: "{{ _directory }}"
+    state: directory
+  loop:
+    - "{{ irssi_config_dir }}"
+    - "{{ irssi_config_dir }}/scripts"
+    - "{{ irssi_config_dir }}/scripts/autorun"
+  loop_control:
+    label: "{{ _directory }}"
+    loop_var: _directory
+
+- name: Ensure irssi scripts are present
+  tags:
+    - irssi
+  ansible.builtin.template:
+    dest: "{{ irssi_config_dir }}/scripts/autorun/{{ _script.name }}"
+    mode: '0600'
+    src: scripts.j2
+  loop: "{{ irssi_scripts }}"
+  loop_control:
+    label: "{{ _script.name }}"
+    loop_var: _script
+  when:
+    - _script.name is defined
+    - _script.base64 is defined
+
+- name: Ensure irssi theme is gathered
+  tags:
+    - irssi
+  ansible.builtin.get_url:
+    dest: "{{ irssi_config_dir }}"
+    mode: '0600'
+    url: "{{ irssi_theme }}"
+  when:
+    - irssi_theme is not none
+
+- name: Ensure irssi configurations are present
+  tags:
+    - irssi
+  ansible.builtin.template:
+    dest: "{{ irssi_config_file }}"
+    mode: '0600'
+    src: config.j2
+...
