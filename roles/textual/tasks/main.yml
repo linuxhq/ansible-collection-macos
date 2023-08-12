@@ -1,0 +1,29 @@
+---
+- name: Ensure textual package is present
+  tags:
+    - textual
+  community.general.homebrew_cask:
+    name: "{{ textual_package }}"
+    state: present
+    update_homebrew: false
+    upgrade_all: false
+
+- name: Ensure textual defaults are present
+  tags:
+    - textual
+  community.general.osx_defaults:
+    array_add: "{{ _default.array_add | default(omit) }}"
+    domain: "{{ textual_domain }}"
+    host: "{{ _default.host | default(omit) }}"
+    key: "{{ _default.key }}"
+    state: present
+    type: "{{ _default.type | default('string') }}"
+    value: "{{ _default.value }}"
+  loop: "{{ textual_defaults }}"
+  loop_control:
+    label: "{{ _default.name | default(none) }}"
+    loop_var: _default
+  when:
+    - _default.key is defined
+    - _default.value is defined
+...
