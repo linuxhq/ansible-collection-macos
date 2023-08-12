@@ -1,0 +1,16 @@
+---
+dependencies: []
+galaxy_info:
+  role_name: liquidprompt
+  author: Taylor Kimball
+  description: An adaptive prompt for bash and zsh
+  license: GPLv3
+  min_ansible_version: 2.14.0
+  platforms:
+    - name: macOS
+      versions:
+        - all
+  galaxy_tags:
+    - liquidprompt
+    - macos
+...
