@@ -36,6 +36,10 @@ An example playbook utilizing all roles available in this collection
           - key: 'Registration Name'
             type: string
             value: 'Taylor Kimball'
+        hermes_defaults:
+          - key: statusBarIconBlackWhite
+            type: bool
+            value: false
         monitorcontrol_defaults:
           - key: allScreens
             type: bool
@@ -48,5 +52,6 @@ An example playbook utilizing all roles available in this collection
       roles:
         - linuxhq.macos.adguard
         - linuxhq.macos.appzapper
+        - linuxhq.macos.hermes
         - linuxhq.macos.monitorcontrol
         - linuxhq.macos.protonvpn
