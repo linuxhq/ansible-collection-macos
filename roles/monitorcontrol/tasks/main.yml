@@ -1,25 +1,25 @@
 ---
-- name: Ensure protonvpn package is present
+- name: Ensure monitorcontrol package is present
   tags:
-    - protonvpn
+    - monitorcontrol
   community.general.homebrew_cask:
-    name: "{{ protonvpn_package }}"
+    name: "{{ monitorcontrol_package }}"
     state: present
     update_homebrew: false
     upgrade_all: false
 
-- name: Ensure protonvpn defaults are present
+- name: Ensure monitorcontrol defaults are present
   tags:
-    - protonvpn
+    - monitorcontrol
   community.general.osx_defaults:
     array_add: "{{ _default.array_add | default(omit) }}"
-    domain: "{{ protonvpn_domain }}"
+    domain: "{{ monitorcontrol_domain }}"
     host: "{{ _default.host | default(omit) }}"
     key: "{{ _default.key }}"
     state: present
     type: "{{ _default.type | default('string') }}"
     value: "{{ _default.value }}"
-  loop: "{{ protonvpn_defaults }}"
+  loop: "{{ monitorcontrol_defaults }}"
   loop_control:
     label: "{{ _default.name | default(none) }}"
     loop_var: _default
