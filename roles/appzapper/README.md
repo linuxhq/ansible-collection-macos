@@ -1,6 +1,6 @@
 # appzapper
 
-[![License](https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat)]
+![License](https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat)
 
 The uninstaller Apple forgot
 
