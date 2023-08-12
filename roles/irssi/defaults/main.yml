@@ -10,11 +10,8 @@ irssi_chatnets:
     type: IRC
 irssi_ignores:
   - exception: 'no'
-    level:
-      - CTCPS
-      - DCC
-    mask:
-      - '*'
+    level: 'CTCPS DCC'
+    mask: '*'
 irssi_servers:
   - address: irc.linuxhq.org
     autoconnect: 'yes'
