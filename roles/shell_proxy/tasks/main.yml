@@ -1,0 +1,9 @@
+---
+- name: Ensure shell proxy settings are present
+  tags:
+    - shell_proxy
+  ansible.builtin.template:
+    dest: "{{ shell_proxy_file }}"
+    mode: '0600'
+    src: shell_proxies.sh.j2
+...
