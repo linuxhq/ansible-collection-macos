@@ -20,10 +20,15 @@ An example playbook utilizing all roles available in this collection
       connection: local
 
       vars:
+        monitorcontrol_defaults:
+          - key: allScreens
+            type: bool
+            value: true
         protonvpn_defaults:
           - key: AutoConnect
             type: bool
             value: true
 
       roles:
+        - linuxhq.macos.monitorcontrol
         - linuxhq.macos.protonvpn
