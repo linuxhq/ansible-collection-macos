@@ -1,0 +1,29 @@
+---
+- name: Ensure sizeup package is present
+  tags:
+    - sizeup
+  community.general.homebrew_cask:
+    name: "{{ sizeup_package }}"
+    state: present
+    update_homebrew: false
+    upgrade_all: false
+
+- name: Ensure sizeup defaults are present
+  tags:
+    - sizeup
+  community.general.osx_defaults:
+    array_add: "{{ _default.array_add | default(omit) }}"
+    domain: "{{ sizeup_domain }}"
+    host: "{{ _default.host | default(omit) }}"
+    key: "{{ _default.key }}"
+    state: present
+    type: "{{ _default.type | default('string') }}"
+    value: "{{ _default.value }}"
+  loop: "{{ sizeup_defaults }}"
+  loop_control:
+    label: "{{ _default.name | default(none) }}"
+    loop_var: _default
+  when:
+    - _default.key is defined
+    - _default.value is defined
+...
