@@ -1,0 +1,29 @@
+---
+- name: Ensure proton drive package is present
+  tags:
+    - proton_drive
+  community.general.homebrew_cask:
+    name: "{{ proton_drive_package }}"
+    state: present
+    update_homebrew: false
+    upgrade_all: false
+
+- name: Ensure proton drive defaults are present
+  tags:
+    - proton_drive
+  community.general.osx_defaults:
+    array_add: "{{ _default.array_add | default(omit) }}"
+    domain: "{{ proton_drive_domain }}"
+    host: "{{ _default.host | default(omit) }}"
+    key: "{{ _default.key }}"
+    state: present
+    type: "{{ _default.type | default('string') }}"
+    value: "{{ _default.value }}"
+  loop: "{{ proton_drive_defaults }}"
+  loop_control:
+    label: "{{ _default.key | default(none) }}"
+    loop_var: _default
+  when:
+    - _default.key is defined
+    - _default.value is defined
+...

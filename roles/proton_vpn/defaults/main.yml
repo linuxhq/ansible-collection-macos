@@ -1,0 +1,5 @@
+---
+proton_vpn_defaults: []
+proton_vpn_domain: ch.protonvpn.mac
+proton_vpn_package: protonvpn
+...
