@@ -1,25 +1,25 @@
 ---
-- name: Ensure protonvpn package is present
+- name: Ensure proton mail package is present
   tags:
-    - protonvpn
+    - proton_mail
   community.general.homebrew_cask:
-    name: "{{ protonvpn_package }}"
+    name: "{{ proton_mail_package }}"
     state: present
     update_homebrew: false
     upgrade_all: false
 
-- name: Ensure protonvpn defaults are present
+- name: Ensure proton mail defaults are present
   tags:
-    - protonvpn
+    - proton_mail
   community.general.osx_defaults:
     array_add: "{{ _default.array_add | default(omit) }}"
-    domain: "{{ protonvpn_domain }}"
+    domain: "{{ proton_mail_domain }}"
     host: "{{ _default.host | default(omit) }}"
     key: "{{ _default.key }}"
     state: present
     type: "{{ _default.type | default('string') }}"
     value: "{{ _default.value }}"
-  loop: "{{ protonvpn_defaults }}"
+  loop: "{{ proton_mail_defaults }}"
   loop_control:
     label: "{{ _default.key | default(none) }}"
     loop_var: _default

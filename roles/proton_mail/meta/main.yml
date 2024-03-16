@@ -1,9 +1,9 @@
 ---
 dependencies: []
 galaxy_info:
-  role_name: protonvpn
+  role_name: proton_mail
   author: Taylor Kimball
-  description: Secure internet anywhere
+  description: Client for Proton Mail
   license: GPLv3
   min_ansible_version: 2.15.0
   platforms:
@@ -12,5 +12,6 @@ galaxy_info:
         - all
   galaxy_tags:
     - macos
-    - protonvpn
+    - mail
+    - proton
 ...
