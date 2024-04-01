@@ -1,0 +1,29 @@
+---
+- name: Ensure rectangle package is present
+  tags:
+    - rectangle
+  community.general.homebrew_cask:
+    name: "{{ rectangle_package }}"
+    state: present
+    update_homebrew: false
+    upgrade_all: false
+
+- name: Ensure rectangle defaults are present
+  tags:
+    - rectangle
+  community.general.osx_defaults:
+    array_add: "{{ _default.array_add | default(omit) }}"
+    domain: "{{ rectangle_domain }}"
+    host: "{{ _default.host | default(omit) }}"
+    key: "{{ _default.key }}"
+    state: present
+    type: "{{ _default.type | default('string') }}"
+    value: "{{ _default.value }}"
+  loop: "{{ rectangle_defaults }}"
+  loop_control:
+    label: "{{ _default.key | default(none) }}"
+    loop_var: _default
+  when:
+    - _default.key is defined
+    - _default.value is defined
+...
