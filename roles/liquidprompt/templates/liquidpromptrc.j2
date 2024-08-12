@@ -10,8 +10,10 @@ source {{ source }}
 LP_PS1_FILE={{ liquidprompt_ps1_file }}
 {% endif %}
 
+LP_ALWAYS_DISPLAY_VALUES={{ '1' if liquidprompt_always_display_values | bool else '0' }}
 LP_BATTERY_THRESHOLD={{ liquidprompt_battery_threshold }}
 LP_DISABLED_VCS_PATH="{{ liquidprompt_disabled_vcs_path | join(':') }}"
+LP_DISPLAY_VALUES_AS_PERCENTS={{ '1' if liquidprompt_display_values_as_percents | bool else '0' }}
 LP_ENABLE_AWS_PROFILE={{ '1' if liquidprompt_enable_aws_profile | bool else '0' }}
 LP_ENABLE_BATT={{ '1' if liquidprompt_enable_batt | bool else '0' }}
 LP_ENABLE_BZR={{ '1' if liquidprompt_enable_bzr | bool else '0' }}
@@ -49,13 +51,11 @@ LP_ENABLE_TITLE_COMMAND={{ '1' if liquidprompt_enable_title_command | bool else 
 LP_ENABLE_VCS_ROOT={{ '1' if liquidprompt_enable_vcs_root | bool else '0' }}
 LP_ENABLE_VIRTUALENV={{ '1' if liquidprompt_enable_virtualenv | bool else '0' }}
 LP_ENABLE_WIFI_STRENGTH={{ '1' if liquidprompt_enable_wifi_strength | bool else '0' }}
-
 LP_HOSTNAME_ALWAYS={{ liquidprompt_hostname_always }}
 LP_LOAD_THRESHOLD={{ liquidprompt_load_threshold }}
 LP_PATH_CHARACTER_KEEP={{ liquidprompt_path_character_keep }}
 LP_PATH_KEEP={{ liquidprompt_path_keep }}
 LP_PATH_LENGTH={{ liquidprompt_path_length }}
-LP_PERCENTS_ALWAYS={{ '1' if liquidprompt_percents_always | bool else '0' }}
 LP_RUNTIME_THRESHOLD={{ liquidprompt_runtime_threshold }}
 LP_TEMP_THRESHOLD={{ liquidprompt_temp_threshold }}
 LP_TIME_ANALOG={{ '1' if liquidprompt_time_analog | bool else '0' }}

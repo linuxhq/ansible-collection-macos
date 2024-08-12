@@ -12,9 +12,11 @@ A useful adaptive prompt for bash & zsh
 
 Available variables are listed below, along with default values:
 
+    liquidprompt_always_display_values: true
     liquidprompt_battery_threshold: 75
     liquidprompt_dest: "{{ lookup('env', 'HOME') }}"
     liquidprompt_disabled_vcs_path: []
+    liquidprompt_display_values_as_percents: false
     liquidprompt_enable_aws_profile: true
     liquidprompt_enable_batt: true
     liquidprompt_enable_bzr: true
@@ -58,7 +60,6 @@ Available variables are listed below, along with default values:
     liquidprompt_path_character_keep: 3
     liquidprompt_path_keep: 2
     liquidprompt_path_length: 35
-    liquidprompt_percents_always: true
     liquidprompt_ps1_file: null
     liquidprompt_runtime_threshold: 2
     liquidprompt_source: []
