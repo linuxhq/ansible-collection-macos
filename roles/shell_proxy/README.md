@@ -10,8 +10,6 @@ None
 
 ## Role Variables
 
-Available variables are listed below, along with default values:
-
     shell_proxy_file: "{{ lookup('env', 'HOME') }}/.bash_proxies"
     shell_proxy_ftp: false
     shell_proxy_ftp_hostname: localhost
@@ -51,7 +49,7 @@ None
 
 ## License
 
-Copyright (C) 2023 Linux HeadQuarters
+Copyright (C) 2025 Linux HeadQuarters
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

@@ -10,8 +10,6 @@ VPN client focusing on security
 
 ## Role Variables
 
-Available variables are listed below, along with default values:
-
     proton_vpn_defaults: []
     proton_vpn_domain: ch.protonvpn.mac
     proton_vpn_package: protonvpn
@@ -57,7 +55,7 @@ None
 
 ## License
 
-Copyright (C) 2023 Linux HeadQuarters
+Copyright (C) 2025 Linux HeadQuarters
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

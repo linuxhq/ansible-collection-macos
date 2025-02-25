@@ -10,8 +10,6 @@ The world's most advanced ad blocker
 
 ## Role Variables
 
-Available variables are listed below, along with default values:
-
     adguard_defaults: []
     adguard_domain: com.adguard.Adguard
     adguard_package: adguard
@@ -57,7 +55,7 @@ None
 
 ## License
 
-Copyright (C) 2023 Linux HeadQuarters
+Copyright (C) 2025 Linux HeadQuarters
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

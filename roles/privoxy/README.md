@@ -10,8 +10,6 @@ A non-caching web proxy
 
 ## Role Variables
 
-Available variables are listed below, along with default values:
-
     privoxy_accept_intercepted_requests: false
     privoxy_actionsfiles:
       - match-all.action
@@ -81,7 +79,7 @@ None
 
 ## License
 
-Copyright (C) 2023 Linux HeadQuarters
+Copyright (C) 2025 Linux HeadQuarters
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

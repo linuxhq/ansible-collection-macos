@@ -10,8 +10,6 @@ Textual IRC Client
 
 ## Role Variables
 
-Available variables are listed below, along with default values:
-
     textual_defaults: []
     textual_domain: com.codeux.apps.textual
     textual_package: textual
@@ -72,7 +70,7 @@ None
 
 ## License
 
-Copyright (C) 2023 Linux HeadQuarters
+Copyright (C) 2025 Linux HeadQuarters
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

@@ -8,12 +8,12 @@
     update_homebrew: false
     upgrade_all: false
 
-- name: Ensure privoxy configurations are present
+- name: Ensure privoxy configuration is managed
   tags:
     - privoxy
   ansible.builtin.template:
     dest: "{{ privoxy_confdir }}/config"
-    mode: 0640
+    mode: '0640'
     src: config.j2
   notify:
     - Restart privoxy
