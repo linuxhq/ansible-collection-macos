@@ -8,20 +8,20 @@
     update_homebrew: false
     upgrade_all: false
 
-- name: Ensure rectangle defaults are present
+- name: Ensure rectangle defaults are managed
   tags:
     - rectangle
   community.general.osx_defaults:
-    array_add: "{{ _default.array_add | default(omit) }}"
+    array_add: "{{ _default.array_add | d(omit) }}"
     domain: "{{ rectangle_domain }}"
-    host: "{{ _default.host | default(omit) }}"
+    host: "{{ _default.host | d(omit) }}"
     key: "{{ _default.key }}"
     state: present
-    type: "{{ _default.type | default('string') }}"
+    type: "{{ _default.type | d('string') }}"
     value: "{{ _default.value }}"
   loop: "{{ rectangle_defaults }}"
   loop_control:
-    label: "{{ _default.key | default(none) }}"
+    label: "{{ _default.key | d(none) }}"
     loop_var: _default
   when:
     - _default.key is defined
