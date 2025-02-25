@@ -20,10 +20,10 @@
     - "{{ irssi_config_dir }}/scripts"
     - "{{ irssi_config_dir }}/scripts/autorun"
   loop_control:
-    label: "{{ _directory }}"
+    label: "{{ _directory | d(none) }}"
     loop_var: _directory
 
-- name: Ensure irssi scripts are present
+- name: Ensure irssi scripts are managed
   tags:
     - irssi
   ansible.builtin.template:
@@ -32,7 +32,7 @@
     src: scripts.j2
   loop: "{{ irssi_scripts }}"
   loop_control:
-    label: "{{ _script.name }}"
+    label: "{{ _script.name | d(none) }}"
     loop_var: _script
   when:
     - _script.name is defined
@@ -48,7 +48,7 @@
   when:
     - irssi_theme is not none
 
-- name: Ensure irssi configurations are present
+- name: Ensure irssi configurations are managed
   tags:
     - irssi
   ansible.builtin.template:
