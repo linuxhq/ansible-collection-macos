@@ -10,8 +10,6 @@ Control your external monitor brightness, contrast or volume
 
 ## Role Variables
 
-Available variables are listed below, along with default values:
-
     monitorcontrol_defaults: []
     monitorcontrol_domain: me.guillaumeb.MonitorControl
     monitorcontrol_package: monitorcontrol
@@ -45,7 +43,7 @@ None
 
 ## License
 
-Copyright (C) 2023 Linux HeadQuarters
+Copyright (C) 2025 Linux HeadQuarters
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

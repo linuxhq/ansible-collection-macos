@@ -10,8 +10,6 @@ Pandora Client
 
 ## Role Variables
 
-Available variables are listed below, along with default values:
-
     hermes_defaults: []
     hermes_domain: com.alexcrichton.Hermes
     hermes_package: hermes
@@ -72,7 +70,7 @@ None
 
 ## License
 
-Copyright (C) 2023 Linux HeadQuarters
+Copyright (C) 2025 Linux HeadQuarters
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

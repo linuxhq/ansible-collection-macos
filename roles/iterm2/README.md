@@ -10,8 +10,6 @@ Terminal Replacement
 
 ## Role Variables
 
-Available variables are listed below, along with default values:
-
     iterm2_defaults: []
     iterm2_domain: com.googlecode.iterm2
     iterm2_package: iterm2
@@ -36,7 +34,7 @@ None
 
 ## License
 
-Copyright (C) 2023 Linux HeadQuarters
+Copyright (C) 2025 Linux HeadQuarters
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

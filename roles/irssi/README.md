@@ -10,8 +10,6 @@ Your text mode chatting application since 1999
 
 ## Role Variables
 
-Available variables are listed below, along with default values:
-
     irssi_config_dir: "{{ lookup('env', 'HOME') }}/.irssi"
     irssi_config_file: "{{ irssi_config_dir }}/config"
     irssi_channels:
@@ -58,7 +56,7 @@ None
 
 ## License
 
-Copyright (C) 2023 Linux HeadQuarters
+Copyright (C) 2025 Linux HeadQuarters
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

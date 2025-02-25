@@ -8,11 +8,11 @@
     update_homebrew: false
     upgrade_all: false
 
-- name: Ensure liquidprompt configuration is present
+- name: Ensure liquidprompt configuration is managed
   tags:
     - liquidprompt
   ansible.builtin.template:
     dest: "{{ liquidprompt_dest }}/.liquidpromptrc"
-    mode: 0644
+    mode: '0644'
     src: liquidpromptrc.j2
 ...

@@ -10,8 +10,6 @@ A useful adaptive prompt for bash & zsh
 
 ## Role Variables
 
-Available variables are listed below, along with default values:
-
     liquidprompt_always_display_values: true
     liquidprompt_battery_threshold: 75
     liquidprompt_dest: "{{ lookup('env', 'HOME') }}"
@@ -82,7 +80,7 @@ None
 
 ## License
 
-Copyright (C) 2023 Linux HeadQuarters
+Copyright (C) 2025 Linux HeadQuarters
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
