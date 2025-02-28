@@ -73,12 +73,6 @@ An example playbook utilizing roles available in this collection
               socks_proxy: 127.0.0.1:9050
               http_parent: '.'
 
-        - role: linuxhq.macos.protonvpn
-          protonvpn_defaults:
-            - key: AutoConnect
-              type: bool
-              value: true
-
         - role: linuxhq.macos.sizeup
           sizeup_defaults:
             - key: MultiMonitorResizeWindowProportionally
