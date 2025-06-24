@@ -1,0 +1,11 @@
+# {{ ansible_managed }}
+
+{% for section in rclone_conf.keys() %}
+[{{ section }}]
+{%   for key, value in rclone_conf[section].items() %}
+{{ key }} = {{ value }}
+{%   endfor %}
+{%   if not loop.last %}
+
+{%   endif %}
+{% endfor %}
