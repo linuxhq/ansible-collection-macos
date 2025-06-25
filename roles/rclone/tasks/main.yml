@@ -29,6 +29,7 @@
   ansible.builtin.file:
     mode: '0755'
     path: "{{ rclone_path_bin | dirname }}"
+    state: directory
 
 - name: Ensure rclone binary file is present
   tags:
@@ -51,8 +52,9 @@
   tags:
     - rclone
   ansible.builtin.file:
-    mode: '0700'
+    mode: '0755'
     path: "{{ rclone_path_conf | dirname }}"
+    state: directory
   when:
     - rclone_conf | length > 0
 
@@ -74,6 +76,20 @@
     path: "{{ rclone_path_plist }}"
   when:
     - rclone_mounts | length > 0
+
+- name: Ensure rclone property list mountpoint is present
+  tags:
+    - rclone
+  ansible.builtin.file:
+    mode: '0755'
+    path: "{{ _mount.mountpoint }}"
+    state: directory
+  loop: "{{ rclone_mounts }}"
+  loop_control:
+    label: "{{ _mount.mountpoint | d(none) }}"
+    loop_var: _mount
+  when:
+    - _mount.mountpoint is defined
 
 - name: Ensure rclone property list file is present
   tags:
