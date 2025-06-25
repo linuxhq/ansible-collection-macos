@@ -3,6 +3,7 @@ rclone_arch: "{{ ansible_architecture }}"
 rclone_conf: {}
 rclone_path_bin: "{{ ansible_env.HOME }}/.local/bin/rclone"
 rclone_path_conf: "{{ ansible_env.HOME }}/.config/rclone/rclone.conf"
+rclone_path_plist: "{{ ansible_env.HOME }}/Library/LaunchAgents"
 rclone_mounts: []
 rclone_version: v1.70.1
 ...

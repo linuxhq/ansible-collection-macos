@@ -66,11 +66,20 @@
   when:
     - rclone_conf | length > 0
 
-- name: Ensure rclone mount property lists are present
+- name: Ensure rclone property list path is present
+  tags:
+    - rclone
+  ansible.builtin.file:
+    mode: '0755'
+    path: "{{ rclone_path_plist }}"
+  when:
+    - rclone_mounts | length > 0
+
+- name: Ensure rclone property list file is present
   tags:
     - rclone
   ansible.builtin.template:
-    dest: "{{ ansible_env.HOME }}/Library/LaunchAgents/{{ _mount.name }}.plist"
+    dest: "{{ rclone_path_plist }}/{{ _mount.name }}.plist"
     mode: '0644'
     src: rclone.plist.j2
   loop: "{{ rclone_mounts }}"
@@ -79,23 +88,23 @@
     loop_var: _mount
   when:
     - _mount.name is defined
-    - _mount.local is defined
     - _mount.remote is defined
+    - _mount.mountpoint is defined
 
-- name: Ensure rclone mount property lists are launched
+- name: Ensure rclone property list agent is launched
   tags:
     - rclone
   ansible.builtin.command:
     cmd: >
       /bin/launchctl load -w
-        {{ ansible_env.HOME }}/Library/LaunchAgents/{{ _mount.name }}.plist
+        {{ rclone_path_plist }}/{{ _mount.name }}.plist
   loop: "{{ rclone_mounts }}"
   loop_control:
     label: "{{ _mount.name | d(none) }}"
     loop_var: _mount
   when:
     - _mount.name is defined
-    - _mount.local is defined
     - _mount.remote is defined
+    - _mount.mountpoint is defined
   changed_when: true
 ...

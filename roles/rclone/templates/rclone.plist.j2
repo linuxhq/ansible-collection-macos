@@ -11,7 +11,7 @@
         <string>{{ rclone_path_bin }}</string>
         <string>mount</string>
         <string>{{ _mount.remote }}</string>
-        <string>{{ _mount.local }}</string>
+        <string>{{ _mount.mountpoint }}</string>
 {% if _mount.flags is defined and _mount.flags | length > 0 %}
 {%   for __flag in _mount.flags %}
         <string>{{ __flag }}</string>
