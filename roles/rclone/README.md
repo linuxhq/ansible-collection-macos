@@ -16,6 +16,7 @@ Available variables are listed below, along with default values:
     rclone_conf: {}
     rclone_path_bin: "{{ ansible_env.HOME }}/.local/bin/rclone"
     rclone_path_conf: "{{ ansible_env.HOME }}/.config/rclone/rclone.conf"
+    rclone_path_plist: "{{ ansible_env.HOME }}/Library/LaunchAgents"
     rclone_mounts: []
     rclone_version: v1.70.1
 
@@ -54,15 +55,15 @@ None
 
           rclone_mounts:
             - name: org.linuxhq.rclone.icedrive
-              local: "{{ ansible_env.HOME }}/Volumes/Icedrive"
               remote: 'icedrive-crypt:'
+              mountpoint: "{{ ansible_env.HOME }}/Volumes/Icedrive"
               flags:
                 - --read-only
                 - --vfs-cache-mode=full
 
             - name: org.linuxhq.rclone.koofr
-              local: "{{ ansible_env.HOME }}/Volumes/Koofr"
               remote: 'koofr-crypt:'
+              mountpoint: "{{ ansible_env.HOME }}/Volumes/Koofr"
               flags:
                 - --read-only
                 - --vfs-cache-mode=full

@@ -1,9 +1,19 @@
 # {{ ansible_managed }}
 
-{% for section in rclone_conf.keys() %}
-[{{ section }}]
-{%   for key, value in rclone_conf[section].items() %}
+{% for remote in rclone_conf.keys() %}
+[{{ remote }}]
+{%   for key, value in rclone_conf[remote].items() %}
+{%     if value is sameas true %}
+{{ key }} = true
+{%     elif value is sameas false %}
+{{ key }} = false
+{%     elif value is string %}
+{{ key }} = {{ value | string }}
+{%     elif value is number %}
+{{ key }} = {{ value | int }}
+{%     else %}
 {{ key }} = {{ value }}
+{%     endif %}
 {%   endfor %}
 {%   if not loop.last %}
 
