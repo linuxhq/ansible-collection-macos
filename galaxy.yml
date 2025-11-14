@@ -5,7 +5,7 @@ build_ignore:
   - .gitignore
 description: A collection of macos roles
 dependencies:
-  community.general: 10.3.1
+  community.general: '>=12.0.0'
 documentation: https://github.com/linuxhq/ansible-collection-macos/blob/main/README.md
 homepage: https://www.linuxhq.org
 issues: https://github.com/linuxhq/ansible-collection-macos/issues
@@ -19,5 +19,5 @@ tags:
   - application
   - macos
   - tools
-version: 1.0.8
+version: 1.0.9
 ...
