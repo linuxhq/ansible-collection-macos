@@ -1,0 +1,16 @@
+---
+dependencies: []
+galaxy_info:
+  role_name: homebrew
+  author: Taylor Kimball
+  description: A free and open-source package manager for macOS
+  license: GPL-3.0-or-later
+  min_ansible_version: 2.15.0
+  platforms:
+    - name: macOS
+      versions:
+        - all
+  galaxy_tags:
+    - homebrew
+    - macos
+...

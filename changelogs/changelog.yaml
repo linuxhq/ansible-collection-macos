@@ -1,6 +1,13 @@
 ---
 ancestor: null
 releases:
+  1.1.1:
+    changes:
+      minor_changes:
+        - homebrew - Initial commit of homebrew role
+      release_summary: >-
+        This release includes a new homebrew role for
+        managing casks, packages, and taps.
   1.1.0:
     changes:
       minor_changes:

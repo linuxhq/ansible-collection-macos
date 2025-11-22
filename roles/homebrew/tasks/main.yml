@@ -1,0 +1,75 @@
+---
+- name: Ensure homebrew is updated
+  tags:
+    - homebrew
+  community.general.homebrew:
+    update_homebrew: true
+  when:
+    - homebrew_update | bool
+
+- name: Ensure all homebrew packages are upgraded
+  tags:
+    - homebrew
+  community.general.homebrew:
+    upgrade_all: true
+    upgrade_options: "{{ homebrew_upgrade_options }}"
+  when:
+    - homebrew_upgrade | bool
+
+- name: Ensure all homebrew casks are upgraded
+  tags:
+    - homebrew
+  community.general.homebrew_cask:
+    greedy: "{{ homebrew_upgrade_greedy }}"
+    upgrade_all: true
+  when:
+    - homebrew_upgrade | bool
+
+- name: Ensure homebrew taps are managed
+  tags:
+    - homebrew
+  community.general.homebrew_tap:
+    name: "{{ _tap.name }}"
+    path: "{{ homebrew_path or omit }}"
+    state: "{{ _tap.state | d('present') }}"
+    url: "{{ _tap.url | d(omit) }}"
+  loop: "{{ homebrew_taps }}"
+  loop_control:
+    label: "{{ _tap.name | d(none) }}"
+    loop_var: _tap
+  when:
+    - _tap.name is defined
+
+- name: Ensure homebrew packages are managed
+  tags:
+    - homebrew
+  community.general.homebrew:
+    force_formula: "{{ _package.force_formula | d(false) }}"
+    install_options: "{{ _package.install_options | d(omit) }}"
+    name: "{{ _package.name }}"
+    path: "{{ homebrew_path or omit }}"
+    state: "{{ _package.state | d('present') }}"
+  loop: "{{ homebrew_packages }}"
+  loop_control:
+    label: "{{ _package.name | d(none) }}"
+    loop_var: _package
+  when:
+    - _package.name is defined
+
+- name: Ensure homebrew casks are managed
+  tags:
+    - homebrew
+  community.general.homebrew_cask:
+    accept_external_apps: "{{ _cask.accept_external_apps | d(false) }}"
+    install_options: "{{ _cask.install_options | d(omit) }}"
+    name: "{{ _cask.name }}"
+    path: "{{ homebrew_path or omit }}"
+    state: "{{ _cask.state | d('present') }}"
+    sudo_password: "{{ _cask.sudo_password | d(omit) }}"
+  loop: "{{ homebrew_casks }}"
+  loop_control:
+    label: "{{ _cask.name | d(none) }}"
+    loop_var: _cask
+  when:
+    - _cask.name is defined
+...
