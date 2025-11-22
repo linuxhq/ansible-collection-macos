@@ -1,0 +1,11 @@
+---
+ancestor: null
+releases:
+  1.1.0:
+    changes:
+      minor_changes:
+        - rclone - Convert rclone_conf from dict to list
+        - Update copyrights in readme and meta files
+      release_summary: >-
+        First release with changelog included
+...

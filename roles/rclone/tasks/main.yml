@@ -3,7 +3,7 @@
   tags:
     - rclone
   ansible.builtin.set_fact:
-    __rclone_release: "rclone-{{ rclone_version }}-osx-{{ rclone_arch }}"
+    __rclone_release: "rclone-{{ rclone_version }}-osx-{{ ansible_architecture }}"
     __rclone_url: "https://downloads.rclone.org/{{ rclone_version }}"
 
 - name: Ensure rclone temporary directory is present
@@ -76,6 +76,14 @@
     path: "{{ rclone_path_plist }}"
   when:
     - rclone_mounts | length > 0
+
+- name: Ensure rclone property list directory is present
+  tags:
+    - rclone
+  ansible.builtin.file:
+    mode: '0755'
+    path: "{{ rclone_path_plist }}"
+    state: directory
 
 - name: Ensure rclone property list mountpoint is present
   tags:

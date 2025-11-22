@@ -10,15 +10,12 @@ None
 
 ## Role Variables
 
-Available variables are listed below, along with default values:
-
-    rclone_arch: "{{ ansible_architecture }}"
-    rclone_conf: {}
+    rclone_conf: []
     rclone_path_bin: "{{ ansible_env.HOME }}/.local/bin/rclone"
     rclone_path_conf: "{{ ansible_env.HOME }}/.config/rclone/rclone.conf"
     rclone_path_plist: "{{ ansible_env.HOME }}/Library/LaunchAgents"
     rclone_mounts: []
-    rclone_version: v1.70.1
+    rclone_version: v1.72.0
 
 ## Dependencies
 
@@ -31,46 +28,28 @@ None
       roles:
         - role: linuxhq.macos.rclone
           rclone_conf:
-            icedrive:
-              pass: "{{ rclone_icedrive_password }}"
-              type: webdav
-              url: https://webdav.icedrive.io
-              user: "{{ rclone_icedrive_username }}"
-              vendor: rclone
-            icedrive-crypt:
-              password: "{{ rclone_icedrive_crypt_password }}"
-              password2: "{{ rclone_icedrive_crypt_password2 }}"
-              remote: icedrive:/rclone
-              type: crypt
-            koofr:
+            - name: koofr
               password: "{{ rclone_koofr_password }}"
               provider: koofr
               type: koofr
               user: "{{ rclone_koofr_username }}"
-            koofr-crypt:
+
+            - name:koofr-crypt
               password: "{{ rclone_koofr_crypt_password }}"
               password2: "{{ rclone_koofr_crypt_password2 }}"
-              remote: koofr:/rclone
+              remote: 'koofr:/rclone'
               type: crypt
 
           rclone_mounts:
-            - name: org.linuxhq.rclone.icedrive
-              remote: 'icedrive-crypt:'
-              mountpoint: "{{ ansible_env.HOME }}/Volumes/Icedrive"
-              flags:
-                - --read-only
-                - --vfs-cache-mode=full
-
             - name: org.linuxhq.rclone.koofr
               remote: 'koofr-crypt:'
               mountpoint: "{{ ansible_env.HOME }}/Volumes/Koofr"
               flags:
                 - --read-only
-                - --vfs-cache-mode=full
 
 ## License
 
-Copyright (C) 2025 Linux HeadQuarters
+Copyright (c) Linux HeadQuarters
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
