@@ -4,7 +4,7 @@ galaxy_info:
   role_name: proton_vpn
   author: Taylor Kimball
   description: VPN client focusing on security
-  license: GPLv3
+  license: GPL-3.0-or-later
   min_ansible_version: 2.14.0
   namespace: linuxhq
   platforms:
