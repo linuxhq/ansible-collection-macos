@@ -13,6 +13,7 @@ A free and open-source package manager for macOS
     homebrew_casks: []
     homebrew_packages: []
     homebrew_path: null
+    homebrew_sudo_password: null
     homebrew_taps: []
     homebrew_update: false
     homebrew_upgrade: false
