@@ -65,7 +65,7 @@
     name: "{{ _cask.name }}"
     path: "{{ homebrew_path or omit }}"
     state: "{{ _cask.state | d('present') }}"
-    sudo_password: "{{ sudo_password or omit }}"
+    sudo_password: "{{ homebrew_sudo_password or omit }}"
   loop: "{{ homebrew_casks }}"
   loop_control:
     label: "{{ _cask.name | d(none) }}"
