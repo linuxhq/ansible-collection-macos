@@ -34,7 +34,7 @@ None
               type: koofr
               user: "{{ rclone_koofr_username }}"
 
-            - name:koofr-crypt
+            - name: koofr-crypt
               password: "{{ rclone_koofr_crypt_password }}"
               password2: "{{ rclone_koofr_crypt_password2 }}"
               remote: 'koofr:/rclone'
