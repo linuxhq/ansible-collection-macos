@@ -15,7 +15,7 @@ None
     rclone_path_conf: "{{ ansible_env.HOME }}/.config/rclone/rclone.conf"
     rclone_path_plist: "{{ ansible_env.HOME }}/Library/LaunchAgents"
     rclone_mounts: []
-    rclone_version: v1.72.0
+    rclone_version: v1.73.0
 
 ## Dependencies
 
