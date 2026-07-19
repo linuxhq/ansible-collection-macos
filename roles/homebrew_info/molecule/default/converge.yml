@@ -3,4 +3,13 @@
   hosts: all
   roles:
     - role: homebrew_info
+      homebrew_info_name: []
+      tags:
+        - molecule-idempotence-notest
+
+    - role: homebrew
+      tags:
+        - molecule-idempotence-notest
+
+    - homebrew_info
 ...

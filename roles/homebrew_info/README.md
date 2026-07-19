@@ -27,7 +27,12 @@ None
     - hosts: workstation
       connection: local
       roles:
+        - role: linuxhq.macos.homebrew
+          homebrew_packages:
+            - name: cloudflared
+            - name: privoxy
+
         - role: linuxhq.macos.homebrew_info
           homebrew_info_name:
+            - cloudflared
             - privoxy
-            - rclone

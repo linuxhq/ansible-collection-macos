@@ -5,20 +5,29 @@ dependency:
     requirements-file: ../../requirements.yml
 
 driver:
-  name: default
-  options:
-    managed: false
-    ansible_connection_options:
-      ansible_connection: local
+  name: vagrant
+  provider:
+    name: tart
 
 platforms:
-  - name: localhost
+  - name: tahoe
+    hostname: false
+    memory: 8192
+    cpus: 4
+    provider_options:
+      disk: 60
+      image: ghcr.io/cirruslabs/macos-tahoe-base:latest
+      name: tahoe
+    config_options:
+      synced_folder: false
+      ssh.username: admin
+      ssh.password: admin
+      vm.boot_timeout: 900
 
 provisioner:
   name: ansible
   env:
     ANSIBLE_ACTION_WARNINGS: false
-    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_PROJECT_DIRECTORY}/../../venv
     ANSIBLE_DEPRECATION_WARNINGS: false
   log: true
   options:
@@ -26,8 +35,29 @@ provisioner:
   inventory:
     group_vars:
       all:
+        homebrew_packages:
+          - name: cloudflared
+          - name: privoxy
+
         homebrew_info_name:
+          - cloudflared
           - privoxy
+
+scenario:
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - check
+    - converge
+    - check
+    - idempotence
+    - verify
+    - cleanup
+    - destroy
 
 verifier:
   name: ansible
