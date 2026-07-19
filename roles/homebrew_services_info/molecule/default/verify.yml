@@ -11,11 +11,15 @@
         - homebrew_services_info
       ansible.builtin.assert:
         that:
-          - _homebrew_services_info_list | length >= 2
-          - _homebrew_services_info_dict | length ==
-              _homebrew_services_info_list | length
-          - "'cloudflared' in _homebrew_services_info_dict"
-          - "'privoxy' in _homebrew_services_info_dict"
+          - _homebrew_services_info_dict | length == 4
+          - _homebrew_services_info_dict['buildkite-agent@3'].file is defined
+          - _homebrew_services_info_dict['buildkite-agent@3'].name is defined
+          - _homebrew_services_info_dict['buildkite-agent@3'].pid is defined
+          - _homebrew_services_info_dict['buildkite-agent@3'].running is defined
+          - _homebrew_services_info_dict['gitlab-runner'].file is defined
+          - _homebrew_services_info_dict['gitlab-runner'].name is defined
+          - _homebrew_services_info_dict['gitlab-runner'].pid is defined
+          - _homebrew_services_info_dict['gitlab-runner'].running is defined
 
     - name: Ensure homebrew services role is included with service names
       tags:
