@@ -1,0 +1,6 @@
+---
+add plugin.module:
+  - name: launchd_info
+    description: Gather information about launchd services.
+    namespace: ''
+...

@@ -1,0 +1,27 @@
+---
+- name: Ensure homebrew casks information is gathered
+  tags:
+    - homebrew_cask_info
+  linuxhq.macos.homebrew_cask_info:
+    name: "{{ homebrew_cask_info_name or omit }}"
+    path: "{{ homebrew_cask_info_path or omit }}"
+  register: __homebrew_cask_info_query
+
+- name: Ensure list of homebrew casks information is generated
+  tags:
+    - homebrew_cask_info
+  ansible.builtin.set_fact:
+    _homebrew_cask_info_list:
+      "{{ __homebrew_cask_info_query.casks |
+          d([]) }}"
+
+- name: Ensure dict of homebrew casks information is generated
+  tags:
+    - homebrew_cask_info
+  ansible.builtin.set_fact:
+    _homebrew_cask_info_dict:
+      "{{ (dict(_homebrew_cask_info_list |
+               json_query('[].name') |
+               zip(_homebrew_cask_info_list))) |
+          d({}) }}"
+...

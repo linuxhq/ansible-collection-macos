@@ -1,0 +1,39 @@
+---
+- name: Verify
+  hosts: all
+  roles:
+    - role: homebrew_services_info
+      homebrew_services_info_name: []
+
+  post_tasks:
+    - name: Ensure homebrew services information is verified
+      tags:
+        - homebrew_services_info
+      ansible.builtin.assert:
+        that:
+          - _homebrew_services_info_list | length >= 2
+          - _homebrew_services_info_dict | length ==
+              _homebrew_services_info_list | length
+          - "'cloudflared' in _homebrew_services_info_dict"
+          - "'privoxy' in _homebrew_services_info_dict"
+
+    - name: Ensure homebrew services role is included with service names
+      tags:
+        - homebrew_services_info
+      ansible.builtin.include_role:
+        name: homebrew_services_info
+
+    - name: Ensure filtered homebrew services information is verified
+      tags:
+        - homebrew_services_info
+      ansible.builtin.assert:
+        that:
+          - _homebrew_services_info_list | length == 2
+          - _homebrew_services_info_dict | length == 2
+          - _homebrew_services_info_dict['cloudflared'].name == 'cloudflared'
+          - _homebrew_services_info_dict['cloudflared'].pid is defined
+          - _homebrew_services_info_dict['cloudflared'].running is defined
+          - _homebrew_services_info_dict['privoxy'].name == 'privoxy'
+          - _homebrew_services_info_dict['privoxy'].pid is defined
+          - _homebrew_services_info_dict['privoxy'].running is defined
+...

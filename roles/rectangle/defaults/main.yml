@@ -2,4 +2,5 @@
 rectangle_defaults: []
 rectangle_domain: com.knollsoft.Rectangle
 rectangle_package: rectangle
+rectangle_state: present
 ...

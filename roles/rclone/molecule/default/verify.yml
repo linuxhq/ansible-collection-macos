@@ -1,0 +1,58 @@
+---
+- name: Verify
+  hosts: all
+  vars_files:
+    - ../../defaults/main.yml
+  environment:
+    PATH: "{{ rclone_path_bin | join(':') }}:{{ ansible_env.PATH }}"
+
+  tasks:
+    - name: Ensure rclone configuration file status is gathered
+      tags:
+        - rclone
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.config/rclone/rclone.conf"
+      register: __rclone_conf_stat
+
+    - name: Ensure rclone property list status is gathered
+      tags:
+        - rclone
+      ansible.builtin.stat:
+        path: >-
+          {{ ansible_env.HOME }}/Library/LaunchAgents/org.linuxhq.rclone.public.plist
+      register: __rclone_plist_stat
+
+    - name: Ensure rclone configuration and property list are present
+      tags:
+        - rclone
+      ansible.builtin.assert:
+        that:
+          - __rclone_conf_stat.stat.exists
+          - __rclone_plist_stat.stat.exists
+
+    - name: Ensure rclone remote is listable
+      tags:
+        - rclone
+      ansible.builtin.command:
+        cmd: >
+          rclone lsd public:
+      changed_when: false
+
+    - name: Ensure rclone mountpoint file status is gathered
+      tags:
+        - rclone
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/Volumes/Public/stat.zip"
+      register: __rclone_mount_stat
+      retries: 12
+      delay: 5
+      until:
+        - __rclone_mount_stat.stat.exists
+
+    - name: Ensure rclone mountpoint file is present
+      tags:
+        - rclone
+      ansible.builtin.assert:
+        that:
+          - __rclone_mount_stat.stat.exists
+...

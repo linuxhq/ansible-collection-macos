@@ -12,7 +12,7 @@ A useful adaptive prompt for bash & zsh
 
     liquidprompt_always_display_values: true
     liquidprompt_battery_threshold: 75
-    liquidprompt_dest: "{{ lookup('env', 'HOME') }}"
+    liquidprompt_dest: "{{ ansible_env.HOME }}"
     liquidprompt_disabled_vcs_path: []
     liquidprompt_display_values_as_percents: false
     liquidprompt_enable_aws_profile: true
@@ -61,6 +61,7 @@ A useful adaptive prompt for bash & zsh
     liquidprompt_ps1_file: null
     liquidprompt_runtime_threshold: 2
     liquidprompt_source: []
+    liquidprompt_state: present
     liquidprompt_temp_threshold: 60
     liquidprompt_time_analog: false
     liquidprompt_user_always: true
@@ -77,20 +78,3 @@ None
         - role: linuxhq.macos.liquidprompt
           liquidprompt_battery_threshold: 50
           liquidprompt_enable_time: true
-
-## License
-
-Copyright (c) Linux HeadQuarters
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.

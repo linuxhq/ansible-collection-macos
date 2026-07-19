@@ -1,0 +1,40 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Ensure iterm2 application status is gathered
+      tags:
+        - iterm2
+      ansible.builtin.stat:
+        path: /Applications/iTerm.app
+      register: __iterm2_present_stat
+
+    - name: Ensure iterm2 application is present
+      tags:
+        - iterm2
+      ansible.builtin.assert:
+        that:
+          - __iterm2_present_stat.stat.exists
+
+    - name: Ensure iterm2 role is included with an absent state
+      tags:
+        - iterm2
+      ansible.builtin.include_role:
+        name: iterm2
+      vars:
+        iterm2_state: absent
+
+    - name: Ensure iterm2 application status is gathered after removal
+      tags:
+        - iterm2
+      ansible.builtin.stat:
+        path: /Applications/iTerm.app
+      register: __iterm2_absent_stat
+
+    - name: Ensure iterm2 application is absent
+      tags:
+        - iterm2
+      ansible.builtin.assert:
+        that:
+          - not __iterm2_absent_stat.stat.exists
+...

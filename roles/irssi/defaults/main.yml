@@ -1,5 +1,5 @@
 ---
-irssi_config_dir: "{{ lookup('env', 'HOME') }}/.irssi"
+irssi_config_dir: "{{ ansible_env.HOME }}/.irssi"
 irssi_config_file: "{{ irssi_config_dir }}/config"
 irssi_channels:
   - name: '#linuxhq'
@@ -25,5 +25,6 @@ irssi_settings:
     real_name: Linux HeadQuarters
     user_name: linuxhq
 irssi_scripts: []
+irssi_state: present
 irssi_theme: null
 ...

@@ -1,0 +1,15 @@
+---
+- name: Verify
+  hosts: all
+  roles:
+    - homebrew_info
+
+  post_tasks:
+    - name: Ensure homebrew formulae information is verified
+      tags:
+        - homebrew_info
+      ansible.builtin.assert:
+        that:
+          - _homebrew_info_list | length == 1
+          - _homebrew_info_dict['privoxy'].version is defined
+...

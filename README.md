@@ -19,9 +19,22 @@ A collection of macos roles
 
 ## Molecule
 
+Role scenarios run against a disposable [Tart](https://tart.run) macOS
+virtual machine with the vagrant driver.
+
     python3 -m venv venv
     source venv/bin/activate
     venv/bin/pip3 install -r requirements.txt
+
+    brew trust cirruslabs/cli
+    brew install cirruslabs/cli/tart
+    brew tap hashicorp/tap
+    brew trust hashicorp/tap
+    brew install hashicorp/tap/hashicorp-vagrant
+    vagrant plugin install vagrant-tart
+
+The host application running molecule needs the macOS Local Network
+permission to reach the virtual machines.
 
 # Playbook
 

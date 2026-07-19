@@ -53,12 +53,13 @@ A non-caching web proxy
     privoxy_single_threaded: false
     privoxy_split_large_forms: false
     privoxy_socket_timeout: 300
-    privoxy_templdir: ''
-    privoxy_temporary_directory: ''
+    privoxy_state: present
+    privoxy_templdir: null
+    privoxy_temporary_directory: null
     privoxy_toggle: true
     privoxy_tolerate_pipelining: true
     privoxy_trust_info_url: []
-    privoxy_trustfile: ''
+    privoxy_trustfile: null
     privoxy_user_manual: /opt/homebrew/share/doc/privoxy/user-manual
 
 ## Dependencies
@@ -76,20 +77,3 @@ None
             - target_pattern: /
               socks_proxy: 127.0.0.1:9050
               http_parent: '.'
-
-## License
-
-Copyright (c) Linux HeadQuarters
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.

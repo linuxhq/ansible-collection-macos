@@ -1,0 +1,36 @@
+---
+dependency:
+  name: galaxy
+  options:
+    requirements-file: ../../requirements.yml
+
+driver:
+  name: default
+  options:
+    managed: false
+    ansible_connection_options:
+      ansible_connection: local
+
+platforms:
+  - name: localhost
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ACTION_WARNINGS: false
+    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_PROJECT_DIRECTORY}/../../venv
+    ANSIBLE_DEPRECATION_WARNINGS: false
+  log: true
+  options:
+    diff: true
+  inventory:
+    group_vars:
+      all:
+        homebrew_info_name:
+          - privoxy
+
+verifier:
+  name: ansible
+  options:
+    diff: true
+...

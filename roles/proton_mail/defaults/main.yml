@@ -2,4 +2,5 @@
 proton_mail_defaults: []
 proton_mail_domain: ch.protonmail.desktop
 proton_mail_package: proton-mail
+proton_mail_state: present
 ...

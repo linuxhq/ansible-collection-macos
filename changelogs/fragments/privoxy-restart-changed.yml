@@ -1,0 +1,6 @@
+---
+bugfixes:
+  - privoxy - restart the service with the ``community.general.homebrew_services``
+    module instead of a raw ``brew services restart`` command, so the restart
+    handler reports its change in the play recap.
+...

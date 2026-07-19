@@ -2,4 +2,5 @@
 proton_drive_defaults: []
 proton_drive_domain: ch.protonmail.drive
 proton_drive_package: proton-drive
+proton_drive_state: present
 ...

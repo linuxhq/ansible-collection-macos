@@ -1,0 +1,40 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Ensure textual application status is gathered
+      tags:
+        - textual
+      ansible.builtin.stat:
+        path: /Applications/Textual.app
+      register: __textual_present_stat
+
+    - name: Ensure textual application is present
+      tags:
+        - textual
+      ansible.builtin.assert:
+        that:
+          - __textual_present_stat.stat.exists
+
+    - name: Ensure textual role is included with an absent state
+      tags:
+        - textual
+      ansible.builtin.include_role:
+        name: textual
+      vars:
+        textual_state: absent
+
+    - name: Ensure textual application status is gathered after removal
+      tags:
+        - textual
+      ansible.builtin.stat:
+        path: /Applications/Textual.app
+      register: __textual_absent_stat
+
+    - name: Ensure textual application is absent
+      tags:
+        - textual
+      ansible.builtin.assert:
+        that:
+          - not __textual_absent_stat.stat.exists
+...

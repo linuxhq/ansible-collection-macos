@@ -1,0 +1,12 @@
+---
+add plugin.module:
+  - name: homebrew_info
+    description: Gather information about Homebrew formulae.
+    namespace: ''
+  - name: homebrew_cask_info
+    description: Gather information about Homebrew casks.
+    namespace: ''
+  - name: homebrew_services_info
+    description: Gather information about Homebrew services.
+    namespace: ''
+...

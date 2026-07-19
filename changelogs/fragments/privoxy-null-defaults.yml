@@ -1,0 +1,7 @@
+---
+minor_changes:
+  - privoxy - default ``privoxy_templdir``, ``privoxy_temporary_directory``,
+    and ``privoxy_trustfile`` to ``null`` instead of an empty string, matching
+    the collection's convention for unset string variables; existing
+    empty-string overrides are still treated as unset.
+...

@@ -1,8 +1,6 @@
-# {{ ansible_managed }}
-
 {% if irssi_channels | length > 0 %}
 channels = (
-{%   for channel in irssi_channels | sort %}
+{%   for channel in irssi_channels | sort(attribute='name') %}
   {
 {%     for key, value in channel.items() %}
     {{ key }} = "{{ value }}";
@@ -19,16 +17,15 @@ chatnets = {
   {{ chatnet }} = {
 {%     for key, value in irssi_chatnets[chatnet].items() %}
     {{ key }} = "{{ value }}";
-  }{% if not loop.last %},{% else %};{% endif %}
 {%     endfor %}
+  };
 {%   endfor %}
-
 };
 {% endif %}
 
 {% if irssi_ignores | length > 0 %}
 ignores = (
-{%   for ignore in irssi_ignores | sort %}
+{%   for ignore in irssi_ignores | sort(attribute='mask') %}
   {
 {%     for key, value in ignore.items() %}
     {{ key }} = "{{ value }}";
@@ -41,7 +38,7 @@ ignores = (
 
 {% if irssi_servers | length > 0 %}
 servers = (
-{%   for server in irssi_servers | sort %}
+{%   for server in irssi_servers | sort(attribute='address') %}
   {
 {%     for key, value in server.items() %}
     {{ key }} = "{{ value }}";

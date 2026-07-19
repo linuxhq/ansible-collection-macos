@@ -1,0 +1,11 @@
+---
+breaking_changes:
+  - rclone - remove the ``rclone_path_plist`` variable; agent property lists
+    are always written to ``~/Library/LaunchAgents``, the only user-writable
+    location the ``community.general.launchd`` module searches.
+minor_changes:
+  - meta - require community.general 13.2.0 or later.
+  - rclone - manage the launchd agents with the ``community.general.launchd``
+    module instead of a raw ``launchctl load`` command; agents are now
+    reloaded when their property list changes and report idempotent results.
+...

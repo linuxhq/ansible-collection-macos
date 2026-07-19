@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: homebrew
+    - role: homebrew_services_info
+...

@@ -1,0 +1,5 @@
+---
+minor_changes:
+  - meta - exclude development, CI, and tooling files from the built
+    collection tarball via ``build_ignore``.
+...

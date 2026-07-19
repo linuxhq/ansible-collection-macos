@@ -1,5 +1,5 @@
 ===========================
-linuxhq.linux Release Notes
+linuxhq.macos Release Notes
 ===========================
 
 .. contents:: Topics
@@ -10,12 +10,12 @@ v1.1.2
 Release Summary
 ---------------
 
-This release updates the default rclone version to v1.73.0 which supports drime and filen
+Updates the default rclone version to v1.73.0, which adds support for the Drime and Filen backends.
 
 Minor Changes
 -------------
 
-- rclone - update version to v1.73.0
+- rclone - update the default rclone version to v1.73.0.
 
 v1.1.1
 ======
@@ -23,12 +23,12 @@ v1.1.1
 Release Summary
 ---------------
 
-This release includes a new homebrew role for managing casks, packages, and taps.
+Adds a new homebrew role for managing casks, packages, and taps.
 
 Minor Changes
 -------------
 
-- homebrew - initial commit
+- homebrew - initial commit.
 
 v1.1.0
 ======
@@ -36,10 +36,10 @@ v1.1.0
 Release Summary
 ---------------
 
-First release with changelog included
+First release with the changelog included.
 
 Minor Changes
 -------------
 
-- Update copyrights in readme and meta files
-- rclone - Convert rclone_conf from dict to list
+- meta - update copyrights in readme and meta files.
+- rclone - convert rclone_conf from a dict to a list.

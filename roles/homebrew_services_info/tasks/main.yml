@@ -1,0 +1,27 @@
+---
+- name: Ensure homebrew services information is gathered
+  tags:
+    - homebrew_services_info
+  linuxhq.macos.homebrew_services_info:
+    name: "{{ homebrew_services_info_name or omit }}"
+    path: "{{ homebrew_services_info_path or omit }}"
+  register: __homebrew_services_info_query
+
+- name: Ensure list of homebrew services information is generated
+  tags:
+    - homebrew_services_info
+  ansible.builtin.set_fact:
+    _homebrew_services_info_list:
+      "{{ __homebrew_services_info_query.services |
+          d([]) }}"
+
+- name: Ensure dict of homebrew services information is generated
+  tags:
+    - homebrew_services_info
+  ansible.builtin.set_fact:
+    _homebrew_services_info_dict:
+      "{{ (dict(_homebrew_services_info_list |
+               json_query('[].name') |
+               zip(_homebrew_services_info_list))) |
+          d({}) }}"
+...

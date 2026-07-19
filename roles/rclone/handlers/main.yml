@@ -1,0 +1,15 @@
+---
+- name: Reload rclone agents
+  tags:
+    - rclone
+  community.general.launchd:
+    name: "{{ _plist._mount.name }}"
+    state: reloaded
+  loop: "{{ __rclone_plist.results }}"
+  loop_control:
+    label: "{{ _plist._mount.name | d(none) }}"
+    loop_var: _plist
+  when:
+    - _plist is changed
+    - not ansible_check_mode
+...

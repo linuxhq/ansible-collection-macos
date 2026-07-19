@@ -1,0 +1,19 @@
+---
+allow_duplicates: true
+dependencies: []
+galaxy_info:
+  role_name: launchd_info
+  author: Taylor Kimball
+  description: Gather information about launchd services
+  license: GPL-3.0-or-later
+  min_ansible_version: 2.18.0
+  namespace: linuxhq
+  platforms:
+    - name: macOS
+      versions:
+        - all
+  galaxy_tags:
+    - info
+    - launchd
+    - macos
+...

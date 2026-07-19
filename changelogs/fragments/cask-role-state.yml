@@ -1,0 +1,7 @@
+---
+minor_changes:
+  - adguard, appzapper, hermes, iterm2, monitorcontrol, proton_drive,
+    proton_mail, proton_vpn, rectangle, sizeup, textual - support uninstalling
+    the cask via a new ``{role}_state`` variable, and removing individual
+    defaults entries via a per-item ``state`` key; both default to ``present``.
+...

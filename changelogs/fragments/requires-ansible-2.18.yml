@@ -1,0 +1,6 @@
+---
+breaking_changes:
+  - meta - raise the minimum supported ansible-core version to 2.18.0 across
+    the collection and every role; upgrade ansible-core on the control node
+    to 2.18.0 or later before installing this release.
+...

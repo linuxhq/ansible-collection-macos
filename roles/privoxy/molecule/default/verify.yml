@@ -1,0 +1,46 @@
+---
+- name: Verify
+  hosts: all
+  roles:
+    - role: homebrew_services_info
+      homebrew_services_info_name:
+        - privoxy
+
+  post_tasks:
+    - name: Ensure privoxy configuration file status is gathered
+      tags:
+        - privoxy
+      ansible.builtin.stat:
+        path: /opt/homebrew/etc/privoxy/config
+      register: __privoxy_present_stat
+
+    - name: Ensure privoxy configuration file and service are verified
+      tags:
+        - privoxy
+      ansible.builtin.assert:
+        that:
+          - __privoxy_present_stat.stat.exists
+          - _homebrew_services_info_dict['privoxy'].running
+
+    - name: Ensure privoxy role is included with an absent state
+      tags:
+        - privoxy
+      ansible.builtin.include_role:
+        name: privoxy
+      vars:
+        privoxy_state: absent
+
+    - name: Ensure privoxy configuration file status is gathered after removal
+      tags:
+        - privoxy
+      ansible.builtin.stat:
+        path: /opt/homebrew/etc/privoxy/config
+      register: __privoxy_absent_stat
+
+    - name: Ensure privoxy configuration file is absent
+      tags:
+        - privoxy
+      ansible.builtin.assert:
+        that:
+          - not __privoxy_absent_stat.stat.exists
+...

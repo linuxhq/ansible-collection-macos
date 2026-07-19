@@ -1,0 +1,5 @@
+---
+trivial:
+  - rectangle - add a molecule scenario running the role against a Tart macOS
+    virtual machine via the vagrant driver.
+...

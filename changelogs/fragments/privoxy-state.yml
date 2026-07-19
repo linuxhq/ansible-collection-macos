@@ -1,0 +1,9 @@
+---
+minor_changes:
+  - privoxy - support uninstalling the package via a new ``privoxy_state``
+    variable, defaulting to ``present``.
+  - privoxy - start the service after the configuration is managed; when
+    ``privoxy_state`` is ``absent`` the service is stopped before the package
+    is uninstalled, the configuration file is removed, and the restart
+    handler is skipped.
+...

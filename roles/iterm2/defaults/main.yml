@@ -2,4 +2,5 @@
 iterm2_defaults: []
 iterm2_domain: com.googlecode.iterm2
 iterm2_package: iterm2
+iterm2_state: present
 ...

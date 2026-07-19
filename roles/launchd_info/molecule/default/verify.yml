@@ -1,0 +1,41 @@
+---
+- name: Verify
+  hosts: all
+  roles:
+    - launchd_info
+
+  post_tasks:
+    - name: Ensure launchd services information is verified
+      tags:
+        - launchd_info
+      ansible.builtin.assert:
+        that:
+          - _launchd_info_list | length > 0
+          - _launchd_info_dict | length == _launchd_info_list | length
+
+    - name: Ensure launchd role is included with default service names
+      tags:
+        - launchd_info
+      ansible.builtin.include_role:
+        name: launchd_info
+      vars:
+        launchd_info_name:
+          - com.apple.cfprefsd.xpc.agent
+          - com.apple.trustd.agent
+
+    - name: Ensure filtered launchd services information is verified
+      tags:
+        - launchd_info
+      ansible.builtin.assert:
+        that:
+          - _launchd_info_list | length == 2
+          - _launchd_info_dict | length == 2
+          - _launchd_info_dict['com.apple.cfprefsd.xpc.agent'].label ==
+              'com.apple.cfprefsd.xpc.agent'
+          - _launchd_info_dict['com.apple.cfprefsd.xpc.agent'].pid is defined
+          - _launchd_info_dict['com.apple.cfprefsd.xpc.agent'].running is defined
+          - _launchd_info_dict['com.apple.trustd.agent'].label ==
+              'com.apple.trustd.agent'
+          - _launchd_info_dict['com.apple.trustd.agent'].pid is defined
+          - _launchd_info_dict['com.apple.trustd.agent'].running is defined
+...

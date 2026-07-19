@@ -1,0 +1,6 @@
+---
+bugfixes:
+  - irssi - sort channels, ignores, and servers by their identifying key when
+    rendering the configuration; previously the template failed with a
+    ``TypeError`` as soon as any of these lists held more than one entry.
+...

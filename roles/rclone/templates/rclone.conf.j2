@@ -1,5 +1,3 @@
-# {{ ansible_managed }}
-
 {% for remote in rclone_conf %}
 [{{ remote.name }}]
 {%   for key, value in remote | dictsort if key != 'name' %}
@@ -9,6 +7,8 @@
 {{ key }} = false
 {%     elif value is string %}
 {{ key }} = {{ value | string }}
+{%     elif value is float %}
+{{ key }} = {{ value | float }}
 {%     elif value is number %}
 {{ key }} = {{ value | int }}
 {%     else %}

@@ -1,0 +1,40 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Ensure liquidprompt configuration status is gathered
+      tags:
+        - liquidprompt
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.liquidpromptrc"
+      register: __liquidprompt_present_stat
+
+    - name: Ensure liquidprompt configuration is present
+      tags:
+        - liquidprompt
+      ansible.builtin.assert:
+        that:
+          - __liquidprompt_present_stat.stat.exists
+
+    - name: Ensure liquidprompt role is included with an absent state
+      tags:
+        - liquidprompt
+      ansible.builtin.include_role:
+        name: liquidprompt
+      vars:
+        liquidprompt_state: absent
+
+    - name: Ensure liquidprompt configuration status is gathered after removal
+      tags:
+        - liquidprompt
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.liquidpromptrc"
+      register: __liquidprompt_absent_stat
+
+    - name: Ensure liquidprompt configuration is absent
+      tags:
+        - liquidprompt
+      ansible.builtin.assert:
+        that:
+          - not __liquidprompt_absent_stat.stat.exists
+...

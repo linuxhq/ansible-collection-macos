@@ -2,4 +2,5 @@
 adguard_defaults: []
 adguard_domain: com.adguard.Adguard
 adguard_package: adguard
+adguard_state: present
 ...

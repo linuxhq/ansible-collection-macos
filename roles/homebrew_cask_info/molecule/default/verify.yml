@@ -1,0 +1,15 @@
+---
+- name: Verify
+  hosts: all
+  roles:
+    - homebrew_cask_info
+
+  post_tasks:
+    - name: Ensure homebrew casks information is verified
+      tags:
+        - homebrew_cask_info
+      ansible.builtin.assert:
+        that:
+          - _homebrew_cask_info_list | length == 1
+          - _homebrew_cask_info_dict['iterm2'].version is defined
+...

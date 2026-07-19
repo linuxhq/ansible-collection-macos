@@ -1,0 +1,5 @@
+---
+minor_changes:
+  - irssi - support uninstalling the package and removing the configuration
+    directory via a new ``irssi_state`` variable, defaulting to ``present``.
+...

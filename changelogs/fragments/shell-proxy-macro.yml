@@ -1,0 +1,5 @@
+---
+trivial:
+  - shell_proxy - render proxy URLs through a shared Jinja macro instead of
+    three duplicated template blocks.
+...

@@ -1,0 +1,26 @@
+---
+- name: Ensure launchd services information is gathered
+  tags:
+    - launchd_info
+  linuxhq.macos.launchd_info:
+    name: "{{ launchd_info_name or omit }}"
+  register: __launchd_info_query
+
+- name: Ensure list of launchd services information is generated
+  tags:
+    - launchd_info
+  ansible.builtin.set_fact:
+    _launchd_info_list:
+      "{{ __launchd_info_query.services |
+          d([]) }}"
+
+- name: Ensure dict of launchd services information is generated
+  tags:
+    - launchd_info
+  ansible.builtin.set_fact:
+    _launchd_info_dict:
+      "{{ (dict(_launchd_info_list |
+               json_query('[].label') |
+               zip(_launchd_info_list))) |
+          d({}) }}"
+...

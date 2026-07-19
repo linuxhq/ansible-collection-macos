@@ -1,58 +1,40 @@
 ---
-- name: Ensure irssi package is present
+- name: Ensure irssi state is valid
+  tags:
+    - irssi
+  ansible.builtin.fail:
+    msg: irssi_state must be 'present' or 'absent'.
+  when:
+    - irssi_state not in ['present', 'absent']
+
+- name: Ensure irssi package is managed
   tags:
     - irssi
   community.general.homebrew:
     name: irssi
-    state: present
+    state: "{{ irssi_state }}"
     update_homebrew: false
     upgrade_all: false
 
-- name: Ensure irssi configuration directories are present
+- name: Ensure irssi present tasks are included
   tags:
     - irssi
-  ansible.builtin.file:
-    mode: '0700'
-    path: "{{ _directory }}"
-    state: directory
-  loop:
-    - "{{ irssi_config_dir }}"
-    - "{{ irssi_config_dir }}/scripts"
-    - "{{ irssi_config_dir }}/scripts/autorun"
-  loop_control:
-    label: "{{ _directory | d(none) }}"
-    loop_var: _directory
-
-- name: Ensure irssi scripts are managed
-  tags:
-    - irssi
-  ansible.builtin.template:
-    dest: "{{ irssi_config_dir }}/scripts/autorun/{{ _script.name }}"
-    mode: '0600'
-    src: scripts.j2
-  loop: "{{ irssi_scripts }}"
-  loop_control:
-    label: "{{ _script.name | d(none) }}"
-    loop_var: _script
+  ansible.builtin.include_tasks:
+    apply:
+      tags:
+        - irssi
+    file: present.yml
   when:
-    - _script.name is defined
-    - _script.base64 is defined
+    - irssi_state == 'present'
 
-- name: Ensure irssi theme is gathered
+- name: Ensure irssi absent tasks are included
   tags:
     - irssi
-  ansible.builtin.get_url:
-    dest: "{{ irssi_config_dir }}"
-    mode: '0600'
-    url: "{{ irssi_theme }}"
+  ansible.builtin.include_tasks:
+    apply:
+      tags:
+        - irssi
+    file: absent.yml
   when:
-    - irssi_theme is not none
-
-- name: Ensure irssi configurations are managed
-  tags:
-    - irssi
-  ansible.builtin.template:
-    dest: "{{ irssi_config_file }}"
-    mode: '0600'
-    src: config.j2
+    - irssi_state == 'absent'
 ...

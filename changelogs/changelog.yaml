@@ -1,25 +1,25 @@
 ---
 ancestor: null
 releases:
-  1.1.2:
-    changes:
-      minor_changes:
-        - rclone - update version to v1.73.0
-      release_summary: >-
-        This release updates the default rclone version
-        to v1.73.0 which supports drime and filen
-  1.1.1:
-    changes:
-      minor_changes:
-        - homebrew - initial commit
-      release_summary: >-
-        This release includes a new homebrew role for
-        managing casks, packages, and taps.
   1.1.0:
     changes:
       minor_changes:
-        - rclone - Convert rclone_conf from dict to list
-        - Update copyrights in readme and meta files
-      release_summary: >-
-        First release with changelog included
+        - meta - update copyrights in readme and meta files.
+        - rclone - convert rclone_conf from a dict to a list.
+      release_summary: First release with the changelog included.
+    release_date: '2025-11-22'
+  1.1.1:
+    changes:
+      minor_changes:
+        - homebrew - initial commit.
+      release_summary: Adds a new homebrew role for managing casks, packages,
+        and taps.
+    release_date: '2025-11-22'
+  1.1.2:
+    changes:
+      minor_changes:
+        - rclone - update the default rclone version to v1.73.0.
+      release_summary: Updates the default rclone version to v1.73.0, which
+        adds support for the Drime and Filen backends.
+    release_date: '2026-01-30'
 ...

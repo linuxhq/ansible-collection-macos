@@ -1,0 +1,6 @@
+---
+bugfixes:
+  - shell_proxy - URL-encode proxy usernames and passwords so credentials
+    containing characters such as ``@`` or ``:`` no longer corrupt the
+    exported proxy URLs.
+...

@@ -1,0 +1,7 @@
+---
+bugfixes:
+  - irssi, liquidprompt, shell_proxy - resolve the default destination paths
+    from the target host's ``HOME`` via gathered facts instead of the control
+    node's environment, so remote hosts are no longer configured with the
+    controller's home directory.
+...

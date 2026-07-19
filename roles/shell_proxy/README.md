@@ -10,7 +10,7 @@ None
 
 ## Role Variables
 
-    shell_proxy_file: "{{ lookup('env', 'HOME') }}/.bash_proxies"
+    shell_proxy_file: "{{ ansible_env.HOME }}/.bash_proxies"
     shell_proxy_ftp: false
     shell_proxy_ftp_hostname: localhost
     shell_proxy_ftp_password: null
@@ -32,6 +32,7 @@ None
     shell_proxy_noproxy:
       - 127.0.0.1
       - localhost
+    shell_proxy_state: present
 
 ## Dependencies
 
@@ -43,23 +44,18 @@ None
       connection: local
       roles:
         - role: linuxhq.macos.shell_proxy
+          shell_proxy_ftp: true
+          shell_proxy_ftp_hostname: proxy.local
+          shell_proxy_ftp_password: p@ss/word
+          shell_proxy_ftp_port: 2121
+          shell_proxy_ftp_username: user@corp
           shell_proxy_http: true
-          shell_proxy_http_password: proxypass
-          shell_proxy_http_username: tkimball
-
-## License
-
-Copyright (c) Linux HeadQuarters
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
+          shell_proxy_http_hostname: proxy.local
+          shell_proxy_http_password: p@ss/word
+          shell_proxy_http_port: 8118
+          shell_proxy_http_username: user@corp
+          shell_proxy_https: true
+          shell_proxy_https_hostname: proxy.local
+          shell_proxy_https_password: p@ss/word
+          shell_proxy_https_port: 8443
+          shell_proxy_https_username: user@corp
