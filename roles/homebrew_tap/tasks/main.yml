@@ -1,0 +1,33 @@
+---
+- name: Ensure homebrew taps are managed
+  tags:
+    - homebrew_tap
+  community.general.homebrew_tap:
+    name: "{{ _tap.name }}"
+    path: "{{ homebrew_tap_path or omit }}"
+    state: "{{ _tap.state | d('present') }}"
+    url: "{{ _tap.url | d(omit) }}"
+  loop: "{{ homebrew_tap_list }}"
+  loop_control:
+    label: "{{ _tap.name | d(none) }}"
+    loop_var: _tap
+  when:
+    - _tap.name is defined
+
+- name: Ensure homebrew taps are trusted
+  tags:
+    - homebrew_tap
+  ansible.builtin.command:
+    cmd: >
+      brew trust --tap {{ _tap.name }}
+  environment:
+    PATH: "{{ homebrew_tap_path or '/opt/homebrew/bin:/usr/local/bin' }}:{{ ansible_env.PATH }}"
+  changed_when: false
+  loop: "{{ homebrew_tap_list }}"
+  loop_control:
+    label: "{{ _tap.name | d(none) }}"
+    loop_var: _tap
+  when:
+    - _tap.name is defined
+    - _tap.state | d('present') == 'present'
+...

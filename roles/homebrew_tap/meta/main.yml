@@ -1,0 +1,17 @@
+---
+dependencies: []
+galaxy_info:
+  role_name: homebrew_tap
+  author: Taylor Kimball
+  description: Manage homebrew taps
+  license: GPL-3.0-or-later
+  min_ansible_version: 2.18.0
+  platforms:
+    - name: macOS
+      versions:
+        - all
+  galaxy_tags:
+    - homebrew
+    - macos
+    - tap
+...
