@@ -28,7 +28,7 @@ None
       connection: local
       roles:
         - role: linuxhq.macos.homebrew
-          homebrew_packages:
+          homebrew_list:
             - name: cloudflared
             - name: privoxy
 

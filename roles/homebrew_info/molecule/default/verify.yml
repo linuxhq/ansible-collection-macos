@@ -38,4 +38,18 @@
           - _homebrew_info_dict['privoxy'].name == 'privoxy'
           - _homebrew_info_dict['privoxy'].installed is defined
           - _homebrew_info_dict['privoxy'].version is defined
+
+    - name: Ensure inventory lists are formatted
+      tags:
+        - homebrew_info
+      ansible.builtin.set_fact:
+        homebrew_list:
+          "{{ homebrew_list |
+              map('combine', {'state': 'absent'}) }}"
+
+    - name: Ensure homebrew role is included
+      tags:
+        - homebrew_info
+      ansible.builtin.include_role:
+        name: homebrew
 ...
