@@ -1,0 +1,52 @@
+---
+- name: Verify
+  hosts: all
+  roles:
+    - role: homebrew_cask_info
+      homebrew_cask_info_name: []
+
+  post_tasks:
+    - name: Ensure homebrew casks information is verified
+      tags:
+        - homebrew_cask_info
+      ansible.builtin.assert:
+        that:
+          - _homebrew_cask_info_dict | length == 3
+          - _homebrew_cask_info_dict['git-credential-manager'].installed is defined
+          - _homebrew_cask_info_dict['git-credential-manager'].name is defined
+          - _homebrew_cask_info_dict['git-credential-manager'].version is defined
+
+    - name: Ensure homebrew cask role is included with cask names
+      tags:
+        - homebrew_cask_info
+      ansible.builtin.include_role:
+        name: homebrew_cask_info
+
+    - name: Ensure filtered homebrew casks information is verified
+      tags:
+        - homebrew_cask_info
+      ansible.builtin.assert:
+        that:
+          - _homebrew_cask_info_list | length == 2
+          - _homebrew_cask_info_dict | length == 2
+          - _homebrew_cask_info_dict['iterm2'].name == 'iterm2'
+          - _homebrew_cask_info_dict['iterm2'].installed is defined
+          - _homebrew_cask_info_dict['iterm2'].version is defined
+          - _homebrew_cask_info_dict['rectangle'].name == 'rectangle'
+          - _homebrew_cask_info_dict['rectangle'].installed is defined
+          - _homebrew_cask_info_dict['rectangle'].version is defined
+
+    - name: Ensure inventory lists are formatted
+      tags:
+        - homebrew_cask_info
+      ansible.builtin.set_fact:
+        homebrew_cask_list:
+          "{{ homebrew_cask_list |
+              map('combine', {'state': 'absent'}) }}"
+
+    - name: Ensure homebrew cask role is included
+      tags:
+        - homebrew_cask_info
+      ansible.builtin.include_role:
+        name: homebrew_cask
+...

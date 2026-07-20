@@ -1,0 +1,8 @@
+---
+- name: Ensure irssi configuration directory is absent
+  tags:
+    - irssi
+  ansible.builtin.file:
+    path: "{{ irssi_config_dir }}"
+    state: absent
+...

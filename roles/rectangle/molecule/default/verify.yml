@@ -1,0 +1,40 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Ensure rectangle application status is gathered
+      tags:
+        - rectangle
+      ansible.builtin.stat:
+        path: /Applications/Rectangle.app
+      register: __rectangle_present_stat
+
+    - name: Ensure rectangle application is present
+      tags:
+        - rectangle
+      ansible.builtin.assert:
+        that:
+          - __rectangle_present_stat.stat.exists
+
+    - name: Ensure rectangle role is included with an absent state
+      tags:
+        - rectangle
+      ansible.builtin.include_role:
+        name: rectangle
+      vars:
+        rectangle_state: absent
+
+    - name: Ensure rectangle application status is gathered after removal
+      tags:
+        - rectangle
+      ansible.builtin.stat:
+        path: /Applications/Rectangle.app
+      register: __rectangle_absent_stat
+
+    - name: Ensure rectangle application is absent
+      tags:
+        - rectangle
+      ansible.builtin.assert:
+        that:
+          - not __rectangle_absent_stat.stat.exists
+...

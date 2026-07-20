@@ -1,0 +1,57 @@
+---
+- name: Verify
+  hosts: all
+  roles:
+    - role: homebrew_services_info
+      homebrew_services_info_name: []
+
+  post_tasks:
+    - name: Ensure homebrew services information is verified
+      tags:
+        - homebrew_services_info
+      ansible.builtin.assert:
+        that:
+          - _homebrew_services_info_dict | length == 4
+          - _homebrew_services_info_dict['buildkite-agent@3'].file is defined
+          - _homebrew_services_info_dict['buildkite-agent@3'].name is defined
+          - _homebrew_services_info_dict['buildkite-agent@3'].pid is defined
+          - _homebrew_services_info_dict['buildkite-agent@3'].running is defined
+          - _homebrew_services_info_dict['gitlab-runner'].file is defined
+          - _homebrew_services_info_dict['gitlab-runner'].name is defined
+          - _homebrew_services_info_dict['gitlab-runner'].pid is defined
+          - _homebrew_services_info_dict['gitlab-runner'].running is defined
+
+    - name: Ensure homebrew services role is included with service names
+      tags:
+        - homebrew_services_info
+      ansible.builtin.include_role:
+        name: homebrew_services_info
+
+    - name: Ensure filtered homebrew services information is verified
+      tags:
+        - homebrew_services_info
+      ansible.builtin.assert:
+        that:
+          - _homebrew_services_info_list | length == 2
+          - _homebrew_services_info_dict | length == 2
+          - _homebrew_services_info_dict['cloudflared'].name == 'cloudflared'
+          - _homebrew_services_info_dict['cloudflared'].pid is defined
+          - _homebrew_services_info_dict['cloudflared'].running is defined
+          - _homebrew_services_info_dict['privoxy'].name == 'privoxy'
+          - _homebrew_services_info_dict['privoxy'].pid is defined
+          - _homebrew_services_info_dict['privoxy'].running is defined
+
+    - name: Ensure inventory lists are formatted
+      tags:
+        - homebrew_services_info
+      ansible.builtin.set_fact:
+        homebrew_list:
+          "{{ homebrew_list |
+              map('combine', {'state': 'absent'}) }}"
+
+    - name: Ensure homebrew role is included
+      tags:
+        - homebrew_services_info
+      ansible.builtin.include_role:
+        name: homebrew
+...

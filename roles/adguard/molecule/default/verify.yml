@@ -1,0 +1,40 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Ensure adguard application status is gathered
+      tags:
+        - adguard
+      ansible.builtin.stat:
+        path: /Applications/AdGuard.app
+      register: __adguard_present_stat
+
+    - name: Ensure adguard application is present
+      tags:
+        - adguard
+      ansible.builtin.assert:
+        that:
+          - __adguard_present_stat.stat.exists
+
+    - name: Ensure adguard role is included with an absent state
+      tags:
+        - adguard
+      ansible.builtin.include_role:
+        name: adguard
+      vars:
+        adguard_state: absent
+
+    - name: Ensure adguard application status is gathered after removal
+      tags:
+        - adguard
+      ansible.builtin.stat:
+        path: /Applications/AdGuard.app
+      register: __adguard_absent_stat
+
+    - name: Ensure adguard application is absent
+      tags:
+        - adguard
+      ansible.builtin.assert:
+        that:
+          - not __adguard_absent_stat.stat.exists
+...

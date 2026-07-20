@@ -1,0 +1,40 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Ensure irssi configuration status is gathered
+      tags:
+        - irssi
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.irssi/config"
+      register: __irssi_config_stat
+
+    - name: Ensure irssi configuration is present
+      tags:
+        - irssi
+      ansible.builtin.assert:
+        that:
+          - __irssi_config_stat.stat.exists
+
+    - name: Ensure irssi role is included with an absent state
+      tags:
+        - irssi
+      ansible.builtin.include_role:
+        name: irssi
+      vars:
+        irssi_state: absent
+
+    - name: Ensure irssi configuration status is gathered after removal
+      tags:
+        - irssi
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.irssi"
+      register: __irssi_absent_stat
+
+    - name: Ensure irssi configuration is absent
+      tags:
+        - irssi
+      ansible.builtin.assert:
+        that:
+          - not __irssi_absent_stat.stat.exists
+...

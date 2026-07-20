@@ -2,4 +2,5 @@
 appzapper_defaults: []
 appzapper_domain: com.appzapper.AppZapper
 appzapper_package: appzapper
+appzapper_state: present
 ...

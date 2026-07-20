@@ -1,0 +1,40 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Ensure shell proxy file status is gathered
+      tags:
+        - shell_proxy
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.bash_proxies"
+      register: __shell_proxy_present_stat
+
+    - name: Ensure shell proxy file is present
+      tags:
+        - shell_proxy
+      ansible.builtin.assert:
+        that:
+          - __shell_proxy_present_stat.stat.exists
+
+    - name: Ensure shell proxy role is included with an absent state
+      tags:
+        - shell_proxy
+      ansible.builtin.include_role:
+        name: shell_proxy
+      vars:
+        shell_proxy_state: absent
+
+    - name: Ensure shell proxy file status is gathered after removal
+      tags:
+        - shell_proxy
+      ansible.builtin.stat:
+        path: "{{ ansible_env.HOME }}/.bash_proxies"
+      register: __shell_proxy_absent_stat
+
+    - name: Ensure shell proxy file is absent
+      tags:
+        - shell_proxy
+      ansible.builtin.assert:
+        that:
+          - not __shell_proxy_absent_stat.stat.exists
+...

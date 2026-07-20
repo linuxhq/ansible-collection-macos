@@ -10,7 +10,7 @@ Your text mode chatting application since 1999
 
 ## Role Variables
 
-    irssi_config_dir: "{{ lookup('env', 'HOME') }}/.irssi"
+    irssi_config_dir: "{{ ansible_env.HOME }}/.irssi"
     irssi_config_file: "{{ irssi_config_dir }}/config"
     irssi_channels:
       - name: '#linuxhq'
@@ -36,6 +36,7 @@ Your text mode chatting application since 1999
         real_name: Linux HeadQuarters
         user_name: linuxhq
     irssi_scripts: []
+    irssi_state: present
     irssi_theme: null
 
 ## Dependencies
@@ -48,25 +49,28 @@ None
       connection: local
       roles:
         - role: linuxhq.macos.irssi
+          irssi_channels:
+            - name: '#linuxhq'
+              autojoin: 'yes'
+              chatnet: linuxhq
+            - name: '#macos'
+              autojoin: 'yes'
+              chatnet: oftc
+          irssi_chatnets:
+            linuxhq:
+              type: IRC
+            oftc:
+              type: IRC
+              nick: tkimball
+          irssi_ignores:
+            - exception: 'no'
+              level: 'CTCPS DCC'
+              mask: '*'
+            - exception: 'no'
+              level: 'JOINS PARTS QUITS'
+              mask: '#macos'
           irssi_settings:
             core:
               nick: tkimball
               real_name: Taylor Kimball
               user_name: tkimball
-
-## License
-
-Copyright (c) Linux HeadQuarters
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.

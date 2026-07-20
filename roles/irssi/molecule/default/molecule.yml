@@ -1,0 +1,84 @@
+---
+dependency:
+  name: galaxy
+  options:
+    requirements-file: ../../requirements.yml
+
+driver:
+  name: vagrant
+  provider:
+    name: tart
+
+platforms:
+  - name: tahoe
+    hostname: false
+    memory: 8192
+    cpus: 4
+    provider_options:
+      disk: 60
+      image: ghcr.io/cirruslabs/macos-tahoe-base:latest
+      name: tahoe
+    config_options:
+      synced_folder: false
+      ssh.username: admin
+      ssh.password: admin
+      vm.boot_timeout: 900
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ACTION_WARNINGS: false
+    ANSIBLE_DEPRECATION_WARNINGS: false
+  log: true
+  options:
+    diff: true
+  inventory:
+    group_vars:
+      all:
+        irssi_channels:
+          - name: '#linuxhq'
+            autojoin: 'yes'
+            chatnet: linuxhq
+          - name: '#macos'
+            autojoin: 'yes'
+            chatnet: oftc
+        irssi_chatnets:
+          linuxhq:
+            type: IRC
+          oftc:
+            type: IRC
+            nick: tkimball
+        irssi_ignores:
+          - exception: 'no'
+            level: 'CTCPS DCC'
+            mask: '*'
+          - exception: 'no'
+            level: 'JOINS PARTS QUITS'
+            mask: '#macos'
+        irssi_settings:
+          core:
+            nick: tkimball
+            real_name: Taylor Kimball
+            user_name: tkimball
+
+scenario:
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - check
+    - converge
+    - check
+    - idempotence
+    - verify
+    - cleanup
+    - destroy
+
+verifier:
+  name: ansible
+  options:
+    diff: true
+...

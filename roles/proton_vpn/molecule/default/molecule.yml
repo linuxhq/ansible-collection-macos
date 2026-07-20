@@ -1,0 +1,87 @@
+---
+dependency:
+  name: galaxy
+  options:
+    requirements-file: ../../requirements.yml
+
+driver:
+  name: vagrant
+  provider:
+    name: tart
+
+platforms:
+  - name: tahoe
+    hostname: false
+    memory: 8192
+    cpus: 4
+    provider_options:
+      disk: 60
+      image: ghcr.io/cirruslabs/macos-tahoe-base:latest
+      name: tahoe
+    config_options:
+      synced_folder: false
+      ssh.username: admin
+      ssh.password: admin
+      vm.boot_timeout: 900
+
+provisioner:
+  name: ansible
+  env:
+    ANSIBLE_ACTION_WARNINGS: false
+    ANSIBLE_DEPRECATION_WARNINGS: false
+  log: true
+  options:
+    diff: true
+  inventory:
+    group_vars:
+      all:
+        proton_vpn_defaults:
+          - key: AutoConnect
+            type: bool
+            value: true
+          - key: ConnectOnDemand
+            type: bool
+            value: true
+          - key: LaunchedBefore
+            type: bool
+            value: true
+          - key: NeagentAppeared
+            type: bool
+            value: true
+          - key: "{{ 'NetShield' + ansible_user_id }}"
+            type: int
+            value: 2
+          - key: RememberLogin
+            type: bool
+            value: true
+          - key: StartMinimized
+            type: bool
+            value: false
+          - key: StartOnBoot
+            type: bool
+            value: true
+          - key: SystemNotifications
+            type: bool
+            value: true
+
+scenario:
+  test_sequence:
+    - dependency
+    - cleanup
+    - destroy
+    - syntax
+    - create
+    - prepare
+    - check
+    - converge
+    - check
+    - idempotence
+    - verify
+    - cleanup
+    - destroy
+
+verifier:
+  name: ansible
+  options:
+    diff: true
+...

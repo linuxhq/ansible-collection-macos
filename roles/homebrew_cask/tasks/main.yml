@@ -1,0 +1,35 @@
+---
+- name: Ensure homebrew is updated
+  tags:
+    - homebrew_cask
+  community.general.homebrew:
+    update_homebrew: true
+  when:
+    - homebrew_cask_update | bool
+
+- name: Ensure all homebrew casks are upgraded
+  tags:
+    - homebrew_cask
+  community.general.homebrew_cask:
+    greedy: "{{ homebrew_cask_upgrade_greedy }}"
+    upgrade_all: true
+  when:
+    - homebrew_cask_upgrade | bool
+
+- name: Ensure homebrew casks are managed
+  tags:
+    - homebrew_cask
+  community.general.homebrew_cask:
+    accept_external_apps: "{{ _cask.accept_external_apps | d(false) }}"
+    install_options: "{{ _cask.install_options | d(omit) }}"
+    name: "{{ _cask.name }}"
+    path: "{{ homebrew_cask_path or omit }}"
+    state: "{{ _cask.state | d('present') }}"
+    sudo_password: "{{ homebrew_cask_sudo_password or omit }}"
+  loop: "{{ homebrew_cask_list }}"
+  loop_control:
+    label: "{{ _cask.name | d(none) }}"
+    loop_var: _cask
+  when:
+    - _cask.name is defined
+...

@@ -1,4 +1,12 @@
 ---
+- name: Ensure shell proxy state is valid
+  tags:
+    - shell_proxy
+  ansible.builtin.fail:
+    msg: shell_proxy_state must be 'present' or 'absent'.
+  when:
+    - shell_proxy_state not in ['present', 'absent']
+
 - name: Ensure shell proxy settings are present
   tags:
     - shell_proxy
@@ -6,4 +14,15 @@
     dest: "{{ shell_proxy_file }}"
     mode: '0600'
     src: shell_proxies.sh.j2
+  when:
+    - shell_proxy_state == 'present'
+
+- name: Ensure shell proxy settings are absent
+  tags:
+    - shell_proxy
+  ansible.builtin.file:
+    path: "{{ shell_proxy_file }}"
+    state: absent
+  when:
+    - shell_proxy_state == 'absent'
 ...

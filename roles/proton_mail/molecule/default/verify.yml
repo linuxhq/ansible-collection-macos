@@ -1,0 +1,40 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Ensure proton mail application status is gathered
+      tags:
+        - proton_mail
+      ansible.builtin.stat:
+        path: "/Applications/Proton Mail.app"
+      register: __proton_mail_present_stat
+
+    - name: Ensure proton mail application is present
+      tags:
+        - proton_mail
+      ansible.builtin.assert:
+        that:
+          - __proton_mail_present_stat.stat.exists
+
+    - name: Ensure proton mail role is included with an absent state
+      tags:
+        - proton_mail
+      ansible.builtin.include_role:
+        name: proton_mail
+      vars:
+        proton_mail_state: absent
+
+    - name: Ensure proton mail application status is gathered after removal
+      tags:
+        - proton_mail
+      ansible.builtin.stat:
+        path: "/Applications/Proton Mail.app"
+      register: __proton_mail_absent_stat
+
+    - name: Ensure proton mail application is absent
+      tags:
+        - proton_mail
+      ansible.builtin.assert:
+        that:
+          - not __proton_mail_absent_stat.stat.exists
+...

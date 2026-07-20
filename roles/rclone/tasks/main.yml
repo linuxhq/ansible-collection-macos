@@ -1,52 +1,12 @@
 ---
-- name: Ensure rclone facts are generated
+- name: Ensure rclone package is present
   tags:
     - rclone
-  ansible.builtin.set_fact:
-    __rclone_release: "rclone-{{ rclone_version }}-osx-{{ ansible_architecture }}"
-    __rclone_url: "https://downloads.rclone.org/{{ rclone_version }}"
-
-- name: Ensure rclone temporary directory is present
-  tags:
-    - rclone
-  ansible.builtin.tempfile:
-    prefix: rclone.
-    state: directory
-    suffix: .zip
-  register: __rclone_tempfile
-
-- name: Ensure rclone package is gathered and unpacked
-  tags:
-    - rclone
-  ansible.builtin.unarchive:
-    dest: "{{ __rclone_tempfile.path }}"
-    remote_src: true
-    src: "{{ __rclone_url }}/{{ __rclone_release }}.zip"
-
-- name: Ensure rclone binary path is present
-  tags:
-    - rclone
-  ansible.builtin.file:
-    mode: '0755'
-    path: "{{ rclone_path_bin | dirname }}"
-    state: directory
-
-- name: Ensure rclone binary file is present
-  tags:
-    - rclone
-  ansible.builtin.copy:
-    dest: "{{ rclone_path_bin }}"
-    mode: '0755'
-    remote_src: true
-    src: "{{ __rclone_tempfile.path }}/{{ __rclone_release }}/rclone"
-
-- name: Ensure rclone temporary directory is absent
-  tags:
-    - rclone
-  ansible.builtin.file:
-    path: "{{ __rclone_tempfile.path }}"
-    state: absent
-  check_mode: false
+  community.general.homebrew:
+    name: rclone
+    state: present
+    update_homebrew: false
+    upgrade_all: false
 
 - name: Ensure rclone configuration path is present
   tags:
@@ -68,22 +28,15 @@
   when:
     - rclone_conf | length > 0
 
-- name: Ensure rclone property list path is present
-  tags:
-    - rclone
-  ansible.builtin.file:
-    mode: '0755'
-    path: "{{ rclone_path_plist }}"
-  when:
-    - rclone_mounts | length > 0
-
 - name: Ensure rclone property list directory is present
   tags:
     - rclone
   ansible.builtin.file:
     mode: '0755'
-    path: "{{ rclone_path_plist }}"
+    path: "{{ ansible_env.HOME }}/Library/LaunchAgents"
     state: directory
+  when:
+    - rclone_mounts | length > 0
 
 - name: Ensure rclone property list mountpoint is present
   tags:
@@ -103,32 +56,54 @@
   tags:
     - rclone
   ansible.builtin.template:
-    dest: "{{ rclone_path_plist }}/{{ _mount.name }}.plist"
+    dest: "{{ ansible_env.HOME }}/Library/LaunchAgents/{{ _mount.name }}.plist"
     mode: '0644'
     src: rclone.plist.j2
+  register: __rclone_plist
   loop: "{{ rclone_mounts }}"
   loop_control:
     label: "{{ _mount.name | d(none) }}"
     loop_var: _mount
+  notify:
+    - Reload rclone agents
   when:
     - _mount.name is defined
     - _mount.remote is defined
     - _mount.mountpoint is defined
 
-- name: Ensure rclone property list agent is launched
+- name: Ensure rclone service information is gathered
   tags:
     - rclone
-  ansible.builtin.command:
-    cmd: >
-      /bin/launchctl load -w
-        {{ rclone_path_plist }}/{{ _mount.name }}.plist
+  linuxhq.macos.launchd_info:
+    name:
+      "{{ rclone_mounts |
+          selectattr('name', 'defined') |
+          map(attribute='name') |
+          list }}"
+  register: __rclone_launchd
+  when:
+    - rclone_mounts | length > 0
+
+- name: Ensure rclone property list agents are started
+  tags:
+    - rclone
+  community.general.launchd:
+    enabled: true
+    name: "{{ _mount.name }}"
+    state: started
   loop: "{{ rclone_mounts }}"
   loop_control:
     label: "{{ _mount.name | d(none) }}"
     loop_var: _mount
   when:
     - _mount.name is defined
+    - _mount.name not in
+        __rclone_launchd.services |
+        d([]) |
+        selectattr('running') |
+        map(attribute='label') |
+        list
     - _mount.remote is defined
     - _mount.mountpoint is defined
-  changed_when: true
+    - not ansible_check_mode
 ...

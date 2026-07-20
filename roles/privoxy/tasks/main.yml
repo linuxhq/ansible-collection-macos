@@ -1,14 +1,40 @@
 ---
-- name: Ensure privoxy package is present
+- name: Ensure privoxy state is valid
+  tags:
+    - privoxy
+  ansible.builtin.fail:
+    msg: privoxy_state must be 'present' or 'absent'.
+  when:
+    - privoxy_state not in ['present', 'absent']
+
+- name: Ensure privoxy service information is gathered
+  tags:
+    - privoxy
+  linuxhq.macos.homebrew_services_info:
+    name: privoxy
+  failed_when: false
+  register: __privoxy_services
+
+- name: Ensure privoxy service is stopped
+  tags:
+    - privoxy
+  community.general.homebrew_services:
+    name: privoxy
+    state: absent
+  when:
+    - privoxy_state == 'absent'
+    - __privoxy_services.services is defined
+
+- name: Ensure privoxy package is managed
   tags:
     - privoxy
   community.general.homebrew:
     name: privoxy
-    state: present
+    state: "{{ privoxy_state }}"
     update_homebrew: false
     upgrade_all: false
 
-- name: Ensure privoxy configuration is managed
+- name: Ensure privoxy configuration is present
   tags:
     - privoxy
   ansible.builtin.template:
@@ -17,4 +43,25 @@
     src: config.j2
   notify:
     - Restart privoxy
+  when:
+    - privoxy_state == 'present'
+
+- name: Ensure privoxy configuration is absent
+  tags:
+    - privoxy
+  ansible.builtin.file:
+    path: "{{ privoxy_confdir }}/config"
+    state: absent
+  when:
+    - privoxy_state == 'absent'
+
+- name: Ensure privoxy service is started
+  tags:
+    - privoxy
+  community.general.homebrew_services:
+    name: privoxy
+    state: present
+  when:
+    - privoxy_state == 'present'
+    - not ansible_check_mode
 ...

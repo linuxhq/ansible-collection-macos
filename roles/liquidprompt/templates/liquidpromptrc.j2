@@ -1,5 +1,3 @@
-# {{ ansible_managed }}
-
 {% if liquidprompt_source | length > 0 %}
 {%   for source in liquidprompt_source %}
 source {{ source }}

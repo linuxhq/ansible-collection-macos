@@ -2,8 +2,10 @@
 - name: Restart privoxy
   tags:
     - privoxy
-  ansible.builtin.command:
-    cmd: >
-      brew services restart privoxy
-  changed_when: false
+  community.general.homebrew_services:
+    name: privoxy
+    state: restarted
+  when:
+    - privoxy_state == 'present'
+    - not ansible_check_mode
 ...

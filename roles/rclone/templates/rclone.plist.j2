@@ -4,17 +4,23 @@
 <dict>
     <key>KeepAlive</key>
     <true/>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>{{ rclone_path_bin | join(':') | e }}:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
     <key>Label</key>
-    <string>{{ _mount.name }}</string>
+    <string>{{ _mount.name | e }}</string>
     <key>ProgramArguments</key>
     <array>
-        <string>{{ rclone_path_bin }}</string>
-        <string>mount</string>
-        <string>{{ _mount.remote }}</string>
-        <string>{{ _mount.mountpoint }}</string>
+        <string>/usr/bin/env</string>
+        <string>rclone</string>
+        <string>nfsmount</string>
+        <string>{{ _mount.remote | e }}</string>
+        <string>{{ _mount.mountpoint | e }}</string>
 {% if _mount.flags is defined and _mount.flags | length > 0 %}
 {%   for __flag in _mount.flags %}
-        <string>{{ __flag }}</string>
+        <string>{{ __flag | e }}</string>
 {%   endfor %}
 {% endif %}
     </array>

@@ -5,7 +5,7 @@ galaxy_info:
   author: Taylor Kimball
   description: VPN client focusing on security
   license: GPL-3.0-or-later
-  min_ansible_version: 2.14.0
+  min_ansible_version: 2.18.0
   namespace: linuxhq
   platforms:
     - name: macOS

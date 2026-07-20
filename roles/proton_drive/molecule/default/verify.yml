@@ -1,0 +1,40 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Ensure proton drive application status is gathered
+      tags:
+        - proton_drive
+      ansible.builtin.stat:
+        path: "/Applications/Proton Drive.app"
+      register: __proton_drive_present_stat
+
+    - name: Ensure proton drive application is present
+      tags:
+        - proton_drive
+      ansible.builtin.assert:
+        that:
+          - __proton_drive_present_stat.stat.exists
+
+    - name: Ensure proton drive role is included with an absent state
+      tags:
+        - proton_drive
+      ansible.builtin.include_role:
+        name: proton_drive
+      vars:
+        proton_drive_state: absent
+
+    - name: Ensure proton drive application status is gathered after removal
+      tags:
+        - proton_drive
+      ansible.builtin.stat:
+        path: "/Applications/Proton Drive.app"
+      register: __proton_drive_absent_stat
+
+    - name: Ensure proton drive application is absent
+      tags:
+        - proton_drive
+      ansible.builtin.assert:
+        that:
+          - not __proton_drive_absent_stat.stat.exists
+...

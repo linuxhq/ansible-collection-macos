@@ -1,0 +1,55 @@
+---
+- name: Verify
+  hosts: all
+  roles:
+    - role: homebrew_info
+      homebrew_info_name: []
+
+  post_tasks:
+    - name: Ensure homebrew formulae information is verified
+      tags:
+        - homebrew_info
+      ansible.builtin.assert:
+        that:
+          - _homebrew_info_dict | length == _homebrew_info_list | length
+          - _homebrew_info_dict['buildkite-agent@3'].installed is defined
+          - _homebrew_info_dict['buildkite-agent@3'].name is defined
+          - _homebrew_info_dict['buildkite-agent@3'].version is defined
+          - _homebrew_info_dict['gitlab-runner'].installed is defined
+          - _homebrew_info_dict['gitlab-runner'].name is defined
+          - _homebrew_info_dict['gitlab-runner'].version is defined
+
+    - name: Ensure homebrew role is included with formula names
+      tags:
+        - homebrew_info
+      ansible.builtin.include_role:
+        name: homebrew_info
+
+    - name: Ensure filtered homebrew formulae information is verified
+      tags:
+        - homebrew_info
+      ansible.builtin.assert:
+        that:
+          - _homebrew_info_list | length == 2
+          - _homebrew_info_dict | length == 2
+          - _homebrew_info_dict['cloudflared'].name == 'cloudflared'
+          - _homebrew_info_dict['cloudflared'].installed is defined
+          - _homebrew_info_dict['cloudflared'].version is defined
+          - _homebrew_info_dict['privoxy'].name == 'privoxy'
+          - _homebrew_info_dict['privoxy'].installed is defined
+          - _homebrew_info_dict['privoxy'].version is defined
+
+    - name: Ensure inventory lists are formatted
+      tags:
+        - homebrew_info
+      ansible.builtin.set_fact:
+        homebrew_list:
+          "{{ homebrew_list |
+              map('combine', {'state': 'absent'}) }}"
+
+    - name: Ensure homebrew role is included
+      tags:
+        - homebrew_info
+      ansible.builtin.include_role:
+        name: homebrew
+...

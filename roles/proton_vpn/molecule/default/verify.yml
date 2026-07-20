@@ -1,0 +1,40 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Ensure proton vpn application status is gathered
+      tags:
+        - proton_vpn
+      ansible.builtin.stat:
+        path: "/Applications/ProtonVPN.app"
+      register: __proton_vpn_present_stat
+
+    - name: Ensure proton vpn application is present
+      tags:
+        - proton_vpn
+      ansible.builtin.assert:
+        that:
+          - __proton_vpn_present_stat.stat.exists
+
+    - name: Ensure proton vpn role is included with an absent state
+      tags:
+        - proton_vpn
+      ansible.builtin.include_role:
+        name: proton_vpn
+      vars:
+        proton_vpn_state: absent
+
+    - name: Ensure proton vpn application status is gathered after removal
+      tags:
+        - proton_vpn
+      ansible.builtin.stat:
+        path: "/Applications/ProtonVPN.app"
+      register: __proton_vpn_absent_stat
+
+    - name: Ensure proton vpn application is absent
+      tags:
+        - proton_vpn
+      ansible.builtin.assert:
+        that:
+          - not __proton_vpn_absent_stat.stat.exists
+...

@@ -1,0 +1,27 @@
+---
+- name: Ensure homebrew formulae information is gathered
+  tags:
+    - homebrew_info
+  linuxhq.macos.homebrew_info:
+    name: "{{ homebrew_info_name or omit }}"
+    path: "{{ homebrew_info_path or omit }}"
+  register: __homebrew_info_query
+
+- name: Ensure list of homebrew formulae information is generated
+  tags:
+    - homebrew_info
+  ansible.builtin.set_fact:
+    _homebrew_info_list:
+      "{{ __homebrew_info_query.formulae |
+          d([]) }}"
+
+- name: Ensure dict of homebrew formulae information is generated
+  tags:
+    - homebrew_info
+  ansible.builtin.set_fact:
+    _homebrew_info_dict:
+      "{{ (dict(_homebrew_info_list |
+                json_query('[].name') |
+                zip(_homebrew_info_list))) |
+          d({}) }}"
+...

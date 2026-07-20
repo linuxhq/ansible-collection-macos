@@ -1,18 +1,37 @@
 ---
-- name: Ensure liquidprompt package is present
+- name: Ensure liquidprompt state is valid
+  tags:
+    - liquidprompt
+  ansible.builtin.fail:
+    msg: liquidprompt_state must be 'present' or 'absent'.
+  when:
+    - liquidprompt_state not in ['present', 'absent']
+
+- name: Ensure liquidprompt package is managed
   tags:
     - liquidprompt
   community.general.homebrew:
     name: liquidprompt
-    state: present
+    state: "{{ liquidprompt_state }}"
     update_homebrew: false
     upgrade_all: false
 
-- name: Ensure liquidprompt configuration is managed
+- name: Ensure liquidprompt configuration is present
   tags:
     - liquidprompt
   ansible.builtin.template:
     dest: "{{ liquidprompt_dest }}/.liquidpromptrc"
     mode: '0644'
     src: liquidpromptrc.j2
+  when:
+    - liquidprompt_state == 'present'
+
+- name: Ensure liquidprompt configuration is absent
+  tags:
+    - liquidprompt
+  ansible.builtin.file:
+    path: "{{ liquidprompt_dest }}/.liquidpromptrc"
+    state: absent
+  when:
+    - liquidprompt_state == 'absent'
 ...

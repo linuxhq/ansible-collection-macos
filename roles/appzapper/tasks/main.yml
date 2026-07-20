@@ -1,10 +1,10 @@
 ---
-- name: Ensure appzapper package is present
+- name: Ensure appzapper package is managed
   tags:
     - appzapper
   community.general.homebrew_cask:
     name: "{{ appzapper_package }}"
-    state: present
+    state: "{{ appzapper_state }}"
     update_homebrew: false
     upgrade_all: false
 
@@ -16,14 +16,15 @@
     domain: "{{ appzapper_domain }}"
     host: "{{ _default.host | d(omit) }}"
     key: "{{ _default.key }}"
-    state: present
+    state: "{{ _default.state | d('present') }}"
     type: "{{ _default.type | d('string') }}"
-    value: "{{ _default.value }}"
+    value: "{{ _default.value | d(omit) }}"
   loop: "{{ appzapper_defaults }}"
   loop_control:
     label: "{{ _default.key | d(none) }}"
     loop_var: _default
   when:
     - _default.key is defined
-    - _default.value is defined
+    - _default.value is defined or
+      _default.state | d('present') != 'present'
 ...

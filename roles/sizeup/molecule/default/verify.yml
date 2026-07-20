@@ -1,0 +1,40 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Ensure sizeup application status is gathered
+      tags:
+        - sizeup
+      ansible.builtin.stat:
+        path: /Applications/SizeUp.app
+      register: __sizeup_present_stat
+
+    - name: Ensure sizeup application is present
+      tags:
+        - sizeup
+      ansible.builtin.assert:
+        that:
+          - __sizeup_present_stat.stat.exists
+
+    - name: Ensure sizeup role is included with an absent state
+      tags:
+        - sizeup
+      ansible.builtin.include_role:
+        name: sizeup
+      vars:
+        sizeup_state: absent
+
+    - name: Ensure sizeup application status is gathered after removal
+      tags:
+        - sizeup
+      ansible.builtin.stat:
+        path: /Applications/SizeUp.app
+      register: __sizeup_absent_stat
+
+    - name: Ensure sizeup application is absent
+      tags:
+        - sizeup
+      ansible.builtin.assert:
+        that:
+          - not __sizeup_absent_stat.stat.exists
+...
