@@ -1,5 +1,0 @@
----
-bugfixes:
-  - rclone - translate the ``x86_64`` architecture fact to rclone's ``amd64``
-    release naming; previously the download URL returned a 404 on Intel Macs.
-...

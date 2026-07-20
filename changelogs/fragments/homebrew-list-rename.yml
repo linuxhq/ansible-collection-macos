@@ -1,3 +1,0 @@
----
-breaking_changes:
-  - homebrew - rename the ``homebrew_packages`` variable to ``homebrew_list``.

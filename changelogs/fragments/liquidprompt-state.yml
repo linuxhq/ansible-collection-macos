@@ -1,6 +1,0 @@
----
-minor_changes:
-  - liquidprompt - support uninstalling the package and removing the
-    configuration via a new ``liquidprompt_state`` variable, defaulting to
-    ``present``.
-...

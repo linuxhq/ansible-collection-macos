@@ -1,5 +1,0 @@
----
-trivial:
-  - meta - document the Tart and Vagrant molecule prerequisites in the
-    collection README and remove the License section from role READMEs.
-...

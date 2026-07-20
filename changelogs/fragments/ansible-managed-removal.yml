@@ -1,5 +1,0 @@
----
-minor_changes:
-  - meta - remove the deprecated ``ansible_managed`` comment header from all
-    role templates.
-...

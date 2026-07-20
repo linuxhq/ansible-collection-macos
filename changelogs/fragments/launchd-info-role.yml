@@ -1,5 +1,0 @@
----
-add object.role:
-  - name: launchd_info
-    description: Gather information about launchd services.
-...

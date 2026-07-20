@@ -1,6 +1,0 @@
----
-bugfixes:
-  - rclone - escape XML special characters when rendering launchd property
-    list files; mount names, remotes, mountpoints, and flags containing
-    characters such as ``&`` previously produced an invalid plist.
-...

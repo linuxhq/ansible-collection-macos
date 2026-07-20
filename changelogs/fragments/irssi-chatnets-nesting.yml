@@ -1,6 +1,0 @@
----
-bugfixes:
-  - irssi - close each chatnet block after all of its settings when rendering
-    the configuration; previously a chatnet with more than one setting leaked
-    the extra settings outside its block.
-...

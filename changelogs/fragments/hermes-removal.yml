@@ -1,5 +1,0 @@
----
-removed_features:
-  - hermes - remove the role; the ``hermes`` cask was delisted from Homebrew
-    after the application was abandoned upstream.
-...

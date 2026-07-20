@@ -1,5 +1,0 @@
----
-bugfixes:
-  - rclone - preserve float values in the rendered configuration; previously
-    options such as a ``tpslimit`` of ``0.5`` were truncated to integers.
-...

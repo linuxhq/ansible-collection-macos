@@ -1,5 +1,0 @@
----
-minor_changes:
-  - shell_proxy - support removing the proxy file via a new
-    ``shell_proxy_state`` variable, defaulting to ``present``.
-...

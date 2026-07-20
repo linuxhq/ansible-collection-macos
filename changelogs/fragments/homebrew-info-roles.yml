@@ -1,9 +1,0 @@
----
-add object.role:
-  - name: homebrew_info
-    description: Gather information about Homebrew formulae.
-  - name: homebrew_cask_info
-    description: Gather information about Homebrew casks.
-  - name: homebrew_services_info
-    description: Gather information about Homebrew services.
-...
