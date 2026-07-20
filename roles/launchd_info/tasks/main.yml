@@ -20,7 +20,7 @@
   ansible.builtin.set_fact:
     _launchd_info_dict:
       "{{ (dict(_launchd_info_list |
-               json_query('[].label') |
-               zip(_launchd_info_list))) |
+                json_query('[].label') |
+                zip(_launchd_info_list))) |
           d({}) }}"
 ...
