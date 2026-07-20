@@ -21,7 +21,7 @@
   ansible.builtin.set_fact:
     _homebrew_cask_info_dict:
       "{{ (dict(_homebrew_cask_info_list |
-               json_query('[].name') |
-               zip(_homebrew_cask_info_list))) |
+                json_query('[].name') |
+                zip(_homebrew_cask_info_list))) |
           d({}) }}"
 ...

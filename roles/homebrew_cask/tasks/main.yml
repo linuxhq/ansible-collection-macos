@@ -2,7 +2,7 @@
 - name: Ensure homebrew is updated
   tags:
     - homebrew_cask
-  community.general.homebrew_cask:
+  community.general.homebrew:
     update_homebrew: true
   when:
     - homebrew_cask_update | bool
