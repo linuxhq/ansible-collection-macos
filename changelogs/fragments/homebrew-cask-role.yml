@@ -1,0 +1,14 @@
+---
+add object.role:
+  - name: homebrew_cask
+    description: Manage homebrew casks.
+breaking_changes:
+  - homebrew - move cask management to the new ``homebrew_cask`` role; the
+    ``homebrew_casks``, ``homebrew_sudo_password``, and
+    ``homebrew_upgrade_greedy`` variables are removed.
+trivial:
+  - homebrew - add a molecule scenario running the role against a Tart macOS
+    virtual machine via the vagrant driver.
+  - homebrew_cask - add a molecule scenario running the role against a Tart
+    macOS virtual machine via the vagrant driver.
+...
