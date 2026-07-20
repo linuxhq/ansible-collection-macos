@@ -21,7 +21,7 @@
   ansible.builtin.set_fact:
     _homebrew_services_info_dict:
       "{{ (dict(_homebrew_services_info_list |
-               json_query('[].name') |
-               zip(_homebrew_services_info_list))) |
+                json_query('[].name') |
+                zip(_homebrew_services_info_list))) |
           d({}) }}"
 ...

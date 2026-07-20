@@ -40,4 +40,18 @@
           - _homebrew_services_info_dict['privoxy'].name == 'privoxy'
           - _homebrew_services_info_dict['privoxy'].pid is defined
           - _homebrew_services_info_dict['privoxy'].running is defined
+
+    - name: Ensure inventory lists are formatted
+      tags:
+        - homebrew_services_info
+      ansible.builtin.set_fact:
+        homebrew_list:
+          "{{ homebrew_list |
+              map('combine', {'state': 'absent'}) }}"
+
+    - name: Ensure homebrew role is included
+      tags:
+        - homebrew_services_info
+      ansible.builtin.include_role:
+        name: homebrew
 ...

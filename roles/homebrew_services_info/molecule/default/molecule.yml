@@ -35,7 +35,7 @@ provisioner:
   inventory:
     group_vars:
       all:
-        homebrew_packages:
+        homebrew_list:
           - name: cloudflared
           - name: privoxy
 
