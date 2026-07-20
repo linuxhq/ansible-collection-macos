@@ -58,12 +58,6 @@ An example playbook utilizing roles available in this collection
               type: string
               value: 'Taylor Kimball'
 
-        - role: linuxhq.macos.hermes
-          hermes_defaults:
-            - key: statusBarIconBlackWhite
-              type: bool
-              value: false
-
         - role: linuxhq.macos.iterm2
           iterm2_defaults:
             - key: PromptOnQuit
