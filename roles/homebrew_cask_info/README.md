@@ -27,6 +27,11 @@ None
     - hosts: workstation
       connection: local
       roles:
+        - role: linuxhq.macos.homebrew_cask
+          homebrew_cask_list:
+            - name: iterm2
+            - name: rectangle
+
         - role: linuxhq.macos.homebrew_cask_info
           homebrew_cask_info_name:
             - iterm2

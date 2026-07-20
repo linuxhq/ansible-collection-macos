@@ -3,4 +3,13 @@
   hosts: all
   roles:
     - role: homebrew_cask_info
+      homebrew_cask_info_name: []
+      tags:
+        - molecule-idempotence-notest
+
+    - role: homebrew_cask
+      tags:
+        - molecule-idempotence-notest
+
+    - homebrew_cask_info
 ...
