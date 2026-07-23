@@ -6,7 +6,7 @@
       tags:
         - shell_proxy
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.bash_proxies"
+        path: "{{ ansible_facts.env.HOME }}/.bash_proxies"
       register: __shell_proxy_present_stat
 
     - name: Ensure shell proxy file is present
@@ -28,7 +28,7 @@
       tags:
         - shell_proxy
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.bash_proxies"
+        path: "{{ ansible_facts.env.HOME }}/.bash_proxies"
       register: __shell_proxy_absent_stat
 
     - name: Ensure shell proxy file is absent

@@ -21,7 +21,7 @@
     cmd: >
       brew trust --tap {{ _tap.name }}
   environment:
-    PATH: "{{ homebrew_tap_path or '/opt/homebrew/bin:/usr/local/bin' }}:{{ ansible_env.PATH }}"
+    PATH: "{{ homebrew_tap_path or '/opt/homebrew/bin:/usr/local/bin' }}:{{ ansible_facts.env.PATH }}"
   changed_when: false
   loop: "{{ homebrew_tap_list }}"
   loop_control:

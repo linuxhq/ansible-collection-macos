@@ -43,7 +43,7 @@ provisioner:
         rclone_mounts:
           - name: org.linuxhq.rclone.public
             remote: 'public:'
-            mountpoint: "{{ ansible_env.HOME }}/Volumes/Public"
+            mountpoint: "{{ ansible_facts.env.HOME }}/Volumes/Public"
             flags:
               - --read-only
 

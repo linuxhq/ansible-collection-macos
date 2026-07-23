@@ -38,7 +38,7 @@ None
             - key: NeagentAppeared
               type: bool
               value: true
-            - key: "{{ 'NetShield' + ansible_user_id }}"
+            - key: "{{ 'NetShield' + ansible_facts.user_id }}"
               type: int
               value: 2
             - key: RememberLogin

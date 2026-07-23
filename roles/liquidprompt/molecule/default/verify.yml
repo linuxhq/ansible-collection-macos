@@ -6,7 +6,7 @@
       tags:
         - liquidprompt
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.liquidpromptrc"
+        path: "{{ ansible_facts.env.HOME }}/.liquidpromptrc"
       register: __liquidprompt_present_stat
 
     - name: Ensure liquidprompt configuration is present
@@ -28,7 +28,7 @@
       tags:
         - liquidprompt
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.liquidpromptrc"
+        path: "{{ ansible_facts.env.HOME }}/.liquidpromptrc"
       register: __liquidprompt_absent_stat
 
     - name: Ensure liquidprompt configuration is absent

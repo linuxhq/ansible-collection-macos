@@ -10,7 +10,7 @@ Your text mode chatting application since 1999
 
 ## Role Variables
 
-    irssi_config_dir: "{{ ansible_env.HOME }}/.irssi"
+    irssi_config_dir: "{{ ansible_facts.env.HOME }}/.irssi"
     irssi_config_file: "{{ irssi_config_dir }}/config"
     irssi_channels:
       - name: '#linuxhq'

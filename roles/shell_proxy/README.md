@@ -10,7 +10,7 @@ None
 
 ## Role Variables
 
-    shell_proxy_file: "{{ ansible_env.HOME }}/.bash_proxies"
+    shell_proxy_file: "{{ ansible_facts.env.HOME }}/.bash_proxies"
     shell_proxy_ftp: false
     shell_proxy_ftp_hostname: localhost
     shell_proxy_ftp_password: null

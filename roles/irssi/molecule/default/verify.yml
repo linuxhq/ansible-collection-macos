@@ -6,7 +6,7 @@
       tags:
         - irssi
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.irssi/config"
+        path: "{{ ansible_facts.env.HOME }}/.irssi/config"
       register: __irssi_config_stat
 
     - name: Ensure irssi configuration is present
@@ -28,7 +28,7 @@
       tags:
         - irssi
       ansible.builtin.stat:
-        path: "{{ ansible_env.HOME }}/.irssi"
+        path: "{{ ansible_facts.env.HOME }}/.irssi"
       register: __irssi_absent_stat
 
     - name: Ensure irssi configuration is absent

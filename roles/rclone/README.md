@@ -14,7 +14,7 @@ A command-line program to manage files on cloud storage
     rclone_path_bin:
       - /opt/homebrew/bin
       - /usr/local/bin
-    rclone_path_conf: "{{ ansible_env.HOME }}/.config/rclone/rclone.conf"
+    rclone_path_conf: "{{ ansible_facts.env.HOME }}/.config/rclone/rclone.conf"
     rclone_mounts: []
 
 ## Dependencies
@@ -35,6 +35,6 @@ None
           rclone_mounts:
             - name: org.linuxhq.rclone.public
               remote: 'public:'
-              mountpoint: "{{ ansible_env.HOME }}/Volumes/Public"
+              mountpoint: "{{ ansible_facts.env.HOME }}/Volumes/Public"
               flags:
                 - --read-only

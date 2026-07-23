@@ -4,6 +4,14 @@ linuxhq.macos Release Notes
 
 .. contents:: Topics
 
+v1.1.4
+======
+
+Bugfixes
+--------
+
+- homebrew_tap, irssi, liquidprompt, proton_vpn, rclone, shell_proxy - reference gathered facts through ``ansible_facts`` (for example ``ansible_facts.env.HOME``) instead of the deprecated top-level ``ansible_env`` and ``ansible_user_id`` injected variables.
+
 v1.1.3
 ======
 

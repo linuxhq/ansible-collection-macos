@@ -3,6 +3,6 @@ rclone_conf: []
 rclone_path_bin:
   - /opt/homebrew/bin
   - /usr/local/bin
-rclone_path_conf: "{{ ansible_env.HOME }}/.config/rclone/rclone.conf"
+rclone_path_conf: "{{ ansible_facts.env.HOME }}/.config/rclone/rclone.conf"
 rclone_mounts: []
 ...

@@ -193,3 +193,13 @@ releases:
         name: launchd_info
         namespace: null
     release_date: '2026-07-19'
+  1.1.4:
+    changes:
+      bugfixes:
+      - homebrew_tap, irssi, liquidprompt, proton_vpn, rclone, shell_proxy - reference
+        gathered facts through ``ansible_facts`` (for example ``ansible_facts.env.HOME``)
+        instead of the deprecated top-level ``ansible_env`` and ``ansible_user_id``
+        injected variables.
+    fragments:
+    - ansible-facts-injected-vars.yml
+    release_date: '2026-07-23'
