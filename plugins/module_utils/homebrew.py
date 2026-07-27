@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-
-from __future__ import absolute_import, division, print_function
-
-__metaclass__ = type
 
 import json
 
@@ -33,18 +28,16 @@ def homebrew_run_json(module, args):
 
     rc, stdout, stderr = module.run_command(cmd)
     if rc != 0:
-        module.fail_json(
-            msg="Unable to gather Homebrew information: %s" % stderr.strip()
-        )
+        module.fail_json(msg=f"Unable to gather Homebrew information: {stderr.strip()}")
 
     try:
         return json.loads(stdout)
     except ValueError as e:
-        module.fail_json(msg="Unable to parse brew output: %s" % e)
+        module.fail_json(msg=f"Unable to parse brew output: {e}")
 
 
 def homebrew_info(module, kind):
-    args = ["info", "--json=v2", "--%s" % kind]
+    args = ["info", "--json=v2", f"--{kind}"]
 
     if module.params["name"]:
         args += module.params["name"]
