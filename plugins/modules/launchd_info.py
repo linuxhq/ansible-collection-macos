@@ -1,10 +1,4 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-
-from __future__ import absolute_import, division, print_function
-
-__metaclass__ = type
 
 DOCUMENTATION = r"""
 ---
@@ -73,15 +67,11 @@ from ansible.module_utils.basic import AnsibleModule
 def info(module, launchctl_bin):
     rc, stdout, stderr = module.run_command([launchctl_bin, "list"])
     if rc != 0:
-        module.fail_json(
-            msg="Unable to gather launchd information: %s" % stderr.strip()
-        )
+        module.fail_json(msg=f"Unable to gather launchd information: {stderr.strip()}")
 
     lines = stdout.splitlines()
     if not lines or lines[0].split("\t") != ["PID", "Status", "Label"]:
-        module.fail_json(
-            msg="Unexpected launchctl list header: %s" % (lines or [""])[0]
-        )
+        module.fail_json(msg=f"Unexpected launchctl list header: {(lines or [''])[0]}")
 
     services = []
 
@@ -91,7 +81,7 @@ def info(module, launchctl_bin):
 
         columns = line.split("\t")
         if len(columns) != 3:
-            module.fail_json(msg="Unexpected launchctl list line: %s" % line)
+            module.fail_json(msg=f"Unexpected launchctl list line: {line}")
 
         pid, status, label = columns
         if module.params["name"] and label not in module.params["name"]:
