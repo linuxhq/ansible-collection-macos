@@ -5,17 +5,39 @@
 [![Lint](https://github.com/linuxhq/ansible-collection-macos/actions/workflows/pre-commit.yml/badge.svg)](https://github.com/linuxhq/ansible-collection-macos/actions/workflows/pre-commit.yml)
 [![Release](https://github.com/linuxhq/ansible-collection-macos/actions/workflows/release.yml/badge.svg)](https://github.com/linuxhq/ansible-collection-macos/actions/workflows/release.yml)
 
-A collection of macos roles
+An Ansible collection of macOS modules, plugins, and roles.
 
-# Collection
+## Requirements
 
-## Build
+- Python `>= 3.13`
+- `ansible-core >= 2.18.0`
+- `community.general >= 13.2.0`
+
+## Installation
+
+    ansible-galaxy collection install linuxhq.macos
+
+## Development
+
+    make
+    source venv/bin/activate
+
+### Build
 
     ansible-galaxy collection build
 
-## Install
+### Changelog
 
-    ansible-galaxy collection install linuxhq.macos
+    antsibull-changelog generate
+
+### Lint
+
+    ansible-lint
+    yamllint -s .
+
+### Test
+
+Every role includes a Molecule scenario with an example playbook.
 
 ## Molecule
 
@@ -33,12 +55,12 @@ virtual machine with the vagrant driver.
     brew install hashicorp/tap/hashicorp-vagrant
     vagrant plugin install vagrant-tart
 
-The host application running molecule needs the macOS Local Network
+The host application running Molecule needs the macOS Local Network
 permission to reach the virtual machines.
 
-# Playbook
+## Playbook
 
-An example playbook utilizing roles available in this collection
+An example playbook using roles from this collection:
 
     - hosts: localhost
       connection: local
