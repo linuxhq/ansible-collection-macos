@@ -26,6 +26,22 @@ None
       roles:
         - role: linuxhq.macos.claude_code
           claude_code_config:
-            permissions:
-              defaultMode: acceptEdits
+            attribution:
+              commit: ''
+              pr: ''
+              sessionUrl: false
+            autoMemoryEnabled: false
+            effortLevel: medium
+            enabledPlugins:
+              codex@openai-codex: true
+            extraKnownMarketplaces:
+              openai-codex:
+                source:
+                  repo: openai/codex-plugin-cc
+                  source: github
+            feedbackSurveyRate: 0
+            model: claude-opus-5
+            skipDangerousModePermissionPrompt: true
             spinnerTipsEnabled: false
+            theme: dark
+            verbose: false

@@ -4,6 +4,25 @@ linuxhq.macos Release Notes
 
 .. contents:: Topics
 
+v1.1.6
+======
+
+Minor Changes
+-------------
+
+- codex role - manage marketplaces and plugins through inventory lists.
+- codex_marketplace module - add support for managing Codex plugin marketplaces.
+- codex_plugin module - add support for managing Codex plugins.
+
+Bugfixes
+--------
+
+- codex role - allow preference removal without a value.
+- codex role - apply configuration for all non-removal package states.
+- codex role - merge configuration keys and preserve Codex-managed marketplace and plugin entries.
+- codex role - remove plugins before removing their marketplaces.
+- codex_marketplace and codex_plugin - allow check mode before Codex is installed.
+
 v1.1.5
 ======
 
