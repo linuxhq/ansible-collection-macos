@@ -214,3 +214,24 @@ releases:
     - claude_code_role.yml
     - codex_role.yml
     release_date: '2026-09-05'
+  1.1.6:
+    changes:
+      bugfixes:
+      - codex role - allow preference removal without a value.
+      - codex role - apply configuration for all non-removal package states.
+      - codex role - merge configuration keys and preserve Codex-managed marketplace
+        and plugin entries.
+      - codex role - remove plugins before removing their marketplaces.
+      - codex_marketplace and codex_plugin - allow check mode before Codex is installed.
+      minor_changes:
+      - codex role - manage marketplaces and plugins through inventory lists.
+      - codex_marketplace module - add support for managing Codex plugin marketplaces.
+      - codex_plugin module - add support for managing Codex plugins.
+    fragments:
+    - codex_check_mode.yml
+    - codex_cleanup_order.yml
+    - codex_config.yml
+    - codex_modules.yml
+    - codex_role_plugins.yml
+    - codex_state_conditions.yml
+    release_date: '2026-09-05'

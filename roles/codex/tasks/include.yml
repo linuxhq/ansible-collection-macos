@@ -1,0 +1,103 @@
+---
+- name: Ensure codex defaults are managed
+  tags:
+    - codex
+  community.general.osx_defaults:
+    array_add: "{{ _default.array_add | d(omit) }}"
+    domain: "{{ codex_domain }}"
+    host: "{{ _default.host | d(omit) }}"
+    key: "{{ _default.key }}"
+    state: "{{ _default.state | d('present') }}"
+    type: "{{ _default.type | d('string') }}"
+    value: "{{ _default.value | d(omit) }}"
+  loop: "{{ codex_defaults }}"
+  loop_control:
+    label: "{{ _default.key | d(none) }}"
+    loop_var: _default
+  when:
+    - _default.key is defined
+    - _default.value is defined or
+      _default.state | d('present') == 'absent'
+
+- name: Ensure codex configuration directory is present
+  tags:
+    - codex
+  ansible.builtin.file:
+    mode: '0700'
+    path: "{{ codex_config_path | dirname }}"
+    state: directory
+
+- name: Ensure codex configuration status is gathered
+  tags:
+    - codex
+  ansible.builtin.stat:
+    path: "{{ codex_config_path }}"
+  register: __codex_config_stat
+
+- name: Ensure codex configuration is gathered
+  tags:
+    - codex
+  ansible.builtin.slurp:
+    src: "{{ codex_config_path }}"
+  register: __codex_config_slurp
+  when:
+    - __codex_config_stat.stat.exists
+
+- name: Ensure codex configuration is managed
+  tags:
+    - codex
+  ansible.builtin.copy:
+    content: >-
+      {{ __codex_config_slurp.content |
+         d('') |
+         ansible.builtin.b64decode |
+         community.general.from_toml |
+         ansible.builtin.combine(codex_config, recursive=true) |
+         community.general.to_toml }}
+    dest: "{{ codex_config_path }}"
+    mode: '0600'
+
+- name: Ensure codex marketplaces are present
+  tags:
+    - codex
+  linuxhq.macos.codex_marketplace:
+    config_dir: "{{ codex_config_path | dirname }}"
+    name: "{{ _marketplace.name }}"
+    ref: "{{ _marketplace.ref | d(omit) }}"
+    source: "{{ _marketplace.source | d(omit) }}"
+    sparse: "{{ _marketplace.sparse | d(omit) }}"
+    state: present
+  loop: "{{ codex_marketplaces }}"
+  loop_control:
+    label: "{{ _marketplace.name | d(none) }}"
+    loop_var: _marketplace
+  when:
+    - _marketplace.state | d('present') == 'present'
+
+- name: Ensure codex plugins are managed
+  tags:
+    - codex
+  linuxhq.macos.codex_plugin:
+    config_dir: "{{ codex_config_path | dirname }}"
+    marketplace: "{{ _plugin.marketplace }}"
+    name: "{{ _plugin.name }}"
+    state: "{{ _plugin.state | d('present') }}"
+  loop: "{{ codex_plugins }}"
+  loop_control:
+    label: "{{ _plugin.name | d(none) }}"
+    loop_var: _plugin
+
+- name: Ensure codex marketplaces are absent
+  tags:
+    - codex
+  linuxhq.macos.codex_marketplace:
+    config_dir: "{{ codex_config_path | dirname }}"
+    name: "{{ _marketplace.name }}"
+    state: absent
+  loop: "{{ codex_marketplaces }}"
+  loop_control:
+    label: "{{ _marketplace.name | d(none) }}"
+    loop_var: _marketplace
+  when:
+    - _marketplace.state | d('present') == 'absent'
+...
