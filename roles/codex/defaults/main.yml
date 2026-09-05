@@ -1,0 +1,8 @@
+---
+codex_config: {}
+codex_config_path: "{{ ansible_facts.env.HOME }}/.codex/config.toml"
+codex_defaults: []
+codex_domain: com.openai.codex
+codex_package: codex
+codex_state: present
+...

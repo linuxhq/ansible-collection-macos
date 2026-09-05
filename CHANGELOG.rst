@@ -4,6 +4,15 @@ linuxhq.macos Release Notes
 
 .. contents:: Topics
 
+v1.1.5
+======
+
+Minor Changes
+-------------
+
+- claude_code role - add support for installing and configuring the Claude Code CLI.
+- codex role - add support for installing and configuring the Codex CLI, including trusted project directories.
+
 v1.1.4
 ======
 

@@ -1,0 +1,49 @@
+---
+- name: Ensure codex package is managed
+  tags:
+    - codex
+  community.general.homebrew_cask:
+    name: "{{ codex_package }}"
+    state: "{{ codex_state }}"
+    update_homebrew: false
+    upgrade_all: false
+
+- name: Ensure codex defaults are managed
+  tags:
+    - codex
+  community.general.osx_defaults:
+    array_add: "{{ _default.array_add | d(omit) }}"
+    domain: "{{ codex_domain }}"
+    host: "{{ _default.host | d(omit) }}"
+    key: "{{ _default.key }}"
+    state: "{{ _default.state | d('present') }}"
+    type: "{{ _default.type | d('string') }}"
+    value: "{{ _default.value | d(omit) }}"
+  loop: "{{ codex_defaults }}"
+  loop_control:
+    label: "{{ _default.key | d(none) }}"
+    loop_var: _default
+  when:
+    - _default.key is defined
+    - _default.value is defined or
+      _default.state | d('present') != 'present'
+
+- name: Ensure codex configuration directory is present
+  tags:
+    - codex
+  ansible.builtin.file:
+    mode: '0700'
+    path: "{{ codex_config_path | dirname }}"
+    state: directory
+
+- name: Ensure codex configuration is managed
+  tags:
+    - codex
+  ansible.builtin.blockinfile:
+    block: "\n{{ codex_config | community.general.to_toml | trim }}\n\n"
+    create: true
+    marker: "# {mark} ANSIBLE MANAGED CODEX CONFIGURATION"
+    mode: '0600'
+    path: "{{ codex_config_path }}"
+    state: present
+...

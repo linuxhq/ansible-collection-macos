@@ -1,0 +1,6 @@
+---
+claude_code_config: {}
+claude_code_config_path: "{{ ansible_facts.env.HOME }}/.claude/settings.json"
+claude_code_package: claude-code
+claude_code_state: present
+...

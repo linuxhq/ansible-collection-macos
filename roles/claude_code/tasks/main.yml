@@ -1,0 +1,26 @@
+---
+- name: Ensure claude code package is managed
+  tags:
+    - claude_code
+  community.general.homebrew_cask:
+    name: "{{ claude_code_package }}"
+    state: "{{ claude_code_state }}"
+    update_homebrew: false
+    upgrade_all: false
+
+- name: Ensure claude code configuration directory is present
+  tags:
+    - claude_code
+  ansible.builtin.file:
+    mode: '0700'
+    path: "{{ claude_code_config_path | dirname }}"
+    state: directory
+
+- name: Ensure claude code configuration is managed
+  tags:
+    - claude_code
+  ansible.builtin.copy:
+    content: "{{ claude_code_config | ansible.builtin.to_nice_json(indent=2) }}\n"
+    dest: "{{ claude_code_config_path }}"
+    mode: '0600'
+...
