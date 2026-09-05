@@ -1,0 +1,48 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Ensure codex executable status is gathered
+      tags:
+        - codex
+      ansible.builtin.stat:
+        path: /opt/homebrew/bin/codex
+      register: __codex_executable_stat
+
+    - name: Ensure codex configuration status is gathered
+      tags:
+        - codex
+      ansible.builtin.stat:
+        path: "{{ ansible_facts.env.HOME }}/.codex/config.toml"
+      register: __codex_config_stat
+
+    - name: Ensure codex executable and configuration are present
+      tags:
+        - codex
+      ansible.builtin.assert:
+        that:
+          - __codex_config_stat.stat.exists
+          - __codex_executable_stat.stat.exists
+
+    - name: Ensure codex role is included with an absent state
+      tags:
+        - codex
+      ansible.builtin.include_role:
+        name: codex
+      vars:
+        codex_state: absent
+
+    - name: Ensure codex executable status is gathered after removal
+      tags:
+        - codex
+      ansible.builtin.stat:
+        path: /opt/homebrew/bin/codex
+      register: __codex_absent_stat
+
+    - name: Ensure codex executable is absent
+      tags:
+        - codex
+      ansible.builtin.assert:
+        that:
+          - not __codex_absent_stat.stat.exists
+...

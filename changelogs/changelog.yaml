@@ -203,3 +203,14 @@ releases:
     fragments:
     - ansible-facts-injected-vars.yml
     release_date: '2026-07-23'
+  1.1.5:
+    changes:
+      minor_changes:
+      - claude_code role - add support for installing and configuring the Claude Code
+        CLI.
+      - codex role - add support for installing and configuring the Codex CLI, including
+        trusted project directories.
+    fragments:
+    - claude_code_role.yml
+    - codex_role.yml
+    release_date: '2026-09-05'

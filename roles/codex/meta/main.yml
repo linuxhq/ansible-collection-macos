@@ -1,0 +1,18 @@
+---
+dependencies: []
+galaxy_info:
+  role_name: codex
+  author: Taylor Kimball
+  description: OpenAI's coding agent that runs in your terminal
+  license: GPL-3.0-or-later
+  min_ansible_version: 2.18.0
+  namespace: linuxhq
+  platforms:
+    - name: macOS
+      versions:
+        - all
+  galaxy_tags:
+    - codex
+    - macos
+    - openai
+...

@@ -1,0 +1,48 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: Ensure claude code executable status is gathered
+      tags:
+        - claude_code
+      ansible.builtin.stat:
+        path: /opt/homebrew/bin/claude
+      register: __claude_code_executable_stat
+
+    - name: Ensure claude code configuration status is gathered
+      tags:
+        - claude_code
+      ansible.builtin.stat:
+        path: "{{ ansible_facts.env.HOME }}/.claude/settings.json"
+      register: __claude_code_config_stat
+
+    - name: Ensure claude code executable and configuration are present
+      tags:
+        - claude_code
+      ansible.builtin.assert:
+        that:
+          - __claude_code_config_stat.stat.exists
+          - __claude_code_executable_stat.stat.exists
+
+    - name: Ensure claude code role is included with an absent state
+      tags:
+        - claude_code
+      ansible.builtin.include_role:
+        name: claude_code
+      vars:
+        claude_code_state: absent
+
+    - name: Ensure claude code executable status is gathered after removal
+      tags:
+        - claude_code
+      ansible.builtin.stat:
+        path: /opt/homebrew/bin/claude
+      register: __claude_code_absent_stat
+
+    - name: Ensure claude code executable is absent
+      tags:
+        - claude_code
+      ansible.builtin.assert:
+        that:
+          - not __claude_code_absent_stat.stat.exists
+...
