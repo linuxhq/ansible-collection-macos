@@ -121,6 +121,7 @@ marketplace:
 """
 
 from ansible.module_utils.basic import AnsibleModule
+
 from ansible_collections.linuxhq.macos.plugins.module_utils.codex import (
     codex_argument_spec,
     codex_bin,
@@ -141,11 +142,7 @@ def marketplaces(module):
 
 def find_marketplace(module):
     return next(
-        (
-            marketplace
-            for marketplace in marketplaces(module)
-            if marketplace.get("name") == module.params["name"]
-        ),
+        (marketplace for marketplace in marketplaces(module) if marketplace.get("name") == module.params["name"]),
         None,
     )
 
@@ -165,16 +162,16 @@ def ensure_present(module, marketplace):
     ]
     if module.params["ref"]:
         args += ["--ref", module.params["ref"]]
+
     for sparse_path in module.params["sparse"] or []:
         args += ["--sparse", sparse_path]
+
     args.append("--json")
 
     codex_run_json(module, args, f"add Codex marketplace {module.params['name']}")
     marketplace = find_marketplace(module)
     if marketplace is None:
-        module.fail_json(
-            msg=f"Codex marketplace {module.params['name']} was not found after adding it."
-        )
+        module.fail_json(msg=f"Codex marketplace {module.params['name']} was not found after adding it.")
 
     return True, marketplace
 
@@ -199,9 +196,7 @@ def ensure_absent(module, marketplace):
     )
     marketplace = find_marketplace(module)
     if marketplace is not None:
-        module.fail_json(
-            msg=f"Codex marketplace {module.params['name']} remains after removing it."
-        )
+        module.fail_json(msg=f"Codex marketplace {module.params['name']} remains after removing it.")
 
     return True, None
 

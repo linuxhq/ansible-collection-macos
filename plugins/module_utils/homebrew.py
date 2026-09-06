@@ -2,9 +2,7 @@
 
 import json
 
-HOMEBREW_PATH_DEFAULT = (
-    "/usr/local/bin:/opt/homebrew/bin:/home/linuxbrew/.linuxbrew/bin"
-)
+HOMEBREW_PATH_DEFAULT = "/usr/local/bin:/opt/homebrew/bin:/home/linuxbrew/.linuxbrew/bin"
 
 
 def homebrew_argument_spec():

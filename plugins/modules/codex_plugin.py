@@ -130,6 +130,7 @@ plugin:
 """
 
 from ansible.module_utils.basic import AnsibleModule
+
 from ansible_collections.linuxhq.macos.plugins.module_utils.codex import (
     codex_argument_spec,
     codex_bin,
@@ -175,9 +176,7 @@ def ensure_present(module, plugin):
     )
     plugin = find_plugin(module)
     if plugin is None:
-        module.fail_json(
-            msg=f"Codex plugin {identifier} was not found after installing it."
-        )
+        module.fail_json(msg=f"Codex plugin {identifier} was not found after installing it.")
 
     return True, plugin
 
