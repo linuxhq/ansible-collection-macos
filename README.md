@@ -63,6 +63,7 @@ Role scenarios run against a disposable [Tart](https://tart.run) macOS
 virtual machine with the vagrant driver.
 
 ```sh
+brew tap cirruslabs/cli
 brew trust cirruslabs/cli
 brew install cirruslabs/cli/tart
 brew tap hashicorp/tap
