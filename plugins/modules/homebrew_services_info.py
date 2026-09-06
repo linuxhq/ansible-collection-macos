@@ -92,6 +92,7 @@ services:
 import os
 
 from ansible.module_utils.basic import AnsibleModule
+
 from ansible_collections.linuxhq.macos.plugins.module_utils.homebrew import (
     homebrew_argument_spec,
     homebrew_services_info,

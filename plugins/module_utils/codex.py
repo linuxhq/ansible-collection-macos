@@ -22,8 +22,10 @@ def codex_bin(module, required=True):
         executable = os.path.expanduser(executable)
         if not os.path.exists(executable) and not required:
             return None
+
         if not os.path.isfile(executable) or not os.access(executable, os.X_OK):
             module.fail_json(msg=f"Unable to locate codex executable: {executable}")
+
         return executable
 
     executable = module.get_bin_path(

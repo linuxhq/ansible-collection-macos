@@ -15,101 +15,68 @@ An Ansible collection of macOS modules, plugins, and roles.
 
 ## Installation
 
-    ansible-galaxy collection install linuxhq.macos
+```sh
+ansible-galaxy collection install linuxhq.macos
+```
 
 ## Development
 
-    make
-    source venv/bin/activate
+With Tox installed, install the pre-commit hook:
 
-### Build
+```sh
+tox run -e pre-commit
+```
 
-    ansible-galaxy collection build
+Tox manages isolated environments under `.tox/`; no environment activation is required.
 
-### Changelog
+### Checks
 
-    antsibull-changelog generate
+Run the default checks:
 
-### Lint
+```sh
+tox
+```
 
-    ansible-lint
-    yamllint -s .
+Run grouped checks:
 
-### Test
+```sh
+tox run -m format
+tox run -m lint
+```
 
-Every role includes a Molecule scenario with an example playbook.
+Run Ansible sanity tests for a module:
 
-## Molecule
+```sh
+tox run -e ansible-test -- sanity --python "$(cat .python-version)" plugins/modules/codex_marketplace.py
+```
+
+### Molecule
+
+Each role has a Molecule scenario that also serves as an example playbook. Set `MOLECULE_ROLE`
+to select a role:
+
+```sh
+MOLECULE_ROLE=codex tox run -e molecule -- test -s default
+```
 
 Role scenarios run against a disposable [Tart](https://tart.run) macOS
 virtual machine with the vagrant driver.
 
-    python3 -m venv venv
-    source venv/bin/activate
-    venv/bin/pip3 install -r requirements.txt
-
-    brew trust cirruslabs/cli
-    brew install cirruslabs/cli/tart
-    brew tap hashicorp/tap
-    brew trust hashicorp/tap
-    brew install hashicorp/tap/hashicorp-vagrant
-    vagrant plugin install vagrant-tart
+```sh
+brew trust cirruslabs/cli
+brew install cirruslabs/cli/tart
+brew tap hashicorp/tap
+brew trust hashicorp/tap
+brew install hashicorp/tap/hashicorp-vagrant
+vagrant plugin install vagrant-tart
+```
 
 The host application running Molecule needs the macOS Local Network
 permission to reach the virtual machines.
 
-## Playbook
+### Changelog and build
 
-An example playbook using roles from this collection:
-
-    - hosts: localhost
-      connection: local
-      roles:
-        - role: linuxhq.macos.adguard
-          adguard_defaults:
-            - key: PopupBlockerEnabled
-              type: bool
-              value: true
-
-        - role: linuxhq.macos.appzapper
-          appzapper_defaults:
-            - key: 'Registration Code'
-              type: string
-              value: APZP-000-000-000-000
-            - key: 'Registration Name'
-              type: string
-              value: 'Taylor Kimball'
-
-        - role: linuxhq.macos.iterm2
-          iterm2_defaults:
-            - key: PromptOnQuit
-              type: bool
-              value: false
-
-        - role: linuxhq.macos.liquidprompt
-          liquidprompt_battery_threshold: 50
-          liquidprompt_enable_time: true
-
-        - role: linuxhq.macos.monitorcontrol
-          monitorcontrol_defaults:
-            - key: allScreens
-              type: bool
-              value: true
-
-        - role: linuxhq.macos.privoxy
-          privoxy_forward_socks5t:
-            - target_pattern: /
-              socks_proxy: 127.0.0.1:9050
-              http_parent: '.'
-
-        - role: linuxhq.macos.sizeup
-          sizeup_defaults:
-            - key: MultiMonitorResizeWindowProportionally
-              type: bool
-              value: true
-
-        - role: linuxhq.macos.textual
-          textual_defaults:
-            - key: CopyTextSelectionOnMouseUp
-              type: bool
-              value: true
+```sh
+tox run -e changelog -- generate
+tox run -e build
+```
