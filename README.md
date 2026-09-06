@@ -42,6 +42,7 @@ Run grouped checks:
 ```sh
 tox run -m format
 tox run -m lint
+tox run -m unit
 ```
 
 Run Ansible sanity tests for a module:
