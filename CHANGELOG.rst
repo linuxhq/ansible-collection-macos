@@ -4,6 +4,14 @@ linuxhq.macos Release Notes
 
 .. contents:: Topics
 
+v1.1.7
+======
+
+Release Summary
+---------------
+
+Maintenance release aligning agent setup guidance, completing role namespace metadata, and cleaning up Molecule environment settings.
+
 v1.1.6
 ======
 
