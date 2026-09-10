@@ -1,8 +1,11 @@
+#!/usr/bin/python
+# Copyright: Ansible Project
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 DOCUMENTATION = r"""
 ---
 module: homebrew_services_info
+version_added: '1.1.0'
 short_description: Gather information about Homebrew services
 description:
   - Gather service information from Homebrew.
@@ -27,6 +30,13 @@ options:
     type: path
 requirements:
   - homebrew
+attributes:
+  check_mode:
+    description: This module only retrieves information and does not modify state.
+    support: full
+  diff_mode:
+    description: Diff mode is not supported.
+    support: none
 """
 
 EXAMPLES = r"""
