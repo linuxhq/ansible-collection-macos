@@ -235,3 +235,10 @@ releases:
     - codex_role_plugins.yml
     - codex_state_conditions.yml
     release_date: '2026-09-05'
+  1.1.7:
+    changes:
+      release_summary: Maintenance release aligning agent setup guidance, completing
+        role namespace metadata, and cleaning up Molecule environment settings.
+    fragments:
+    - final-collection-cleanup.yml
+    release_date: '2026-09-10'
