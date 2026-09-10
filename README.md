@@ -9,9 +9,7 @@ An Ansible collection of macOS modules, plugins, and roles.
 
 ## Requirements
 
-- Python `>= 3.13`
-- `ansible-core >= 2.18.0`
-- `community.general >= 13.2.0`
+See [requirements.yml](requirements.yml).
 
 ## Installation
 
@@ -20,6 +18,8 @@ ansible-galaxy collection install linuxhq.macos
 ```
 
 ## Development
+
+Local Tox environments use the Python version selected by `.python-version`.
 
 With Tox installed, install the pre-commit hook:
 
@@ -48,7 +48,7 @@ tox run -m unit
 Run Ansible sanity tests for a module:
 
 ```sh
-tox run -e ansible-test -- sanity --python "$(cat .python-version)" plugins/modules/codex_marketplace.py
+tox run -e ansible-test -- sanity plugins/modules/codex_marketplace.py
 ```
 
 ### Molecule
