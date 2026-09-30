@@ -49,11 +49,11 @@ None
             tui:
               show_tooltips: false
           codex_marketplaces:
-            - name: sendbird
-              source: https://github.com/sendbird/codex-marketplace.git
+            - name: linuxhq
+              source: https://github.com/linuxhq/cc-plugin-codex.git
               state: present
           codex_plugins:
-            # https://github.com/sendbird/cc-plugin-codex
-            - marketplace: sendbird
-              name: cc
+            # https://github.com/linuxhq/cc-plugin-codex
+            - marketplace: linuxhq
+              name: claude
               state: present
