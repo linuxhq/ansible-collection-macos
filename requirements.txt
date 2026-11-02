@@ -13,5 +13,5 @@ pre-commit==4.6.2
 pytest==9.2.0
 python-vagrant==1.0.0
 ruff==0.16.9
-tomlkit==0.15.1
+tomlkit==0.15.2
 yamllint==1.38.0
