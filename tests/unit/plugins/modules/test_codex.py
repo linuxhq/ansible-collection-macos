@@ -286,6 +286,20 @@ def test_replaced_marketplace_with_different_manifest_name_is_kept(run_module):
     assert command.call_count == 2
 
 
+def test_new_marketplace_beside_discovered_marketplace_is_removed(run_module):
+    discovered = {"name": "other", "root": "/home/test/.agents/plugins"}
+    result, command, _lookup = run_module(
+        codex_marketplace,
+        {"name": "example", "source": SOURCE},
+        [{"marketplaces": [discovered]}, added("other"), {"marketplaces": [discovered]}, removed("other")],
+    )
+    assert result["failed"] is True
+    assert "changed" not in result
+    assert result["msg"] == f"Codex marketplace source {SOURCE} declares marketplace other, not example."
+    assert command.call_count == 4
+    assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "remove", "other", "--json"]
+
+
 def test_unlisted_marketplace_with_different_manifest_name_is_kept(run_module):
     result, command, _lookup = run_module(
         codex_marketplace,

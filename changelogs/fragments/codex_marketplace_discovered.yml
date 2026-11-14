@@ -1,0 +1,5 @@
+---
+bugfixes:
+  - codex_marketplace - when O(source) declares the name of a discovered marketplace instead of O(name), remove
+    the configured marketplace Codex adds beside it rather than reporting that Codex replaced the existing
+    marketplace.

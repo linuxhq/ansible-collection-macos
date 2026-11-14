@@ -225,7 +225,9 @@ def ensure_present(module, listed):
     if added_name != name:
         msg = f"Codex marketplace source {source} declares marketplace {added_name}, not {name}."
         if not result["alreadyAdded"]:
-            if select_marketplace(listed, added_name) is not None:
+            # Codex replaces a configured marketplace in place but adds a new entry beside a discovered one.
+            replaced = select_marketplace(listed, added_name)
+            if replaced is not None and replaced.get("marketplaceSource"):
                 module.fail_json(changed=True, msg=f"{msg} Codex replaced the existing marketplace {added_name}.")
 
             # An unlisted marketplace may be an existing one Codex replaced while plugins are disabled.
