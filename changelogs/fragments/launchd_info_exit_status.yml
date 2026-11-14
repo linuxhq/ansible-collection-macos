@@ -1,0 +1,4 @@
+---
+bugfixes:
+  - launchd_info - document that C(last_exit_status) is C(0) for a service that has not exited and a negated signal
+    number for a service stopped by a signal.

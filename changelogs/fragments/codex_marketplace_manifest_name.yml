@@ -1,0 +1,4 @@
+---
+bugfixes:
+  - codex_marketplace - fail when O(source) declares a marketplace name other than O(name), removing the marketplace
+    the module just added so the next run converges.

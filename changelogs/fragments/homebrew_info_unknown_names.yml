@@ -1,0 +1,9 @@
+---
+bugfixes:
+  - homebrew_info, homebrew_cask_info, and homebrew_services_info - omit names that Homebrew does not know from the
+    results instead of failing the whole query.
+  - homebrew_info, homebrew_cask_info, and homebrew_services_info - name the query and fall back to standard output in
+    failure messages, and fail clearly when brew returns an unexpected structure.
+trivial:
+  - homebrew_info, homebrew_cask_info, homebrew_services_info, and launchd_info roles - verify unknown and mixed names
+    in the Molecule scenarios.

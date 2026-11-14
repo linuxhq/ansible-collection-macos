@@ -32,10 +32,49 @@
           - _launchd_info_dict | length == 2
           - _launchd_info_dict['com.apple.cfprefsd.xpc.agent'].label ==
               'com.apple.cfprefsd.xpc.agent'
+          - _launchd_info_dict['com.apple.cfprefsd.xpc.agent'].last_exit_status is defined
           - _launchd_info_dict['com.apple.cfprefsd.xpc.agent'].pid is defined
           - _launchd_info_dict['com.apple.cfprefsd.xpc.agent'].running is defined
           - _launchd_info_dict['com.apple.trustd.agent'].label ==
               'com.apple.trustd.agent'
+          - _launchd_info_dict['com.apple.trustd.agent'].last_exit_status is defined
           - _launchd_info_dict['com.apple.trustd.agent'].pid is defined
           - _launchd_info_dict['com.apple.trustd.agent'].running is defined
+
+    - name: Ensure launchd info role is included with an unknown name
+      tags:
+        - launchd_info
+      ansible.builtin.include_role:
+        name: launchd_info
+      vars:
+        launchd_info_name:
+          - org.linuxhq.missing
+
+    - name: Ensure unknown names are omitted
+      tags:
+        - launchd_info
+      ansible.builtin.assert:
+        that:
+          - _launchd_info_list == []
+          - _launchd_info_dict == {}
+
+    - name: Ensure launchd info role is included with known and unknown names
+      tags:
+        - launchd_info
+      ansible.builtin.include_role:
+        name: launchd_info
+      vars:
+        launchd_info_name:
+          - com.apple.trustd.agent
+          - org.linuxhq.missing
+
+    - name: Ensure only known names are returned
+      tags:
+        - launchd_info
+      ansible.builtin.assert:
+        that:
+          - _launchd_info_list | length == 1
+          - _launchd_info_dict | length == 1
+          - _launchd_info_dict['com.apple.trustd.agent'].label ==
+              'com.apple.trustd.agent'
 ...

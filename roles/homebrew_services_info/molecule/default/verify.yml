@@ -12,14 +12,14 @@
       ansible.builtin.assert:
         that:
           - _homebrew_services_info_dict | length == 4
-          - _homebrew_services_info_dict['buildkite-agent@3'].file is defined
-          - _homebrew_services_info_dict['buildkite-agent@3'].name is defined
+          - _homebrew_services_info_dict['buildkite-agent@3'].file is string
+          - _homebrew_services_info_dict['buildkite-agent@3'].name == 'buildkite-agent@3'
           - _homebrew_services_info_dict['buildkite-agent@3'].pid is defined
-          - _homebrew_services_info_dict['buildkite-agent@3'].running is defined
-          - _homebrew_services_info_dict['gitlab-runner'].file is defined
-          - _homebrew_services_info_dict['gitlab-runner'].name is defined
+          - _homebrew_services_info_dict['buildkite-agent@3'].running is boolean
+          - _homebrew_services_info_dict['gitlab-runner'].file is string
+          - _homebrew_services_info_dict['gitlab-runner'].name == 'gitlab-runner'
           - _homebrew_services_info_dict['gitlab-runner'].pid is defined
-          - _homebrew_services_info_dict['gitlab-runner'].running is defined
+          - _homebrew_services_info_dict['gitlab-runner'].running is boolean
 
     - name: Ensure homebrew services role is included with service names
       tags:
@@ -35,11 +35,51 @@
           - _homebrew_services_info_list | length == 2
           - _homebrew_services_info_dict | length == 2
           - _homebrew_services_info_dict['cloudflared'].name == 'cloudflared'
+          - _homebrew_services_info_dict['cloudflared'].service_name is string
+          - _homebrew_services_info_dict['cloudflared'].registered is boolean
           - _homebrew_services_info_dict['cloudflared'].pid is defined
-          - _homebrew_services_info_dict['cloudflared'].running is defined
+          - _homebrew_services_info_dict['cloudflared'].running is boolean
           - _homebrew_services_info_dict['privoxy'].name == 'privoxy'
+          - _homebrew_services_info_dict['privoxy'].service_name is string
+          - _homebrew_services_info_dict['privoxy'].registered is boolean
           - _homebrew_services_info_dict['privoxy'].pid is defined
-          - _homebrew_services_info_dict['privoxy'].running is defined
+          - _homebrew_services_info_dict['privoxy'].running is boolean
+
+    - name: Ensure homebrew services info role is included with an unknown name
+      tags:
+        - homebrew_services_info
+      ansible.builtin.include_role:
+        name: homebrew_services_info
+      vars:
+        homebrew_services_info_name:
+          - linuxhq-missing-service
+
+    - name: Ensure unknown names are omitted
+      tags:
+        - homebrew_services_info
+      ansible.builtin.assert:
+        that:
+          - _homebrew_services_info_list == []
+          - _homebrew_services_info_dict == {}
+
+    - name: Ensure homebrew services info role is included with known and unknown names
+      tags:
+        - homebrew_services_info
+      ansible.builtin.include_role:
+        name: homebrew_services_info
+      vars:
+        homebrew_services_info_name:
+          - privoxy
+          - linuxhq-missing-service
+
+    - name: Ensure only known names are returned
+      tags:
+        - homebrew_services_info
+      ansible.builtin.assert:
+        that:
+          - _homebrew_services_info_list | length == 1
+          - _homebrew_services_info_dict | length == 1
+          - _homebrew_services_info_dict['privoxy'].name == 'privoxy'
 
     - name: Ensure inventory lists are formatted
       tags:
