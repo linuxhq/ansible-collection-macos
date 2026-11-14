@@ -185,6 +185,27 @@ def test_unloadable_cask_path_fails(run_module, reason):
     assert command.call_count == 1
 
 
+@pytest.mark.parametrize("plugin", [homebrew_info, homebrew_services_info])
+def test_unloadable_formula_class_fails(run_module, plugin):
+    stderr = (
+        'Error: No available formula with the name "user/tap/broken".\n'
+        "In formula file: /opt/homebrew/Library/Taps/user/homebrew-tap/Formula/broken.rb\n"
+        "Expected to find class Broken, but only found: Other.\n"
+    )
+    result, command, _lookup = run_module(plugin, {"name": ["user/tap/broken"]}, [(1, "", stderr)])
+    assert result["failed"] is True
+    assert "Expected to find class Broken" in result["msg"]
+    assert command.call_count == 1
+
+
+@pytest.mark.parametrize("plugin", [homebrew_info, homebrew_services_info])
+def test_unknown_formula_with_suggestion_is_omitted(run_module, plugin):
+    stderr = 'Error: No available formula with the name "wgett". Did you mean wget?\n'
+    result, command, _lookup = run_module(plugin, {"name": ["wgett"]}, [(1, "", stderr)] * 2)
+    assert result["changed"] is False
+    assert command.call_count == 2
+
+
 @pytest.mark.parametrize("plugin", [homebrew_info, homebrew_cask_info, homebrew_services_info])
 def test_other_failure_during_name_retry_fails(run_module, plugin):
     stderr = "Error: Cask 'one' is unavailable: Failed to download https://example.test.\n"

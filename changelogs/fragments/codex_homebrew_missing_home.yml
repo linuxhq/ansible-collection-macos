@@ -1,0 +1,7 @@
+---
+bugfixes:
+  - codex_marketplace and codex_plugin - report no change for O(state=absent) without running Codex when the resolved
+    Codex home directory (O(config_dir), E(CODEX_HOME), or C(~/.codex)) does not exist, instead of failing outside
+    check mode.
+  - homebrew_info and homebrew_services_info - fail for a formula whose file Homebrew finds but cannot load, such as a
+    tap formula that defines the wrong class, instead of omitting it as an unknown name.

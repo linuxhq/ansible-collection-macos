@@ -2,8 +2,6 @@
 bugfixes:
   - codex_plugin - with O(state=absent), also remove a plugin that Codex no longer lists, such as one whose marketplace
     was removed, when its cache directory still exists in the Codex home directory.
-  - codex_marketplace - in check mode, fail for O(state=absent) when the marketplace has no configured source, matching
-    the real run, instead of predicting a change.
   - codex_marketplace and codex_plugin - document the minimum supported Codex version, 0.139.0, which first reports the
     configured source of a marketplace.
 trivial:

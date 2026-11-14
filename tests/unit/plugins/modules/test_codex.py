@@ -475,6 +475,36 @@ def test_missing_config_dir_in_check_mode(run_module, resource, tmp_path, state)
     command.assert_not_called()
 
 
+def test_missing_config_dir_absent(run_module, resource, tmp_path):
+    plugin, params, _key, result_key, *_details = resource
+    config = str(tmp_path / "missing")
+    result, command, _lookup = run_module(plugin, {**params, "state": "absent", "config_dir": config})
+    assert result["changed"] is False
+    assert result.get("failed") is None
+    assert result[result_key] is None
+    assert result["msg"] == f"Codex home directory {config} does not exist; {result_key} is absent."
+    command.assert_not_called()
+
+
+def test_missing_executable_absent_fails(run_module, resource, tmp_path):
+    plugin, params, *_details = resource
+    config = str(tmp_path / "missing")
+    params = {**params, "state": "absent", "config_dir": config}
+    result, command, _lookup = run_module(plugin, params, executable=None)
+    assert result == {"failed": True, "msg": "Unable to locate codex executable."}
+    command.assert_not_called()
+
+
+def test_missing_config_dir_present_runs_codex(run_module, resource, tmp_path):
+    plugin, params, *_details = resource
+    config = str(tmp_path / "missing")
+    error = (1, "", f"Error: CODEX_HOME points to {config}, but that path does not exist\n")
+    result, command, _lookup = run_module(plugin, {**params, "config_dir": config}, [error])
+    assert result["failed"] is True
+    assert "does not exist" in result["msg"]
+    assert command.call_count == 1
+
+
 @pytest.mark.parametrize("environment", ["codex_home", "default"])
 @pytest.mark.parametrize("state", ["present", "absent"])
 def test_missing_codex_home_in_check_mode(run_module, resource, monkeypatch, tmp_path, environment, state):

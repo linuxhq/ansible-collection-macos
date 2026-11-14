@@ -16,6 +16,8 @@ description:
     home directory.
     The Codex home directory is O(config_dir), else E(CODEX_HOME), else
     C(~/.codex).
+  - With O(state=absent), reports no change without running Codex when the
+    Codex home directory does not exist.
 author:
   - Taylor Kimball (@tkimball83)
 attributes:
@@ -184,6 +186,7 @@ from ansible.module_utils.basic import AnsibleModule
 
 from ansible_collections.linuxhq.macos.plugins.module_utils.codex import (
     codex_argument_spec,
+    codex_bin,
     codex_home,
     codex_list,
     codex_result,
@@ -304,13 +307,15 @@ def main():
         supports_check_mode=True,
     )
 
-    unavailable = module.check_mode and codex_unavailable(module)
+    absent = module.params["state"] == "absent"
+    if absent and not module.check_mode:
+        # Removal still requires Codex, but a missing Codex home holds nothing to remove.
+        codex_bin(module)
+
+    unavailable = (module.check_mode or absent) and codex_unavailable(module)
     if unavailable:
-        module.exit_json(
-            changed=module.params["state"] == "present",
-            msg=f"{unavailable}; plugin state cannot be determined in check mode.",
-            plugin=None,
-        )
+        reason = "plugin state cannot be determined in check mode" if module.check_mode else "plugin is absent"
+        module.exit_json(changed=not absent, msg=f"{unavailable}; {reason}.", plugin=None)
 
     if module.params["state"] == "present":
         changed, plugin = ensure_present(module, find_plugin(module))
