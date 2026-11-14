@@ -39,7 +39,7 @@ def codex_bin(module, required=True):
     return executable
 
 
-def codex_run_json(module, args, operation):
+def codex_run_json(module, args, operation, missing=None):
     environment = None
     if module.params["config_dir"]:
         environment = {
@@ -49,6 +49,9 @@ def codex_run_json(module, args, operation):
     command = [codex_bin(module)] + args
     rc, stdout, stderr = module.run_command(command, environ_update=environment)
     if rc != 0:
+        if missing is not None and missing in stderr:
+            return None
+
         detail = stderr.strip() or stdout.strip()
         module.fail_json(msg=f"Unable to {operation}: {detail}")
 

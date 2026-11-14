@@ -74,7 +74,7 @@ def test_package_query(run_module, plugin, key, kind, _item, names, check_mode):
         "info",
         "--json=v2",
         f"--{kind}",
-        *(names or ["--installed"]),
+        *(["--", *names] if names else ["--installed"]),
     ]
     lookup.assert_called_once_with("brew", opt_dirs=["/custom/bin", "/other/bin"])
 
@@ -93,7 +93,60 @@ def test_package_unknown_names_are_omitted(run_module, plugin, key, kind, item):
         plugin, {"name": [known, "missing"]}, [unavailable, {key: [item]}, unavailable]
     )
     assert result == {"changed": False, key: [item]}
-    assert [call.args[0][4:] for call in command.call_args_list] == [[known, "missing"], [known], ["missing"]]
+    assert [call.args[0][4:] for call in command.call_args_list] == [
+        ["--", known, "missing"],
+        ["--", known],
+        ["--", "missing"],
+    ]
+
+
+@pytest.mark.parametrize("plugin,key,kind,item", PACKAGES)
+def test_package_option_names_are_not_options(run_module, plugin, key, kind, item):
+    unavailable = (1, "", UNAVAILABLE[kind].format(name="--installed"))
+    result, command, _lookup = run_module(plugin, {"name": ["--installed"]}, [unavailable, unavailable])
+    assert result == {"changed": False, key: []}
+    assert [call.args[0][3:] for call in command.call_args_list] == [[f"--{kind}", "--", "--installed"]] * 2
+
+
+@pytest.mark.parametrize("plugin,key,kind,item", PACKAGES)
+def test_package_duplicates_are_removed(run_module, plugin, key, kind, item):
+    other = {**item, ("full_token" if kind == "cask" else "full_name"): "other"}
+    known = item.get("token", item["name"])
+    unavailable = (1, "", UNAVAILABLE[kind].format(name="missing"))
+    batch, batch_command, _lookup = run_module(plugin, {"name": [known, known]}, [{key: [item, other, item]}])
+    fallback, fallback_command, _lookup = run_module(
+        plugin,
+        {"name": [known, known, "missing"]},
+        [unavailable, {key: [item]}, {key: [item]}, unavailable],
+    )
+    assert batch == {"changed": False, key: [item, other]}
+    assert fallback == {"changed": False, key: [item]}
+    assert batch_command.call_count == 1
+    assert fallback_command.call_count == 4
+
+
+def test_services_option_names_are_not_options(run_module):
+    unavailable = (1, "", UNAVAILABLE["service"].format(name="--all"))
+    result, command, _lookup = run_module(homebrew_services_info, {"name": ["--all"]}, [unavailable, unavailable])
+    assert result == {"changed": False, "services": []}
+    assert [call.args[0][1:] for call in command.call_args_list] == [["services", "info", "--json", "--", "--all"]] * 2
+
+
+def test_services_duplicates_are_removed(run_module, tmp_path):
+    plist = tmp_path / "service.plist"
+    plist.touch()
+    present = service("privoxy", str(plist))
+    unavailable = (1, "", UNAVAILABLE["service"].format(name="missing"))
+    batch, _command, _lookup = run_module(
+        homebrew_services_info, {"name": ["privoxy", "privoxy"]}, [[present, present]]
+    )
+    fallback, command, _lookup = run_module(
+        homebrew_services_info,
+        {"name": ["privoxy", "privoxy", "missing"]},
+        [unavailable, [present], [present], unavailable],
+    )
+    assert batch == fallback == {"changed": False, "services": [present]}
+    assert command.call_count == 4
 
 
 @pytest.mark.parametrize(
@@ -132,7 +185,13 @@ def test_services_selection(run_module, tmp_path, names):
         check_mode=True,
     )
     assert result == {"changed": False, "services": [present, root]}
-    assert command.call_args.args[0] == ["/mock/bin/tool", "services", "info", "--json", *(names or ["--all"])]
+    assert command.call_args.args[0] == [
+        "/mock/bin/tool",
+        "services",
+        "info",
+        "--json",
+        *(["--", *names] if names else ["--all"]),
+    ]
 
 
 @pytest.mark.parametrize("stdout", ["", " \n"])

@@ -1,0 +1,9 @@
+---
+bugfixes:
+  - codex_plugin - list plugins from O(marketplace) only instead of every marketplace and the remote plugin catalog, so
+    another configured marketplace that fails to load no longer fails the task.
+  - codex_marketplace - remove a marketplace with O(state=absent) without listing marketplaces first, so it can be
+    removed while a configured marketplace fails to load.
+  - codex_marketplace - document that O(ref) and O(sparse) must also match an existing marketplace.
+  - codex_plugin - document the C(source) return values for Git and npm plugin sources and that C(version) may be
+    V(null).

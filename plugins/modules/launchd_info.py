@@ -81,7 +81,8 @@ from ansible.module_utils.basic import AnsibleModule
 def info(module, launchctl_bin):
     rc, stdout, stderr = module.run_command([launchctl_bin, "list"])
     if rc != 0:
-        module.fail_json(msg=f"Unable to gather launchd information: {stderr.strip()}")
+        detail = stderr.strip() or stdout.strip()
+        module.fail_json(msg=f"Unable to gather launchd information: {detail}")
 
     lines = stdout.splitlines()
     if not lines or lines[0].split("\t") != ["PID", "Status", "Label"]:
@@ -101,12 +102,18 @@ def info(module, launchctl_bin):
         if module.params["name"] and label not in module.params["name"]:
             continue
 
+        try:
+            last_exit_status = int(status) if status not in ("-", "") else None
+            pid = int(pid) if pid not in ("-", "") else None
+        except ValueError:
+            module.fail_json(msg=f"Unexpected launchctl list line: {line}")
+
         services.append(
             {
                 "label": label,
-                "last_exit_status": int(status) if status not in ("-", "") else None,
-                "pid": int(pid) if pid not in ("-", "") else None,
-                "running": pid not in ("-", ""),
+                "last_exit_status": last_exit_status,
+                "pid": pid,
+                "running": pid is not None,
             }
         )
 

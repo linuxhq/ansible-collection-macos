@@ -2,6 +2,5 @@
 bugfixes:
   - codex_plugin - document the C(marketplace_source) return value.
 trivial:
-  - codex role - document the codex_defaults, codex_marketplaces, and codex_plugins item schemas.
   - codex role - verify marketplace and plugin presence and removal in the Molecule scenario.
   - codex_marketplace and codex_plugin - use realistic Codex CLI output in unit tests.

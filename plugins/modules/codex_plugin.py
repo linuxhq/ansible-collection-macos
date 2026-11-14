@@ -129,16 +129,43 @@ plugin:
           description: Remote plugin source identifier.
           returned: when available
           type: str
+        package:
+          description: Package name of an npm plugin source.
+          returned: when available
+          type: str
         path:
-          description: Local plugin source path.
+          description: Local plugin source path, or the plugin path within the
+            repository of a V(git-subdir) source.
+          returned: when available
+          type: str
+        ref:
+          description: Git reference of a V(git) or V(git-subdir) source.
+          returned: when available
+          type: str
+        registry:
+          description: Registry of an npm plugin source.
+          returned: when available
+          type: str
+        sha:
+          description: Git commit of a V(git) or V(git-subdir) source.
           returned: when available
           type: str
         source:
-          description: Plugin source type.
+          description: Plugin source type, such as V(local), V(git),
+            V(git-subdir), V(npm), or V(remote).
+          returned: when available
+          type: str
+        url:
+          description: Repository URL of a V(git) or V(git-subdir) source.
+          returned: when available
+          type: str
+        version:
+          description: Version of an npm plugin source.
           returned: when available
           type: str
     version:
-      description: Installed plugin version.
+      description: Installed plugin version, or V(null) when Codex reports no
+        version.
       returned: when plugin exists
       type: str
 """
@@ -157,9 +184,9 @@ from ansible_collections.linuxhq.macos.plugins.module_utils.codex import (
 def plugins(module):
     return codex_list(
         module,
-        ["plugin", "list", "--json"],
+        ["plugin", "list", "--marketplace", module.params["marketplace"], "--json"],
         "installed",
-        "gather Codex plugin information",
+        f"gather Codex plugin information for marketplace {module.params['marketplace']}",
     )
 
 

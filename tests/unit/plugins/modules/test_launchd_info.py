@@ -36,6 +36,8 @@ def test_filter(run_module, names, expected):
         ("PID Status Label\n", "header"),
         ("PID\tStatus\tLabel\ninvalid\n", "line"),
         ("PID\tStatus\tLabel\n1\t0\tname\textra\n", "line"),
+        ("PID\tStatus\tLabel\nabc\t0\tname\n", "line: abc\t0\tname"),
+        ("PID\tStatus\tLabel\n-\tbad\tname\n", "line: -\tbad\tname"),
     ],
 )
 def test_malformed_output(run_module, output, message):
@@ -49,8 +51,9 @@ def test_empty_list(run_module):
     assert result == {"changed": False, "services": []}
 
 
-def test_command_failure(run_module):
-    result, _command, _lookup = run_module(launchd_info, responses=[(1, "", " permission denied \n")])
+@pytest.mark.parametrize("stdout,stderr", [("", " permission denied \n"), (" permission denied \n", "")])
+def test_command_failure(run_module, stdout, stderr):
+    result, _command, _lookup = run_module(launchd_info, responses=[(1, stdout, stderr)])
     assert result == {"failed": True, "msg": "Unable to gather launchd information: permission denied"}
 
 

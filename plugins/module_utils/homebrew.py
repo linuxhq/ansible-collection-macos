@@ -51,11 +51,12 @@ def homebrew_outputs(module, args, default_arg, operation):
     if not names:
         return [homebrew_output(module, args + [default_arg], operation)]
 
-    output = homebrew_output(module, args + names, operation, skip_unavailable=True)
+    # "--" keeps names that begin with "-" from being parsed as brew options.
+    output = homebrew_output(module, args + ["--"] + names, operation, skip_unavailable=True)
     if output is not None:
         return [output]
 
-    outputs = [homebrew_output(module, args + [name], operation, skip_unavailable=True) for name in names]
+    outputs = [homebrew_output(module, args + ["--", name], operation, skip_unavailable=True) for name in names]
 
     return [output for output in outputs if output is not None]
 
@@ -74,6 +75,24 @@ def homebrew_items(module, items, operation):
     return items
 
 
+def homebrew_unique(items, key):
+    # brew repeats an item for a repeated name or for aliases of one name.
+    seen = set()
+    unique = []
+
+    for item in items:
+        identifier = item.get(key)
+        if isinstance(identifier, str):
+            if identifier in seen:
+                continue
+
+            seen.add(identifier)
+
+        unique.append(item)
+
+    return unique
+
+
 def homebrew_info(module, kind):
     key = "casks" if kind == "cask" else "formulae"
     operation = homebrew_operation(module, kind, f"installed {key}")
@@ -86,7 +105,7 @@ def homebrew_info(module, kind):
 
         items += homebrew_items(module, data.get(key), operation)
 
-    return items
+    return homebrew_unique(items, "full_token" if kind == "cask" else "full_name")
 
 
 def homebrew_services_info(module):
@@ -100,4 +119,4 @@ def homebrew_services_info(module):
 
         services += homebrew_items(module, homebrew_json(module, stdout, operation), operation)
 
-    return services
+    return homebrew_unique(services, "name")
