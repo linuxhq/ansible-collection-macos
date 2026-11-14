@@ -10,6 +10,11 @@ version_added: "1.1.0"
 description:
   - Install and remove Codex plugins from configured marketplaces.
   - Plugin state is managed through the Codex CLI.
+  - With O(state=absent), a plugin that Codex no longer lists, such as one
+    whose marketplace was removed, is still removed when its cache directory
+    C(plugins/cache/<marketplace>/<name>) exists in the Codex home directory.
+    The Codex home directory is O(config_dir), else E(CODEX_HOME), else
+    C(~/.codex).
 author:
   - Taylor Kimball (@tkimball83)
 attributes:
@@ -52,7 +57,7 @@ options:
     default: present
     type: str
 requirements:
-  - codex
+  - codex >= 0.139.0
 """
 
 EXAMPLES = r"""
@@ -171,10 +176,13 @@ plugin:
       type: str
 """
 
+import os
+
 from ansible.module_utils.basic import AnsibleModule
 
 from ansible_collections.linuxhq.macos.plugins.module_utils.codex import (
     codex_argument_spec,
+    codex_home,
     codex_list,
     codex_result,
     codex_run_json,
@@ -223,22 +231,46 @@ def ensure_present(module, plugin):
     return True, plugin
 
 
-def ensure_absent(module, plugin):
-    if plugin is None:
-        return False, None
+def plugin_cache(module):
+    return os.path.join(codex_home(module), "plugins", "cache", module.params["marketplace"], module.params["name"])
 
-    if module.check_mode:
-        return True, plugin
 
+def remove_plugin(module):
     identifier = plugin_id(module)
     codex_run_json(
         module,
         ["plugin", "remove", identifier, "--json"],
         f"remove Codex plugin {identifier}",
     )
+
+
+def ensure_unlisted_absent(module):
+    # Codex stops listing a plugin once its marketplace is removed, but keeps it installed.
+    cache = plugin_cache(module)
+    if not os.path.isdir(cache):
+        return False, None
+
+    if module.check_mode:
+        return True, None
+
+    remove_plugin(module)
+    if os.path.isdir(cache):
+        module.fail_json(msg=f"Codex plugin {plugin_id(module)} remains in {cache} after removing it.")
+
+    return True, None
+
+
+def ensure_absent(module, plugin):
+    if plugin is None:
+        return ensure_unlisted_absent(module)
+
+    if module.check_mode:
+        return True, plugin
+
+    remove_plugin(module)
     plugin = find_plugin(module)
     if plugin is not None:
-        module.fail_json(msg=f"Codex plugin {identifier} remains after removing it.")
+        module.fail_json(msg=f"Codex plugin {plugin_id(module)} remains after removing it.")
 
     return True, None
 

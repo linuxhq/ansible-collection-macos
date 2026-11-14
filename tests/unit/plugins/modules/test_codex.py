@@ -1,5 +1,7 @@
 """State transitions and failure contracts for both Codex modules."""
 
+import shutil
+
 import pytest
 
 from ansible_collections.linuxhq.macos.plugins.modules import codex_marketplace, codex_plugin
@@ -175,6 +177,20 @@ def test_absent_marketplace_without_source_fails(run_module):
     assert command.call_count == 2
 
 
+def test_absent_marketplace_without_source_fails_in_check_mode(run_module):
+    result, command, _lookup = run_module(
+        codex_marketplace,
+        {"name": "personal", "state": "absent"},
+        [{"marketplaces": [{"name": "personal", "root": "/home/test"}]}],
+        check_mode=True,
+    )
+    assert result == {
+        "failed": True,
+        "msg": "Codex marketplace personal has no configured source and cannot be removed.",
+    }
+    assert command.call_count == 1
+
+
 @pytest.mark.parametrize(
     "response,message",
     [
@@ -297,6 +313,43 @@ def test_failed_postcondition(run_module, resource):
     assert result["failed"] is True
     assert "not found" in result["msg"] or "not listed" in result["msg"]
     assert command.call_count == 3
+
+
+@pytest.mark.parametrize("check_mode", [False, True])
+def test_unlisted_plugin_with_cache_is_removed(run_module, codex_home, check_mode):
+    cache = codex_home / "plugins" / "cache" / "example" / "editor"
+    (cache / "1.0.0").mkdir(parents=True)
+
+    def remove(args):
+        shutil.rmtree(cache)
+        return {}
+
+    params = {"name": "editor", "marketplace": "example", "state": "absent"}
+    result, command, _lookup = run_module(codex_plugin, params, [{"installed": []}, remove], check_mode)
+    assert result == {"changed": True, "plugin": None}
+    assert cache.is_dir() is check_mode
+    if check_mode:
+        assert command.call_count == 1
+    else:
+        assert command.call_count == 2
+        assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "remove", "editor@example", "--json"]
+
+
+def test_unlisted_plugin_cache_postcondition(run_module, codex_home):
+    cache = codex_home / "plugins" / "cache" / "example" / "editor"
+    cache.mkdir(parents=True)
+    params = {"name": "editor", "marketplace": "example", "state": "absent"}
+    result, command, _lookup = run_module(codex_plugin, params, [{"installed": []}, {}])
+    assert result == {"failed": True, "msg": f"Codex plugin editor@example remains in {cache} after removing it."}
+    assert command.call_args_list[1].args[0] == ["/mock/bin/tool", "plugin", "remove", "editor@example", "--json"]
+
+
+def test_unlisted_plugin_without_cache_is_unchanged(run_module, codex_home):
+    (codex_home / "plugins" / "cache" / "example" / "other").mkdir(parents=True)
+    params = {"name": "editor", "marketplace": "example", "state": "absent"}
+    result, command, _lookup = run_module(codex_plugin, params, [{"installed": []}])
+    assert result == {"changed": False, "plugin": None}
+    assert command.call_count == 1
 
 
 def test_plugin_removal_postcondition(run_module):

@@ -39,6 +39,14 @@ def codex_bin(module, required=True):
     return executable
 
 
+def codex_home(module):
+    config_dir = module.params["config_dir"]
+    if config_dir:
+        return os.path.expanduser(config_dir)
+
+    return os.environ.get("CODEX_HOME") or os.path.expanduser("~/.codex")
+
+
 def codex_unavailable(module):
     if codex_bin(module, required=False) is None:
         return "Codex is not installed"
