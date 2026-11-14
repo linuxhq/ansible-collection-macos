@@ -1,0 +1,8 @@
+---
+bugfixes:
+  - codex_marketplace - keep a marketplace that O(source) added under a name other than O(name) when Codex does not
+    list it after adding, such as an existing marketplace replaced in place while Codex plugins are disabled
+    (C(features.plugins)), instead of removing it while rolling back.
+  - codex_marketplace - report a change when a newly added marketplace is not listed by Codex.
+  - codex_marketplace and codex_plugin - in check mode, predict the change without running Codex when the resolved Codex
+    home directory (O(config_dir), E(CODEX_HOME), or C(~/.codex)) does not exist, so Codex does not create it.

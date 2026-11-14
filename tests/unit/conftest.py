@@ -17,6 +17,7 @@ class ModuleResult(Exception):
 @pytest.fixture(autouse=True)
 def codex_home(monkeypatch, tmp_path):
     home = tmp_path / "codex-home"
+    home.mkdir()
     monkeypatch.setenv("CODEX_HOME", str(home))
     return home
 

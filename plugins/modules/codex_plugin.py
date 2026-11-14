@@ -20,7 +20,8 @@ author:
 attributes:
   check_mode:
     description: Can run in check mode and return changed status prediction
-      without modifying the target. If Codex is not installed or O(config_dir)
+      without modifying the target. If Codex is not installed or the Codex
+      home directory (O(config_dir), else E(CODEX_HOME), else C(~/.codex))
       does not exist, reports a change for O(state=present) and no change for
       O(state=absent) without querying plugin state.
     support: full
@@ -80,8 +81,8 @@ plugin:
   description:
     - Codex plugin after the requested state is applied.
     - Returns V(null) when the plugin is absent.
-    - Also returns V(null) in check mode when Codex is not installed or
-      O(config_dir) does not exist.
+    - Also returns V(null) in check mode when Codex is not installed or the
+      Codex home directory does not exist.
   returned: always
   type: dict
   contains:
