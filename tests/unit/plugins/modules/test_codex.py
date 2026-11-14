@@ -258,11 +258,11 @@ def test_new_marketplace_with_different_manifest_name_is_removed(run_module):
     result, command, _lookup = run_module(
         codex_marketplace,
         {"name": "example", "source": SOURCE},
-        [{"marketplaces": []}, added("other"), removed("other")],
+        [{"marketplaces": []}, added("other"), {"marketplaces": [{**MARKETPLACE, "name": "other"}]}, removed("other")],
     )
     assert result["failed"] is True
     assert result["msg"] == f"Codex marketplace source {SOURCE} declares marketplace other, not example."
-    assert command.call_count == 3
+    assert command.call_count == 4
     assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "remove", "other", "--json"]
 
 
@@ -284,6 +284,22 @@ def test_replaced_marketplace_with_different_manifest_name_is_kept(run_module):
         "Codex replaced the existing marketplace other."
     )
     assert command.call_count == 2
+
+
+def test_unlisted_marketplace_with_different_manifest_name_is_kept(run_module):
+    result, command, _lookup = run_module(
+        codex_marketplace,
+        {"name": "example", "source": SOURCE},
+        [{"marketplaces": []}, added("other"), {"marketplaces": []}],
+    )
+    assert result == {
+        "changed": True,
+        "failed": True,
+        "msg": f"Codex marketplace source {SOURCE} declares marketplace other, not example. Codex added marketplace "
+        "other but does not list it, so it was not removed; Codex plugins may be disabled (features.plugins).",
+    }
+    assert command.call_count == 3
+    assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "list", "--json"]
 
 
 def test_existing_marketplace_with_different_manifest_name_is_kept(run_module):
@@ -397,7 +413,26 @@ def test_missing_config_dir_in_check_mode(run_module, resource, tmp_path, state)
     result, command, _lookup = run_module(plugin, {**params, "state": state, "config_dir": config}, check_mode=True)
     assert result["changed"] is (state == "present")
     assert result[result_key] is None
-    assert result["msg"].startswith(f"Codex configuration directory {config} does not exist;")
+    assert result["msg"].startswith(f"Codex home directory {config} does not exist;")
+    command.assert_not_called()
+
+
+@pytest.mark.parametrize("environment", ["codex_home", "default"])
+@pytest.mark.parametrize("state", ["present", "absent"])
+def test_missing_codex_home_in_check_mode(run_module, resource, monkeypatch, tmp_path, environment, state):
+    plugin, params, _key, result_key, *_details = resource
+    monkeypatch.setenv("HOME", str(tmp_path))
+    if environment == "codex_home":
+        home = str(tmp_path / "missing")
+        monkeypatch.setenv("CODEX_HOME", home)
+    else:
+        home = str(tmp_path / ".codex")
+        monkeypatch.delenv("CODEX_HOME")
+
+    result, command, _lookup = run_module(plugin, {**params, "state": state}, check_mode=True)
+    assert result["changed"] is (state == "present")
+    assert result[result_key] is None
+    assert result["msg"].startswith(f"Codex home directory {home} does not exist;")
     command.assert_not_called()
 
 
@@ -409,13 +444,15 @@ def test_existing_config_dir_in_check_mode_queries_state(run_module, resource, t
     assert command.call_args.kwargs == {"environ_update": {"CODEX_HOME": str(tmp_path)}}
 
 
-def test_marketplace_added_but_not_listed_names_plugins_feature(run_module):
+@pytest.mark.parametrize("already_added", [True, False])
+def test_marketplace_added_but_not_listed_names_plugins_feature(run_module, already_added):
     result, command, _lookup = run_module(
         codex_marketplace,
         {"name": "example", "source": SOURCE},
-        [{"marketplaces": []}, added(already_added=True), {"marketplaces": []}],
+        [{"marketplaces": []}, added(already_added=already_added), {"marketplaces": []}],
     )
     assert result == {
+        "changed": not already_added,
         "failed": True,
         "msg": "Codex marketplace example was added but is not listed by Codex; Codex plugins may be disabled "
         "(features.plugins).",

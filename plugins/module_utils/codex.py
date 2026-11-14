@@ -51,9 +51,9 @@ def codex_unavailable(module):
     if codex_bin(module, required=False) is None:
         return "Codex is not installed"
 
-    config_dir = module.params["config_dir"]
-    if config_dir and not os.path.exists(os.path.expanduser(config_dir)):
-        return f"Codex configuration directory {config_dir} does not exist"
+    home = codex_home(module)
+    if not os.path.exists(home):
+        return f"Codex home directory {home} does not exist"
 
     return None
 

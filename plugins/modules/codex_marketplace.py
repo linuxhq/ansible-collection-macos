@@ -30,7 +30,8 @@ attributes:
     description: Can run in check mode and return changed status prediction
       without modifying the target. An existing marketplace is reported unchanged
       because check mode cannot verify that O(source) matches its configured
-      source. If Codex is not installed or O(config_dir) does not exist,
+      source. If Codex is not installed or the Codex home directory
+      (O(config_dir), else E(CODEX_HOME), else C(~/.codex)) does not exist,
       reports a change for O(state=present) and no change for O(state=absent)
       without querying marketplace state. Check mode cannot see marketplaces
       while Codex plugins are disabled (C(features.plugins)).
@@ -53,8 +54,8 @@ options:
     description:
       - Marketplace name declared by its marketplace manifest.
       - When O(source) declares a different name, the module fails. A
-        marketplace this module just added is removed again, while an existing
-        marketplace with the declared name is kept.
+        marketplace this module just added is removed again when Codex lists
+        it, while an existing marketplace with the declared name is kept.
       - A marketplace without a configured source, such as a built-in or
         discovered marketplace, cannot be managed with O(state=present).
     required: true
@@ -120,8 +121,8 @@ marketplace:
   description:
     - Codex marketplace after the requested state is applied.
     - Returns V(null) when the marketplace is absent.
-    - Also returns V(null) in check mode when Codex is not installed or
-      O(config_dir) does not exist.
+    - Also returns V(null) in check mode when Codex is not installed or the
+      Codex home directory does not exist.
   returned: always
   type: dict
   contains:
@@ -172,8 +173,12 @@ def select_marketplace(listed, name):
     return next((marketplace for marketplace in listed if marketplace.get("name") == name), None)
 
 
+def find_listed(module, name):
+    return select_marketplace(marketplaces(module), name)
+
+
 def find_marketplace(module):
-    return select_marketplace(marketplaces(module), module.params["name"])
+    return find_listed(module, module.params["name"])
 
 
 def add_marketplace(module):
@@ -223,6 +228,14 @@ def ensure_present(module, listed):
             if select_marketplace(listed, added_name) is not None:
                 module.fail_json(changed=True, msg=f"{msg} Codex replaced the existing marketplace {added_name}.")
 
+            # An unlisted marketplace may be an existing one Codex replaced while plugins are disabled.
+            if find_listed(module, added_name) is None:
+                module.fail_json(
+                    changed=True,
+                    msg=f"{msg} Codex added marketplace {added_name} but does not list it, so it was not removed; "
+                    "Codex plugins may be disabled (features.plugins).",
+                )
+
             remove_marketplace(module, added_name)
 
         module.fail_json(msg=msg)
@@ -233,8 +246,9 @@ def ensure_present(module, listed):
     marketplace = find_marketplace(module)
     if marketplace is None:
         module.fail_json(
+            changed=not result["alreadyAdded"],
             msg=f"Codex marketplace {name} was added but is not listed by Codex; Codex plugins may be disabled "
-            "(features.plugins)."
+            "(features.plugins).",
         )
 
     return not result["alreadyAdded"], marketplace
