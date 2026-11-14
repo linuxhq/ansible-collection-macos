@@ -1,0 +1,5 @@
+---
+bugfixes:
+  - codex_marketplace - prefer the configured marketplace when Codex also lists a discovered marketplace with
+    the same name, so a matching source is unchanged, check-mode absent predicts removal, and a replaced
+    configured marketplace is not removed.

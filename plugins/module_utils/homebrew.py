@@ -35,7 +35,8 @@ def homebrew_operation(module, kind, default):
 
 
 def homebrew_output(module, args, operation, skip_unavailable=False):
-    rc, stdout, stderr = module.run_command([homebrew_bin(module)] + args)
+    # HOMEBREW_COLOR colors "Error:" even off a TTY, which hides HOMEBREW_UNAVAILABLE.
+    rc, stdout, stderr = module.run_command([homebrew_bin(module)] + args, environ_update={"HOMEBREW_NO_COLOR": "1"})
     if rc == 0:
         return stdout
 

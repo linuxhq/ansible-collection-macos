@@ -170,7 +170,11 @@ def marketplaces(module):
 
 
 def select_marketplace(listed, name):
-    return next((marketplace for marketplace in listed if marketplace.get("name") == name), None)
+    # Codex lists a discovered marketplace before a configured one with the same name.
+    matches = [marketplace for marketplace in listed if marketplace.get("name") == name]
+    return next(
+        (marketplace for marketplace in matches if marketplace.get("marketplaceSource")), next(iter(matches), None)
+    )
 
 
 def find_listed(module, name):
