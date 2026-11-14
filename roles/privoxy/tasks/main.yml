@@ -12,7 +12,6 @@
     - privoxy
   linuxhq.macos.homebrew_services_info:
     name: privoxy
-  failed_when: false
   register: __privoxy_services
 
 - name: Ensure privoxy service is stopped
@@ -23,7 +22,7 @@
     state: absent
   when:
     - privoxy_state == 'absent'
-    - __privoxy_services.services is defined
+    - __privoxy_services.services | length > 0
 
 - name: Ensure privoxy package is managed
   tags:

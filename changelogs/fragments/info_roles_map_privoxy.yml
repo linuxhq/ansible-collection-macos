@@ -1,0 +1,6 @@
+---
+bugfixes:
+  - homebrew_info, homebrew_cask_info, homebrew_services_info, and launchd_info roles - build the published
+    dictionaries with the built-in C(map) filter instead of C(json_query), removing the controller dependency on
+    C(jmespath) and failing clearly instead of misaligning keys when an item lacks its key.
+  - privoxy role - stop hiding service lookup failures and stop the service only when Homebrew reports it.
