@@ -120,7 +120,7 @@ def test_idempotency_and_check_mode(run_module, resource, state, exists, check_m
     )
     assert result["changed"] is changed
     assert result.get("failed") is None
-    assert (result[result_key] is not None) is exists
+    assert (result[result_key] is not None) is (exists and state == "present")
     assert command.call_count == 1
     assert command.call_args.args[0] == ["/mock/bin/tool", *LIST_ARGS[plugin]]
 
@@ -253,7 +253,7 @@ def test_absent_configured_marketplace_beside_discovered_marketplace_in_check_mo
         [{"marketplaces": [DISCOVERED, MARKETPLACE]}],
         check_mode=True,
     )
-    assert result == {"changed": True, "marketplace": MARKETPLACE_RESULT}
+    assert result == {"changed": True, "marketplace": None}
     assert command.call_count == 1
 
 
