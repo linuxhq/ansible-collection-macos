@@ -1,0 +1,12 @@
+---
+breaking_changes:
+  - homebrew_info - return the C(formulae) items reported by C(brew info --json=v2) unmodified. The C(description) and
+    C(version) keys are replaced by Homebrew's C(desc) and C(versions.stable), and C(installed) is a list of keg
+    dictionaries instead of a list of version strings.
+  - homebrew_cask_info - return the C(casks) items reported by C(brew info --json=v2) unmodified. The cask token moves
+    from C(name) to C(token), C(name) is now Homebrew's list of application names, and C(description) is replaced by
+    C(desc).
+  - homebrew_services_info - return the C(services) items reported by C(brew services info --json) unmodified,
+    including keys such as C(service_name), C(schedulable), C(loaded_file), and C(command).
+  - homebrew_cask_info role - key C(_homebrew_cask_info_dict) by cask token, because C(name) is now a list of
+    application names.

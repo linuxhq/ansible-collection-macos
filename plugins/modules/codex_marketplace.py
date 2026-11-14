@@ -10,13 +10,20 @@ version_added: "1.1.0"
 description:
   - Add and remove Codex plugin marketplace sources.
   - Marketplace state is managed through the Codex CLI.
+  - With O(state=present), an existing marketplace is passed to C(codex plugin
+    marketplace add) again, and Codex decides whether O(source) matches the
+    configured source.
+  - The source of an existing marketplace cannot be changed in place; remove
+    the marketplace with O(state=absent), then add it from the new source.
 author:
   - Taylor Kimball (@tkimball83)
 attributes:
   check_mode:
     description: Can run in check mode and return changed status prediction
-      without modifying the target. If Codex is not installed, reports a potential
-      change without querying marketplace state.
+      without modifying the target. An existing marketplace is reported unchanged
+      because check mode cannot verify that O(source) matches its configured
+      source. If Codex is not installed, reports a change for O(state=present)
+      and no change for O(state=absent) without querying marketplace state.
     support: full
   diff_mode:
     description: Diff mode is not supported.
@@ -35,22 +42,27 @@ options:
   name:
     description:
       - Marketplace name declared by its marketplace manifest.
+      - When O(source) declares a different name, a marketplace this module just
+        added is removed again and the module fails.
+      - A marketplace without a configured source, such as a built-in or
+        discovered marketplace, cannot be managed with O(state=present).
     required: true
     type: str
   ref:
     description:
       - Git reference to fetch when adding a Git marketplace.
-      - Used only when O(state=present) and the marketplace is absent.
+      - Used only when O(state=present).
     type: str
   source:
     description:
       - Local path, GitHub repository, HTTPS Git URL, or SSH Git URL.
       - Required when O(state=present).
+      - Must match the configured source of an existing marketplace.
     type: str
   sparse:
     description:
       - Sparse checkout paths for a Git marketplace.
-      - Used only when O(state=present) and the marketplace is absent.
+      - Used only when O(state=present).
     elements: str
     type: list
   state:
@@ -147,19 +159,10 @@ def find_marketplace(module):
     )
 
 
-def ensure_present(module, marketplace):
-    if marketplace is not None:
-        return False, marketplace
-
-    if module.check_mode:
-        return True, None
-
-    args = [
-        "plugin",
-        "marketplace",
-        "add",
-        module.params["source"],
-    ]
+def add_marketplace(module):
+    name = module.params["name"]
+    source = module.params["source"]
+    args = ["plugin", "marketplace", "add", source]
     if module.params["ref"]:
         args += ["--ref", module.params["ref"]]
 
@@ -168,12 +171,47 @@ def ensure_present(module, marketplace):
 
     args.append("--json")
 
-    codex_run_json(module, args, f"add Codex marketplace {module.params['name']}")
+    operation = f"add Codex marketplace {name} from {source}"
+    result = codex_run_json(module, args, operation)
+    if not isinstance(result.get("marketplaceName"), str) or not isinstance(result.get("alreadyAdded"), bool):
+        module.fail_json(msg=f"Unexpected codex output while {operation}.")
+
+    return result
+
+
+def remove_marketplace(module, name):
+    codex_run_json(
+        module,
+        ["plugin", "marketplace", "remove", name, "--json"],
+        f"remove Codex marketplace {name}",
+    )
+
+
+def ensure_present(module, marketplace):
+    name = module.params["name"]
+    source = module.params["source"]
+    if marketplace is not None and not marketplace.get("marketplaceSource"):
+        module.fail_json(msg=f"Codex marketplace {name} has no configured source and cannot be managed from {source}.")
+
+    if module.check_mode:
+        return marketplace is None, marketplace
+
+    result = add_marketplace(module)
+    added_name = result["marketplaceName"]
+    if added_name != name:
+        if not result["alreadyAdded"]:
+            remove_marketplace(module, added_name)
+
+        module.fail_json(msg=f"Codex marketplace source {source} declares marketplace {added_name}, not {name}.")
+
+    if result["alreadyAdded"] and marketplace is not None:
+        return False, marketplace
+
     marketplace = find_marketplace(module)
     if marketplace is None:
-        module.fail_json(msg=f"Codex marketplace {module.params['name']} was not found after adding it.")
+        module.fail_json(msg=f"Codex marketplace {name} was not found after adding it.")
 
-    return True, marketplace
+    return not result["alreadyAdded"], marketplace
 
 
 def ensure_absent(module, marketplace):
@@ -183,17 +221,7 @@ def ensure_absent(module, marketplace):
     if module.check_mode:
         return True, marketplace
 
-    codex_run_json(
-        module,
-        [
-            "plugin",
-            "marketplace",
-            "remove",
-            module.params["name"],
-            "--json",
-        ],
-        f"remove Codex marketplace {module.params['name']}",
-    )
+    remove_marketplace(module, module.params["name"])
     marketplace = find_marketplace(module)
     if marketplace is not None:
         module.fail_json(msg=f"Codex marketplace {module.params['name']} remains after removing it.")
@@ -225,7 +253,7 @@ def main():
 
     if module.check_mode and codex_bin(module, required=False) is None:
         module.exit_json(
-            changed=True,
+            changed=module.params["state"] == "present",
             marketplace=None,
             msg="Codex is not installed; marketplace state cannot be determined in check mode.",
         )

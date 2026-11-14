@@ -11,7 +11,9 @@ description:
   - Gather cask information from Homebrew.
   - With O(name), gather information about the given casks, whether installed
     or not.
+  - Names that Homebrew does not know are omitted from the results.
   - Without O(name), gather information about every installed cask.
+  - Cask information is returned as reported by C(brew info --json=v2).
   - Use M(linuxhq.macos.homebrew_info) to gather formula information.
 author:
   - Taylor Kimball (@tkimball83)
@@ -52,7 +54,9 @@ EXAMPLES = r"""
 RETURN = r"""
 ---
 casks:
-  description: Homebrew casks.
+  description:
+    - Homebrew casks as reported by C(brew info --json=v2).
+    - Each item is returned unmodified; commonly used keys are listed below.
   returned: always
   type: list
   elements: dict
@@ -61,8 +65,13 @@ casks:
       description: Whether the cask is deprecated.
       returned: always
       type: bool
-    description:
+    desc:
       description: Short description of the cask.
+      returned: always
+      type: str
+    full_token:
+      description: Cask token qualified with its tap when the tap is not
+        C(homebrew/cask).
       returned: always
       type: str
     installed:
@@ -71,15 +80,20 @@ casks:
       returned: always
       type: str
     name:
-      description: Cask token.
+      description: Application names of the cask.
       returned: always
-      type: str
+      type: list
+      elements: str
     outdated:
       description: Whether the installed cask is outdated.
       returned: always
       type: bool
     tap:
       description: Tap the cask comes from.
+      returned: always
+      type: str
+    token:
+      description: Cask token.
       returned: always
       type: str
     version:
@@ -96,30 +110,13 @@ from ansible_collections.linuxhq.macos.plugins.module_utils.homebrew import (
 )
 
 
-def info(module):
-    data = homebrew_info(module, "cask")
-
-    return [
-        {
-            "deprecated": cask.get("deprecated", False),
-            "description": cask.get("desc"),
-            "installed": cask.get("installed"),
-            "name": cask.get("token"),
-            "outdated": cask.get("outdated", False),
-            "tap": cask.get("tap"),
-            "version": cask.get("version"),
-        }
-        for cask in data.get("casks", [])
-    ]
-
-
 def main():
     module = AnsibleModule(
         argument_spec=homebrew_argument_spec(),
         supports_check_mode=True,
     )
 
-    module.exit_json(changed=False, casks=info(module))
+    module.exit_json(changed=False, casks=homebrew_info(module, "cask"))
 
 
 if __name__ == "__main__":

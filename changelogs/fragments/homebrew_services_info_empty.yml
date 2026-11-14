@@ -1,0 +1,4 @@
+---
+bugfixes:
+  - homebrew_services_info - return an empty list when no installed formula has a service, instead of failing to parse
+    the empty output of C(brew services info --json --all).

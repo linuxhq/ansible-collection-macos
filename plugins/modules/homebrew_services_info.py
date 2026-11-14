@@ -10,10 +10,13 @@ short_description: Gather information about Homebrew services
 description:
   - Gather service information from Homebrew.
   - With O(name), gather information about the given services.
+  - Names that Homebrew does not know are omitted from the results.
   - Without O(name), gather information about every Homebrew service.
-  - Services whose formula is not installed are omitted; Homebrew reports a
-    synthesized definition for any known formula, which this module filters
-    by the existence of the service property list.
+  - Homebrew reports a synthesized definition for any known formula, so a
+    service is returned only when Homebrew reports its service file as
+    registered or the reported service file exists. Services whose formula is
+    not installed or defines no service are omitted.
+  - Service information is returned as reported by C(brew services info --json).
 author:
   - Taylor Kimball (@tkimball83)
 options:
@@ -52,26 +55,41 @@ EXAMPLES = r"""
 RETURN = r"""
 ---
 services:
-  description: Homebrew services.
+  description:
+    - Homebrew services as reported by C(brew services info --json).
+    - Each item is returned unmodified; commonly used keys are listed below.
   returned: always
   type: list
   elements: dict
   contains:
+    command:
+      description: Command the service runs.
+      returned: when the formula service defines a command
+      type: str
     exit_code:
-      description: Exit code of the service, or V(null) when the service is
-        not loaded.
+      description: Last exit code of the service, or V(null) when launchd
+        reports none.
       returned: always
       type: int
     file:
-      description: Path to the service property list file.
+      description:
+        - Path to the service file.
+        - For a service registered in another launchd domain, such as one
+          started with C(sudo), the path Homebrew reports may not exist for
+          the querying user.
       returned: always
       type: str
     loaded:
       description: Whether the service is loaded by launchd.
       returned: always
       type: bool
+    loaded_file:
+      description: Path to the loaded service file, or V(null) when launchd
+        does not report it.
+      returned: always
+      type: str
     name:
-      description: Service name.
+      description: Formula name of the service.
       returned: always
       type: str
     pid:
@@ -80,21 +98,29 @@ services:
       returned: always
       type: int
     registered:
-      description: Whether the service is registered with Homebrew.
+      description: Whether a service file is registered in a launchd domain.
       returned: always
       type: bool
     running:
       description: Whether the service is running.
       returned: always
       type: bool
+    schedulable:
+      description: Whether the service runs on a schedule.
+      returned: always
+      type: bool
+    service_name:
+      description: Launchd label of the service.
+      returned: always
+      type: str
     status:
-      description: Status of the service, such as V(none), V(started), or
-        V(error).
+      description: Status of the service, such as V(none), V(started),
+        V(stopped), V(scheduled), V(error), V(unknown), or V(other).
       returned: always
       type: str
     user:
-      description: User the service runs as, or V(null) when the service is
-        not loaded.
+      description: User the service runs as, or V(null) when no service file
+        is registered.
       returned: always
       type: str
 """
@@ -109,23 +135,11 @@ from ansible_collections.linuxhq.macos.plugins.module_utils.homebrew import (
 )
 
 
-def info(module):
-    data = homebrew_services_info(module)
-
+def services(module):
     return [
-        {
-            "exit_code": service.get("exit_code"),
-            "file": service.get("file"),
-            "loaded": service.get("loaded", False),
-            "name": service.get("name"),
-            "pid": service.get("pid"),
-            "registered": service.get("registered", False),
-            "running": service.get("running", False),
-            "status": service.get("status"),
-            "user": service.get("user"),
-        }
-        for service in data
-        if service.get("file") and os.path.exists(service["file"])
+        service
+        for service in homebrew_services_info(module)
+        if service.get("registered") is True or (service.get("file") and os.path.exists(service["file"]))
     ]
 
 
@@ -135,7 +149,7 @@ def main():
         supports_check_mode=True,
     )
 
-    module.exit_json(changed=False, services=info(module))
+    module.exit_json(changed=False, services=services(module))
 
 
 if __name__ == "__main__":

@@ -15,8 +15,9 @@ author:
 attributes:
   check_mode:
     description: Can run in check mode and return changed status prediction
-      without modifying the target. If Codex is not installed, reports a potential
-      change without querying plugin state.
+      without modifying the target. If Codex is not installed, reports a change
+      for O(state=present) and no change for O(state=absent) without querying
+      plugin state.
     support: full
   diff_mode:
     description: Diff mode is not supported.
@@ -98,6 +99,19 @@ plugin:
       description: Marketplace containing the plugin.
       returned: when plugin exists
       type: str
+    marketplace_source:
+      description: Configured source of the marketplace containing the plugin.
+      returned: when available
+      type: dict
+      contains:
+        source:
+          description: Marketplace source location.
+          returned: when available
+          type: str
+        source_type:
+          description: Marketplace source type.
+          returned: when available
+          type: str
     name:
       description: Plugin name.
       returned: when plugin exists
@@ -222,7 +236,7 @@ def main():
 
     if module.check_mode and codex_bin(module, required=False) is None:
         module.exit_json(
-            changed=True,
+            changed=module.params["state"] == "present",
             msg="Codex is not installed; plugin state cannot be determined in check mode.",
             plugin=None,
         )

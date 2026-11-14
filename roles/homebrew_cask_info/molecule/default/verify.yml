@@ -12,9 +12,9 @@
       ansible.builtin.assert:
         that:
           - _homebrew_cask_info_dict | length == 3
-          - _homebrew_cask_info_dict['git-credential-manager'].installed is defined
-          - _homebrew_cask_info_dict['git-credential-manager'].name is defined
-          - _homebrew_cask_info_dict['git-credential-manager'].version is defined
+          - _homebrew_cask_info_dict['git-credential-manager'].installed is string
+          - _homebrew_cask_info_dict['git-credential-manager'].token == 'git-credential-manager'
+          - _homebrew_cask_info_dict['git-credential-manager'].version is string
 
     - name: Ensure homebrew cask role is included with cask names
       tags:
@@ -29,12 +29,52 @@
         that:
           - _homebrew_cask_info_list | length == 2
           - _homebrew_cask_info_dict | length == 2
-          - _homebrew_cask_info_dict['iterm2'].name == 'iterm2'
-          - _homebrew_cask_info_dict['iterm2'].installed is defined
-          - _homebrew_cask_info_dict['iterm2'].version is defined
-          - _homebrew_cask_info_dict['rectangle'].name == 'rectangle'
-          - _homebrew_cask_info_dict['rectangle'].installed is defined
-          - _homebrew_cask_info_dict['rectangle'].version is defined
+          - _homebrew_cask_info_dict['iterm2'].token == 'iterm2'
+          - _homebrew_cask_info_dict['iterm2'].name == ['iTerm2']
+          - _homebrew_cask_info_dict['iterm2'].desc is string
+          - _homebrew_cask_info_dict['iterm2'].installed is string
+          - _homebrew_cask_info_dict['iterm2'].version is string
+          - _homebrew_cask_info_dict['rectangle'].token == 'rectangle'
+          - _homebrew_cask_info_dict['rectangle'].name == ['Rectangle']
+          - _homebrew_cask_info_dict['rectangle'].desc is string
+          - _homebrew_cask_info_dict['rectangle'].installed is string
+          - _homebrew_cask_info_dict['rectangle'].version is string
+
+    - name: Ensure homebrew cask info role is included with an unknown name
+      tags:
+        - homebrew_cask_info
+      ansible.builtin.include_role:
+        name: homebrew_cask_info
+      vars:
+        homebrew_cask_info_name:
+          - linuxhq-missing-cask
+
+    - name: Ensure unknown names are omitted
+      tags:
+        - homebrew_cask_info
+      ansible.builtin.assert:
+        that:
+          - _homebrew_cask_info_list == []
+          - _homebrew_cask_info_dict == {}
+
+    - name: Ensure homebrew cask info role is included with known and unknown names
+      tags:
+        - homebrew_cask_info
+      ansible.builtin.include_role:
+        name: homebrew_cask_info
+      vars:
+        homebrew_cask_info_name:
+          - iterm2
+          - linuxhq-missing-cask
+
+    - name: Ensure only known names are returned
+      tags:
+        - homebrew_cask_info
+      ansible.builtin.assert:
+        that:
+          - _homebrew_cask_info_list | length == 1
+          - _homebrew_cask_info_dict | length == 1
+          - _homebrew_cask_info_dict['iterm2'].token == 'iterm2'
 
     - name: Ensure inventory lists are formatted
       tags:

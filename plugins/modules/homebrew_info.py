@@ -11,7 +11,9 @@ description:
   - Gather formula information from Homebrew.
   - With O(name), gather information about the given formulae, whether
     installed or not.
+  - Names that Homebrew does not know are omitted from the results.
   - Without O(name), gather information about every installed formula.
+  - Formula information is returned as reported by C(brew info --json=v2).
   - Use M(linuxhq.macos.homebrew_cask_info) to gather cask information.
 author:
   - Taylor Kimball (@tkimball83)
@@ -52,7 +54,9 @@ EXAMPLES = r"""
 RETURN = r"""
 ---
 formulae:
-  description: Homebrew formulae.
+  description:
+    - Homebrew formulae as reported by C(brew info --json=v2).
+    - Each item is returned unmodified; commonly used keys are listed below.
   returned: always
   type: list
   elements: dict
@@ -61,16 +65,31 @@ formulae:
       description: Whether the formula is deprecated.
       returned: always
       type: bool
-    description:
+    desc:
       description: Short description of the formula.
       returned: always
       type: str
+    full_name:
+      description: Formula name qualified with its tap when the tap is not
+        C(homebrew/core).
+      returned: always
+      type: str
     installed:
-      description: Installed versions of the formula; empty when the formula
-        is not installed.
+      description: Installed kegs of the formula; empty when the formula is
+        not installed.
       returned: always
       type: list
-      elements: str
+      elements: dict
+      contains:
+        installed_on_request:
+          description: Whether the keg was installed on request rather than as
+            a dependency.
+          returned: always
+          type: bool
+        version:
+          description: Installed version.
+          returned: always
+          type: str
     name:
       description: Formula name.
       returned: always
@@ -87,10 +106,23 @@ formulae:
       description: Tap the formula comes from.
       returned: always
       type: str
-    version:
-      description: Latest stable version of the formula.
+    versions:
+      description: Available versions of the formula.
       returned: always
-      type: str
+      type: dict
+      contains:
+        bottle:
+          description: Whether a bottle is available.
+          returned: always
+          type: bool
+        head:
+          description: HEAD version, or V(null) when the formula has no HEAD.
+          returned: always
+          type: str
+        stable:
+          description: Latest stable version.
+          returned: always
+          type: str
 """
 
 from ansible.module_utils.basic import AnsibleModule
@@ -101,31 +133,13 @@ from ansible_collections.linuxhq.macos.plugins.module_utils.homebrew import (
 )
 
 
-def info(module):
-    data = homebrew_info(module, "formula")
-
-    return [
-        {
-            "deprecated": formula.get("deprecated", False),
-            "description": formula.get("desc"),
-            "installed": [item.get("version") for item in formula.get("installed", [])],
-            "name": formula.get("name"),
-            "outdated": formula.get("outdated", False),
-            "pinned": formula.get("pinned", False),
-            "tap": formula.get("tap"),
-            "version": formula.get("versions", {}).get("stable"),
-        }
-        for formula in data.get("formulae", [])
-    ]
-
-
 def main():
     module = AnsibleModule(
         argument_spec=homebrew_argument_spec(),
         supports_check_mode=True,
     )
 
-    module.exit_json(changed=False, formulae=info(module))
+    module.exit_json(changed=False, formulae=homebrew_info(module, "formula"))
 
 
 if __name__ == "__main__":

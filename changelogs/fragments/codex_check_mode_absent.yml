@@ -1,0 +1,4 @@
+---
+bugfixes:
+  - codex_marketplace and codex_plugin - report no change for O(state=absent) in check mode when Codex is not
+    installed.

@@ -24,6 +24,91 @@
           - __codex_config_stat.stat.exists
           - __codex_executable_stat.stat.exists
 
+    - name: Ensure codex marketplace presence is gathered
+      tags:
+        - codex
+      linuxhq.macos.codex_marketplace:
+        config_dir: "{{ ansible_facts.env.HOME }}/.codex"
+        name: "{{ (codex_marketplaces | first).name }}"
+        source: "{{ (codex_marketplaces | first).source }}"
+        state: present
+      check_mode: true
+      register: __codex_marketplace_present
+
+    - name: Ensure codex plugin presence is gathered
+      tags:
+        - codex
+      linuxhq.macos.codex_plugin:
+        config_dir: "{{ ansible_facts.env.HOME }}/.codex"
+        marketplace: "{{ (codex_plugins | first).marketplace }}"
+        name: "{{ (codex_plugins | first).name }}"
+        state: present
+      check_mode: true
+      register: __codex_plugin_present
+
+    - name: Ensure codex marketplace and plugin are present
+      tags:
+        - codex
+      ansible.builtin.assert:
+        that:
+          - not __codex_marketplace_present.changed
+          - __codex_marketplace_present.marketplace.name ==
+              (codex_marketplaces | first).name
+          - __codex_marketplace_present.marketplace.marketplace_source.source ==
+              (codex_marketplaces | first).source
+          - not __codex_plugin_present.changed
+          - __codex_plugin_present.plugin.plugin_id ==
+              (codex_plugins | first).name ~ '@' ~ (codex_plugins | first).marketplace
+          - __codex_plugin_present.plugin.installed
+
+    - name: Ensure inventory lists are formatted
+      tags:
+        - codex
+      ansible.builtin.set_fact:
+        codex_marketplaces:
+          "{{ codex_marketplaces |
+              map('combine', {'state': 'absent'}) }}"
+        codex_plugins:
+          "{{ codex_plugins |
+              map('combine', {'state': 'absent'}) }}"
+
+    - name: Ensure codex role is included with absent marketplaces and plugins
+      tags:
+        - codex
+      ansible.builtin.include_role:
+        name: codex
+
+    - name: Ensure codex marketplace absence is gathered
+      tags:
+        - codex
+      linuxhq.macos.codex_marketplace:
+        config_dir: "{{ ansible_facts.env.HOME }}/.codex"
+        name: "{{ (codex_marketplaces | first).name }}"
+        state: absent
+      check_mode: true
+      register: __codex_marketplace_absent
+
+    - name: Ensure codex plugin absence is gathered
+      tags:
+        - codex
+      linuxhq.macos.codex_plugin:
+        config_dir: "{{ ansible_facts.env.HOME }}/.codex"
+        marketplace: "{{ (codex_plugins | first).marketplace }}"
+        name: "{{ (codex_plugins | first).name }}"
+        state: absent
+      check_mode: true
+      register: __codex_plugin_absent
+
+    - name: Ensure codex marketplace and plugin are absent
+      tags:
+        - codex
+      ansible.builtin.assert:
+        that:
+          - not __codex_marketplace_absent.changed
+          - __codex_marketplace_absent.marketplace is none
+          - not __codex_plugin_absent.changed
+          - __codex_plugin_absent.plugin is none
+
     - name: Ensure codex role is included with an absent state
       tags:
         - codex

@@ -1,0 +1,4 @@
+---
+bugfixes:
+  - homebrew_services_info - keep services that Homebrew reports as registered even when the reported service file does
+    not exist for the querying user, such as services started with C(sudo).

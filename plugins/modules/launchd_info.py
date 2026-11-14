@@ -56,8 +56,12 @@ services:
       returned: always
       type: str
     last_exit_status:
-      description: Last exit status of the service, or V(null) when the
-        service has not exited.
+      description:
+        - Last exit status reported by C(launchctl list).
+        - V(0) when the service has not exited or last exited successfully.
+        - A negative value is the negated number of the signal that stopped
+          the service.
+        - V(null) when C(launchctl list) reports no status.
       returned: always
       type: int
     pid:
