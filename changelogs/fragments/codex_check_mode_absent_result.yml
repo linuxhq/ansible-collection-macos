@@ -1,0 +1,4 @@
+---
+bugfixes:
+  - codex_marketplace and codex_plugin - in check mode, return V(null) for a resource that O(state=absent) would
+    remove, matching the real run, instead of the current resource.

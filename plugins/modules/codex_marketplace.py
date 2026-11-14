@@ -267,7 +267,7 @@ def ensure_absent(module):
         if marketplace is not None and not marketplace.get("marketplaceSource"):
             module.fail_json(msg=f"Codex marketplace {name} has no configured source and cannot be removed.")
 
-        return marketplace is not None, marketplace
+        return marketplace is not None, None
 
     # Remove directly: listing fails while any configured marketplace is broken.
     if remove_marketplace(module, name, missing=f"marketplace `{name}` is not configured or installed") is not None:

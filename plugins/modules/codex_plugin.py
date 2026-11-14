@@ -266,7 +266,7 @@ def ensure_absent(module, plugin):
         return ensure_unlisted_absent(module)
 
     if module.check_mode:
-        return True, plugin
+        return True, None
 
     remove_plugin(module)
     plugin = find_plugin(module)
