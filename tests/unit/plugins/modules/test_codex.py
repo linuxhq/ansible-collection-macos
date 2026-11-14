@@ -295,7 +295,7 @@ def test_failed_postcondition(run_module, resource):
     plugin, params, key, _result_key, _item, _expected, _prefix, _add, _remove, add_result = resource
     result, command, _lookup = run_module(plugin, {**params, "state": "present"}, [{key: []}, add_result, {key: []}])
     assert result["failed"] is True
-    assert "not found" in result["msg"]
+    assert "not found" in result["msg"] or "not listed" in result["msg"]
     assert command.call_count == 3
 
 
@@ -315,6 +315,39 @@ def test_missing_executable_in_check_mode(run_module, resource, state):
     assert result[result_key] is None
     assert "not installed" in result["msg"]
     command.assert_not_called()
+
+
+@pytest.mark.parametrize("state", ["present", "absent"])
+def test_missing_config_dir_in_check_mode(run_module, resource, tmp_path, state):
+    plugin, params, _key, result_key, *_details = resource
+    config = str(tmp_path / "missing")
+    result, command, _lookup = run_module(plugin, {**params, "state": state, "config_dir": config}, check_mode=True)
+    assert result["changed"] is (state == "present")
+    assert result[result_key] is None
+    assert result["msg"].startswith(f"Codex configuration directory {config} does not exist;")
+    command.assert_not_called()
+
+
+def test_existing_config_dir_in_check_mode_queries_state(run_module, resource, tmp_path):
+    plugin, params, key, _result_key, item, *_details = resource
+    result, command, _lookup = run_module(plugin, {**params, "config_dir": str(tmp_path)}, [{key: [item]}], True)
+    assert result["changed"] is False
+    assert command.call_count == 1
+    assert command.call_args.kwargs == {"environ_update": {"CODEX_HOME": str(tmp_path)}}
+
+
+def test_marketplace_added_but_not_listed_names_plugins_feature(run_module):
+    result, command, _lookup = run_module(
+        codex_marketplace,
+        {"name": "example", "source": SOURCE},
+        [{"marketplaces": []}, added(already_added=True), {"marketplaces": []}],
+    )
+    assert result == {
+        "failed": True,
+        "msg": "Codex marketplace example was added but is not listed by Codex; Codex plugins may be disabled "
+        "(features.plugins).",
+    }
+    assert command.call_count == 3
 
 
 def test_marketplace_options_preserve_argument_boundaries(run_module):

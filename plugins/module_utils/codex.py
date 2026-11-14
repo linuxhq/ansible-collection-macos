@@ -39,6 +39,17 @@ def codex_bin(module, required=True):
     return executable
 
 
+def codex_unavailable(module):
+    if codex_bin(module, required=False) is None:
+        return "Codex is not installed"
+
+    config_dir = module.params["config_dir"]
+    if config_dir and not os.path.exists(os.path.expanduser(config_dir)):
+        return f"Codex configuration directory {config_dir} does not exist"
+
+    return None
+
+
 def codex_run_json(module, args, operation, missing=None):
     environment = None
     if module.params["config_dir"]:

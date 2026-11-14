@@ -13,9 +13,11 @@ description:
   - With O(state=present), an existing marketplace is passed to C(codex plugin
     marketplace add) again, and Codex decides whether O(source), O(ref), and
     O(sparse) match the configured marketplace.
-  - The O(source), O(ref), or O(sparse) paths of an existing marketplace cannot
-    be changed in place; remove the marketplace with O(state=absent), then add
-    it again with the new values.
+  - Codex replaces an existing local marketplace in place with a Git
+    O(source) whose manifest declares the same name.
+  - Codex rejects any other change to the O(source), O(ref), or O(sparse) of
+    an existing marketplace; remove the marketplace with O(state=absent), then
+    add it again with the new values.
   - With O(state=absent), the marketplace is removed with C(codex plugin
     marketplace remove) without listing marketplaces first, so a configured
     marketplace that fails to load can still be removed.
@@ -28,8 +30,9 @@ attributes:
     description: Can run in check mode and return changed status prediction
       without modifying the target. An existing marketplace is reported unchanged
       because check mode cannot verify that O(source) matches its configured
-      source. If Codex is not installed, reports a change for O(state=present)
-      and no change for O(state=absent) without querying marketplace state.
+      source. If Codex is not installed or O(config_dir) does not exist,
+      reports a change for O(state=present) and no change for O(state=absent)
+      without querying marketplace state.
     support: full
   diff_mode:
     description: Diff mode is not supported.
@@ -58,19 +61,20 @@ options:
     description:
       - Git reference to fetch when adding a Git marketplace.
       - Used only when O(state=present).
-      - Must match the configured reference of an existing marketplace.
+      - Must match the configured reference of an existing Git marketplace.
     type: str
   source:
     description:
       - Local path, GitHub repository, HTTPS Git URL, or SSH Git URL.
       - Required when O(state=present).
-      - Must match the configured source of an existing marketplace.
+      - Must match the configured source of an existing marketplace, unless a
+        Git source replaces a local marketplace.
     type: str
   sparse:
     description:
       - Sparse checkout paths for a Git marketplace.
       - Used only when O(state=present).
-      - Must match the configured sparse checkout paths of an existing
+      - Must match the configured sparse checkout paths of an existing Git
         marketplace.
     elements: str
     type: list
@@ -114,7 +118,8 @@ marketplace:
   description:
     - Codex marketplace after the requested state is applied.
     - Returns V(null) when the marketplace is absent.
-    - Also returns V(null) in check mode when Codex is not installed.
+    - Also returns V(null) in check mode when Codex is not installed or
+      O(config_dir) does not exist.
   returned: always
   type: dict
   contains:
@@ -145,10 +150,10 @@ from ansible.module_utils.basic import AnsibleModule
 
 from ansible_collections.linuxhq.macos.plugins.module_utils.codex import (
     codex_argument_spec,
-    codex_bin,
     codex_list,
     codex_result,
     codex_run_json,
+    codex_unavailable,
 )
 
 
@@ -219,7 +224,10 @@ def ensure_present(module, marketplace):
 
     marketplace = find_marketplace(module)
     if marketplace is None:
-        module.fail_json(msg=f"Codex marketplace {name} was not found after adding it.")
+        module.fail_json(
+            msg=f"Codex marketplace {name} was added but is not listed by Codex; Codex plugins may be disabled "
+            "(features.plugins)."
+        )
 
     return not result["alreadyAdded"], marketplace
 
@@ -262,11 +270,12 @@ def main():
         supports_check_mode=True,
     )
 
-    if module.check_mode and codex_bin(module, required=False) is None:
+    unavailable = module.check_mode and codex_unavailable(module)
+    if unavailable:
         module.exit_json(
             changed=module.params["state"] == "present",
             marketplace=None,
-            msg="Codex is not installed; marketplace state cannot be determined in check mode.",
+            msg=f"{unavailable}; marketplace state cannot be determined in check mode.",
         )
 
     if module.params["state"] == "present":
