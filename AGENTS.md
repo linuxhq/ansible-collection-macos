@@ -31,13 +31,13 @@ Invoke skills rather than running commands ad hoc.
 | ------------------------- | ----------------------------- |
 | `ansible-lint`            | Lint roles & playbooks        |
 | `ansible-test`            | Module sanity                 |
+| `audit`                   | Audit and fix a module group  |
 | `black`                   | Format Python                 |
 | `blank-line-after-blocks` | Space Python blocks           |
 | `changelog`               | Changelog fragments & release |
 | `collection-build`        | Build the collection tarball  |
 | `isort`                   | Sort Python imports           |
 | `molecule`                | Role tests                    |
-| `plugins-audit`           | Exhaustive plugins audit      |
 | `pyenv`                   | Install pyenv + pinned Python |
 | `ruff`                    | Lint Python                   |
 | `tox`                     | Set up isolated environments  |
