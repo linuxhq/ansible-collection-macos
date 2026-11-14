@@ -11,8 +11,9 @@ description:
   - Install and remove Codex plugins from configured marketplaces.
   - Plugin state is managed through the Codex CLI.
   - With O(state=absent), a plugin that Codex no longer lists, such as one
-    whose marketplace was removed, is still removed when its cache directory
-    C(plugins/cache/<marketplace>/<name>) exists in the Codex home directory.
+    whose marketplace was removed or fails to load, is still removed when its
+    cache directory C(plugins/cache/<marketplace>/<name>) exists in the Codex
+    home directory.
     The Codex home directory is O(config_dir), else E(CODEX_HOME), else
     C(~/.codex).
 author:
@@ -191,12 +192,13 @@ from ansible_collections.linuxhq.macos.plugins.module_utils.codex import (
 )
 
 
-def plugins(module):
+def plugins(module, missing=None):
     return codex_list(
         module,
         ["plugin", "list", "--marketplace", module.params["marketplace"], "--json"],
         "installed",
         f"gather Codex plugin information for marketplace {module.params['marketplace']}",
+        missing,
     )
 
 
@@ -204,12 +206,16 @@ def plugin_id(module):
     return f"{module.params['name']}@{module.params['marketplace']}"
 
 
-def find_plugin(module):
+def select_plugin(module, listed):
     identifier = plugin_id(module)
     return next(
-        (plugin for plugin in plugins(module) if plugin.get("pluginId") == identifier),
+        (plugin for plugin in listed if plugin.get("pluginId") == identifier),
         None,
     )
+
+
+def find_plugin(module):
+    return select_plugin(module, plugins(module))
 
 
 def ensure_present(module, plugin):
@@ -261,7 +267,10 @@ def ensure_unlisted_absent(module):
     return True, None
 
 
-def ensure_absent(module, plugin):
+def ensure_absent(module):
+    # Codex cannot list the plugins of a marketplace that fails to load, but can still remove them.
+    listed = plugins(module, missing="failed to load configured marketplace snapshot")
+    plugin = None if listed is None else select_plugin(module, listed)
     if plugin is None:
         return ensure_unlisted_absent(module)
 
@@ -303,11 +312,10 @@ def main():
             plugin=None,
         )
 
-    plugin = find_plugin(module)
     if module.params["state"] == "present":
-        changed, plugin = ensure_present(module, plugin)
+        changed, plugin = ensure_present(module, find_plugin(module))
     else:
-        changed, plugin = ensure_absent(module, plugin)
+        changed, plugin = ensure_absent(module)
 
     module.exit_json(changed=changed, plugin=codex_result(plugin))
 

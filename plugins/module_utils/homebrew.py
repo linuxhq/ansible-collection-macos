@@ -9,7 +9,7 @@ HOMEBREW_PATH_DEFAULT = "/usr/local/bin:/opt/homebrew/bin:/home/linuxbrew/.linux
 # Errors Homebrew raises for a formula or cask name it does not know.
 HOMEBREW_UNAVAILABLE = re.compile(
     r"^Error: (?:No available formula(?: or cask)? with the name \""
-    r"|Cask '[^']+' is unavailable(?:\.$|: No Cask with this name exists\.))",
+    r"|Cask '[^']+' is unavailable(?:\.$|: No Cask with this name exists\.|: '.+' does not exist\.$))",
     re.MULTILINE,
 )
 

@@ -21,8 +21,9 @@ description:
   - With O(state=absent), the marketplace is removed with C(codex plugin
     marketplace remove) without listing marketplaces first, so a configured
     marketplace that fails to load can still be removed.
-  - A marketplace without a configured source, such as a built-in or
-    discovered marketplace, cannot be removed with O(state=absent).
+  - With O(state=absent), a marketplace without a configured source, such as
+    a built-in or discovered marketplace, is treated as already absent and
+    left in place.
 author:
   - Taylor Kimball (@tkimball83)
 attributes:
@@ -263,20 +264,13 @@ def ensure_present(module, listed):
 def ensure_absent(module):
     name = module.params["name"]
     if module.check_mode:
+        # A listed marketplace without a configured source (built-in or discovered) is already absent.
         marketplace = find_marketplace(module)
-        if marketplace is not None and not marketplace.get("marketplaceSource"):
-            module.fail_json(msg=f"Codex marketplace {name} has no configured source and cannot be removed.")
-
-        return marketplace is not None, None
+        return marketplace is not None and bool(marketplace.get("marketplaceSource")), None
 
     # Remove directly: listing fails while any configured marketplace is broken.
-    if remove_marketplace(module, name, missing=f"marketplace `{name}` is not configured or installed") is not None:
-        return True, None
-
-    if find_marketplace(module) is not None:
-        module.fail_json(msg=f"Codex marketplace {name} has no configured source and cannot be removed.")
-
-    return False, None
+    removed = remove_marketplace(module, name, missing=f"marketplace `{name}` is not configured or installed")
+    return removed is not None, None
 
 
 def main():

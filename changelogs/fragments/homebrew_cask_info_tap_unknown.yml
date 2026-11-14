@@ -1,0 +1,4 @@
+---
+bugfixes:
+  - homebrew_cask_info - omit an unknown cask name qualified with an installed tap that lacks it, such as
+    C(hashicorp/tap/missing), instead of failing.
