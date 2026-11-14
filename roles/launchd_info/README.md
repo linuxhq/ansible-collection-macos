@@ -12,9 +12,6 @@ None
 
     launchd_info_name: []
 
-`launchd_info_name` filters services by label; `[]` gathers every loaded
-service. Labels that are not loaded are omitted.
-
 ## Dependencies
 
 None

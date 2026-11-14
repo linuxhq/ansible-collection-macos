@@ -13,18 +13,14 @@ Gather information about Homebrew casks
     homebrew_cask_info_name: []
     homebrew_cask_info_path: null
 
-`homebrew_cask_info_name` lists the casks to gather information about;
-`[]` gathers every installed cask. Names Homebrew does not know are
-omitted.
-
 ## Dependencies
 
 None
 
 ## Return Values
 
-    _homebrew_cask_info_dict  # casks keyed by token
-    _homebrew_cask_info_list  # casks as reported by brew info --json=v2
+    _homebrew_cask_info_dict
+    _homebrew_cask_info_list
 
 ## Example Playbook
 

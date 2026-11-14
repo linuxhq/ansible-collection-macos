@@ -13,18 +13,14 @@ Gather information about Homebrew services
     homebrew_services_info_name: []
     homebrew_services_info_path: null
 
-`homebrew_services_info_name` lists the services to gather information
-about; `[]` gathers every Homebrew service. Names Homebrew does not know
-are omitted.
-
 ## Dependencies
 
 None
 
 ## Return Values
 
-    _homebrew_services_info_dict  # services keyed by name
-    _homebrew_services_info_list  # services as reported by brew services info --json
+    _homebrew_services_info_dict
+    _homebrew_services_info_list
 
 ## Example Playbook
 

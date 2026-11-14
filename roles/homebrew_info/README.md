@@ -13,18 +13,14 @@ Gather information about Homebrew formulae
     homebrew_info_name: []
     homebrew_info_path: null
 
-`homebrew_info_name` lists the formulae to gather information about;
-`[]` gathers every installed formula. Names Homebrew does not know are
-omitted.
-
 ## Dependencies
 
 None
 
 ## Return Values
 
-    _homebrew_info_dict  # formulae keyed by name
-    _homebrew_info_list  # formulae as reported by brew info --json=v2
+    _homebrew_info_dict
+    _homebrew_info_list
 
 ## Example Playbook
 

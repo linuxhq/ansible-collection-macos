@@ -6,4 +6,4 @@ bugfixes:
     failure messages, and fail clearly when brew returns an unexpected structure.
 trivial:
   - homebrew_info, homebrew_cask_info, homebrew_services_info, and launchd_info roles - verify unknown and mixed names
-    in the Molecule scenarios and describe the name filters in the READMEs.
+    in the Molecule scenarios.

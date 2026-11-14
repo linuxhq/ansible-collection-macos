@@ -20,36 +20,6 @@ Install and configure the OpenAI Codex CLI
     codex_plugins: []
     codex_state: present
 
-`codex_defaults` items manage preferences in the `codex_domain` domain with
-`community.general.osx_defaults`. Items without `key`, or without `value`
-unless `state` is `absent`, are skipped.
-
-    codex_defaults:
-      - key: string               # required
-        value: any                # required unless state is absent
-        type: string              # default: string
-        state: present            # present or absent; default: present
-        host: string              # optional
-        array_add: false          # optional
-
-`codex_marketplaces` items manage marketplaces with
-`linuxhq.macos.codex_marketplace`. Present marketplaces are added before
-plugins are managed; absent marketplaces are removed after plugins.
-
-    codex_marketplaces:
-      - name: string              # required; name declared by the manifest
-        source: string            # required when state is present
-        ref: string               # optional Git reference
-        sparse: []                # optional sparse checkout paths
-        state: present            # present or absent; default: present
-
-`codex_plugins` items manage plugins with `linuxhq.macos.codex_plugin`.
-
-    codex_plugins:
-      - marketplace: string       # required
-        name: string              # required
-        state: present            # present or absent; default: present
-
 ## Dependencies
 
 None
