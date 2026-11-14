@@ -100,6 +100,17 @@ def test_package_unknown_names_are_omitted(run_module, plugin, key, kind, item):
     ]
 
 
+@pytest.mark.parametrize(
+    "plugin,output",
+    [(homebrew_info, {"formulae": []}), (homebrew_cask_info, {"casks": []}), (homebrew_services_info, [])],
+)
+def test_color_is_disabled(run_module, plugin, output):
+    unavailable = (1, "", UNAVAILABLE["formula"].format(name="missing"))
+    result, command, _lookup = run_module(plugin, {"name": ["one", "missing"]}, [unavailable, output, unavailable])
+    assert result["changed"] is False
+    assert [call.kwargs for call in command.call_args_list] == [{"environ_update": {"HOMEBREW_NO_COLOR": "1"}}] * 3
+
+
 @pytest.mark.parametrize("plugin,key,kind,item", PACKAGES)
 def test_package_option_names_are_not_options(run_module, plugin, key, kind, item):
     unavailable = (1, "", UNAVAILABLE[kind].format(name="--installed"))

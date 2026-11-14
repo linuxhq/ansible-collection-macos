@@ -1,0 +1,4 @@
+---
+bugfixes:
+  - homebrew_info, homebrew_cask_info, and homebrew_services_info - run brew with E(HOMEBREW_NO_COLOR=1) so unknown
+    names are still omitted when E(HOMEBREW_COLOR) is set.

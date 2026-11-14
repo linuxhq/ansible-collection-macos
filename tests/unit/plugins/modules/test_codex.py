@@ -224,6 +224,39 @@ def test_existing_marketplace_with_same_source_is_unchanged(run_module):
     assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "add", SOURCE, "--json"]
 
 
+DISCOVERED = {"name": "example", "root": "/home/test/.agents/plugins"}
+
+
+@pytest.mark.parametrize(
+    "check_mode,responses,changed",
+    [
+        (True, [], False),
+        (False, [added(already_added=True)], False),
+        (False, [added(), {"marketplaces": [DISCOVERED, MARKETPLACE]}], True),
+    ],
+)
+def test_configured_marketplace_beside_discovered_marketplace_is_managed(run_module, check_mode, responses, changed):
+    result, command, _lookup = run_module(
+        codex_marketplace,
+        {"name": "example", "source": SOURCE},
+        [{"marketplaces": [DISCOVERED, MARKETPLACE]}, *responses],
+        check_mode,
+    )
+    assert result == {"changed": changed, "marketplace": MARKETPLACE_RESULT}
+    assert command.call_count == 1 + len(responses)
+
+
+def test_absent_configured_marketplace_beside_discovered_marketplace_in_check_mode(run_module):
+    result, command, _lookup = run_module(
+        codex_marketplace,
+        {"name": "example", "state": "absent"},
+        [{"marketplaces": [DISCOVERED, MARKETPLACE]}],
+        check_mode=True,
+    )
+    assert result == {"changed": True, "marketplace": MARKETPLACE_RESULT}
+    assert command.call_count == 1
+
+
 def test_existing_marketplace_with_different_source_fails(run_module):
     stderr = (
         "Error: marketplace 'example' is already added from a different source; remove it before adding this source\n"
@@ -298,6 +331,20 @@ def test_new_marketplace_beside_discovered_marketplace_is_removed(run_module):
     assert result["msg"] == f"Codex marketplace source {SOURCE} declares marketplace other, not example."
     assert command.call_count == 4
     assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "remove", "other", "--json"]
+
+
+def test_replaced_marketplace_beside_discovered_marketplace_is_kept(run_module):
+    configured = {**MARKETPLACE, "name": "other"}
+    discovered = {"name": "other", "root": "/home/test/.agents/plugins"}
+    result, command, _lookup = run_module(
+        codex_marketplace,
+        {"name": "example", "source": SOURCE},
+        [{"marketplaces": [discovered, configured]}, added("other")],
+    )
+    assert result["failed"] is True
+    assert result["changed"] is True
+    assert result["msg"].endswith("Codex replaced the existing marketplace other.")
+    assert command.call_count == 2
 
 
 def test_unlisted_marketplace_with_different_manifest_name_is_kept(run_module):
