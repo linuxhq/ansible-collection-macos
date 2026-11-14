@@ -94,10 +94,17 @@ def resource(request):
     )
 
 
+LIST_ARGS = {
+    codex_marketplace: ["plugin", "marketplace", "list", "--json"],
+    codex_plugin: ["plugin", "list", "--marketplace", "example", "--json"],
+}
+
+NOT_CONFIGURED = (1, "", "Error: marketplace `example` is not configured or installed\n")
+
+
 @pytest.mark.parametrize(
     "state,exists,check_mode,changed",
     [
-        ("absent", False, False, False),
         ("present", True, True, False),
         ("absent", False, True, False),
         ("present", False, True, True),
@@ -105,7 +112,7 @@ def resource(request):
     ],
 )
 def test_idempotency_and_check_mode(run_module, resource, state, exists, check_mode, changed):
-    plugin, params, key, result_key, item, _expected, prefix, *_details = resource
+    plugin, params, key, result_key, item, *_details = resource
     result, command, _lookup = run_module(
         plugin, {**params, "state": state}, [{key: [item] if exists else []}], check_mode
     )
@@ -113,7 +120,73 @@ def test_idempotency_and_check_mode(run_module, resource, state, exists, check_m
     assert result.get("failed") is None
     assert (result[result_key] is not None) is exists
     assert command.call_count == 1
-    assert command.call_args.args[0] == ["/mock/bin/tool", *prefix, "list", "--json"]
+    assert command.call_args.args[0] == ["/mock/bin/tool", *LIST_ARGS[plugin]]
+
+
+def test_absent_plugin_is_unchanged(run_module):
+    result, command, _lookup = run_module(
+        codex_plugin, {"name": "editor", "marketplace": "example", "state": "absent"}, [{"installed": []}]
+    )
+    assert result == {"changed": False, "plugin": None}
+    assert command.call_count == 1
+
+
+def test_plugin_list_is_scoped_to_marketplace(run_module):
+    result, command, _lookup = run_module(
+        codex_plugin, {"name": "editor", "marketplace": "openai-curated"}, [{"installed": []}], check_mode=True
+    )
+    assert result["changed"] is True
+    assert command.call_args.args[0] == [
+        "/mock/bin/tool",
+        "plugin",
+        "list",
+        "--marketplace",
+        "openai-curated",
+        "--json",
+    ]
+
+
+def test_absent_marketplace_removes_without_listing(run_module):
+    result, command, _lookup = run_module(codex_marketplace, {"name": "example", "state": "absent"}, [removed()])
+    assert result == {"changed": True, "marketplace": None}
+    command.assert_called_once()
+    assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "remove", "example", "--json"]
+
+
+def test_absent_marketplace_not_configured_is_unchanged(run_module):
+    result, command, _lookup = run_module(
+        codex_marketplace, {"name": "example", "state": "absent"}, [NOT_CONFIGURED, {"marketplaces": []}]
+    )
+    assert result == {"changed": False, "marketplace": None}
+    assert command.call_count == 2
+    assert command.call_args.args[0] == ["/mock/bin/tool", *LIST_ARGS[codex_marketplace]]
+
+
+def test_absent_marketplace_without_source_fails(run_module):
+    result, command, _lookup = run_module(
+        codex_marketplace,
+        {"name": "example", "state": "absent"},
+        [NOT_CONFIGURED, {"marketplaces": [{"name": "example", "root": "/home/test"}]}],
+    )
+    assert result == {
+        "failed": True,
+        "msg": "Codex marketplace example has no configured source and cannot be removed.",
+    }
+    assert command.call_count == 2
+
+
+@pytest.mark.parametrize(
+    "response,message",
+    [
+        ((1, "", "Error: permission denied\n"), "Unable to remove Codex marketplace example: Error: permission denied"),
+        ({}, "Unexpected codex output while remove Codex marketplace example."),
+        (removed("other"), "Unexpected codex output while remove Codex marketplace example."),
+    ],
+)
+def test_absent_marketplace_remove_failure(run_module, response, message):
+    result, command, _lookup = run_module(codex_marketplace, {"name": "example", "state": "absent"}, [response])
+    assert result == {"failed": True, "msg": message}
+    command.assert_called_once()
 
 
 def test_existing_plugin_is_unchanged(run_module):
@@ -201,36 +274,36 @@ def test_unexpected_marketplace_add_result(run_module, response):
     assert command.call_count == 2
 
 
-@pytest.mark.parametrize("state", ["present", "absent"])
-def test_mutation_refreshes_state(run_module, resource, state):
-    plugin, params, key, result_key, item, expected, prefix, add_arg, remove_arg, add_result = resource
-    creating = state == "present"
-    responses = [
-        {key: [] if creating else [item]},
-        add_result if creating else {},
-        {key: [item] if creating else []},
-    ]
-    result, command, _lookup = run_module(plugin, {**params, "state": state}, responses)
-    assert result["changed"] is True
+def test_mutation_refreshes_state(run_module, resource):
+    plugin, params, key, result_key, item, expected, prefix, add_arg, _remove_arg, add_result = resource
+    responses = [{key: []}, add_result, {key: [item]}]
+    result, command, _lookup = run_module(plugin, {**params, "state": "present"}, responses)
+    assert result == {"changed": True, result_key: expected}
     assert command.call_count == 3
-    assert command.call_args_list[1].args[0] == [
-        "/mock/bin/tool",
-        *prefix,
-        "add" if creating else "remove",
-        add_arg if creating else remove_arg,
-        "--json",
-    ]
-    assert result[result_key] == (expected if creating else None)
+    assert command.call_args_list[1].args[0] == ["/mock/bin/tool", *prefix, "add", add_arg, "--json"]
 
 
-@pytest.mark.parametrize("state", ["present", "absent"])
-def test_failed_postcondition(run_module, resource, state):
-    plugin, params, key, _result_key, item, _expected, _prefix, _add, _remove, add_result = resource
-    unchanged = [] if state == "present" else [item]
-    responses = [{key: unchanged}, add_result if state == "present" else {}, {key: unchanged}]
-    result, command, _lookup = run_module(plugin, {**params, "state": state}, responses)
+def test_plugin_removal_refreshes_state(run_module):
+    params = {"name": "editor", "marketplace": "example", "state": "absent"}
+    result, command, _lookup = run_module(codex_plugin, params, [{"installed": [PLUGIN]}, {}, {"installed": []}])
+    assert result == {"changed": True, "plugin": None}
+    assert command.call_count == 3
+    assert command.call_args_list[1].args[0] == ["/mock/bin/tool", "plugin", "remove", "editor@example", "--json"]
+
+
+def test_failed_postcondition(run_module, resource):
+    plugin, params, key, _result_key, _item, _expected, _prefix, _add, _remove, add_result = resource
+    result, command, _lookup = run_module(plugin, {**params, "state": "present"}, [{key: []}, add_result, {key: []}])
     assert result["failed"] is True
-    assert ("not found" if state == "present" else "remains") in result["msg"]
+    assert "not found" in result["msg"]
+    assert command.call_count == 3
+
+
+def test_plugin_removal_postcondition(run_module):
+    params = {"name": "editor", "marketplace": "example", "state": "absent"}
+    result, command, _lookup = run_module(codex_plugin, params, [{"installed": [PLUGIN]}, {}, {"installed": [PLUGIN]}])
+    assert result["failed"] is True
+    assert "remains" in result["msg"]
     assert command.call_count == 3
 
 

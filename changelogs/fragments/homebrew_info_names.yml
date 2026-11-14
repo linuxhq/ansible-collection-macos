@@ -1,0 +1,6 @@
+---
+bugfixes:
+  - homebrew_info, homebrew_cask_info, and homebrew_services_info - pass O(name) values to brew after C(--) so a name
+    that begins with C(-), such as C(--installed), is treated as an unknown name instead of a brew option.
+  - homebrew_info, homebrew_cask_info, and homebrew_services_info - return each formula, cask, or service once when
+    O(name) repeats a name or names it more than once, such as by its fully qualified name.

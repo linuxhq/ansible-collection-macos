@@ -11,10 +11,16 @@ description:
   - Add and remove Codex plugin marketplace sources.
   - Marketplace state is managed through the Codex CLI.
   - With O(state=present), an existing marketplace is passed to C(codex plugin
-    marketplace add) again, and Codex decides whether O(source) matches the
-    configured source.
-  - The source of an existing marketplace cannot be changed in place; remove
-    the marketplace with O(state=absent), then add it from the new source.
+    marketplace add) again, and Codex decides whether O(source), O(ref), and
+    O(sparse) match the configured marketplace.
+  - The O(source), O(ref), or O(sparse) paths of an existing marketplace cannot
+    be changed in place; remove the marketplace with O(state=absent), then add
+    it again with the new values.
+  - With O(state=absent), the marketplace is removed with C(codex plugin
+    marketplace remove) without listing marketplaces first, so a configured
+    marketplace that fails to load can still be removed.
+  - A marketplace without a configured source, such as a built-in or
+    discovered marketplace, cannot be removed with O(state=absent).
 author:
   - Taylor Kimball (@tkimball83)
 attributes:
@@ -52,6 +58,7 @@ options:
     description:
       - Git reference to fetch when adding a Git marketplace.
       - Used only when O(state=present).
+      - Must match the configured reference of an existing marketplace.
     type: str
   source:
     description:
@@ -63,6 +70,8 @@ options:
     description:
       - Sparse checkout paths for a Git marketplace.
       - Used only when O(state=present).
+      - Must match the configured sparse checkout paths of an existing
+        marketplace.
     elements: str
     type: list
   state:
@@ -179,12 +188,13 @@ def add_marketplace(module):
     return result
 
 
-def remove_marketplace(module, name):
-    codex_run_json(
-        module,
-        ["plugin", "marketplace", "remove", name, "--json"],
-        f"remove Codex marketplace {name}",
-    )
+def remove_marketplace(module, name, missing=None):
+    operation = f"remove Codex marketplace {name}"
+    result = codex_run_json(module, ["plugin", "marketplace", "remove", name, "--json"], operation, missing)
+    if result is not None and result.get("marketplaceName") != name:
+        module.fail_json(msg=f"Unexpected codex output while {operation}.")
+
+    return result
 
 
 def ensure_present(module, marketplace):
@@ -214,19 +224,20 @@ def ensure_present(module, marketplace):
     return not result["alreadyAdded"], marketplace
 
 
-def ensure_absent(module, marketplace):
-    if marketplace is None:
-        return False, None
-
+def ensure_absent(module):
     if module.check_mode:
-        return True, marketplace
+        marketplace = find_marketplace(module)
+        return marketplace is not None, marketplace
 
-    remove_marketplace(module, module.params["name"])
-    marketplace = find_marketplace(module)
-    if marketplace is not None:
-        module.fail_json(msg=f"Codex marketplace {module.params['name']} remains after removing it.")
+    # Remove directly: listing fails while any configured marketplace is broken.
+    name = module.params["name"]
+    if remove_marketplace(module, name, missing=f"marketplace `{name}` is not configured or installed") is not None:
+        return True, None
 
-    return True, None
+    if find_marketplace(module) is not None:
+        module.fail_json(msg=f"Codex marketplace {name} has no configured source and cannot be removed.")
+
+    return False, None
 
 
 def main():
@@ -258,11 +269,10 @@ def main():
             msg="Codex is not installed; marketplace state cannot be determined in check mode.",
         )
 
-    marketplace = find_marketplace(module)
     if module.params["state"] == "present":
-        changed, marketplace = ensure_present(module, marketplace)
+        changed, marketplace = ensure_present(module, find_marketplace(module))
     else:
-        changed, marketplace = ensure_absent(module, marketplace)
+        changed, marketplace = ensure_absent(module)
 
     module.exit_json(changed=changed, marketplace=codex_result(marketplace))
 

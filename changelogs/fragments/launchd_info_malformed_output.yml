@@ -1,0 +1,6 @@
+---
+bugfixes:
+  - launchd_info - fail with the unexpected C(launchctl list) line instead of a traceback when its PID or status column
+    is not an integer.
+  - launchd_info - fall back to standard output in the failure message when C(launchctl list) fails without error
+    output.
