@@ -43,14 +43,20 @@
       linuxhq.macos.launchd_info:
         name:
           - homebrew.mxcl.privoxy
+          - sh.brew.privoxy
       register: __privoxy_absent_launchd
 
     - name: Ensure privoxy launch agent status is gathered after removal
       tags:
         - privoxy
       ansible.builtin.stat:
-        path: "{{ ansible_facts.env.HOME }}/Library/LaunchAgents/homebrew.mxcl.privoxy.plist"
-      register: __privoxy_absent_launch_agent
+        path: "{{ ansible_facts.env.HOME }}/Library/LaunchAgents/{{ __privoxy_launch_agent }}.plist"
+      loop:
+        - homebrew.mxcl.privoxy
+        - sh.brew.privoxy
+      loop_control:
+        loop_var: __privoxy_launch_agent
+      register: __privoxy_absent_launch_agents
 
     - name: Ensure privoxy configuration file and service are absent
       tags:
@@ -59,5 +65,5 @@
         that:
           - not __privoxy_absent_stat.stat.exists
           - __privoxy_absent_launchd.services | length == 0
-          - not __privoxy_absent_launch_agent.stat.exists
+          - __privoxy_absent_launch_agents.results | selectattr('stat.exists') | list | length == 0
 ...
