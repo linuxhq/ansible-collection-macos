@@ -266,6 +266,26 @@ def test_new_marketplace_with_different_manifest_name_is_removed(run_module):
     assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "remove", "other", "--json"]
 
 
+def test_replaced_marketplace_with_different_manifest_name_is_kept(run_module):
+    listed = {
+        **MARKETPLACE,
+        "name": "other",
+        "marketplaceSource": {"sourceType": "local", "source": "/home/test/other"},
+    }
+    result, command, _lookup = run_module(
+        codex_marketplace,
+        {"name": "example", "source": SOURCE},
+        [{"marketplaces": [listed]}, added("other")],
+    )
+    assert result["failed"] is True
+    assert result["changed"] is True
+    assert result["msg"] == (
+        f"Codex marketplace source {SOURCE} declares marketplace other, not example. "
+        "Codex replaced the existing marketplace other."
+    )
+    assert command.call_count == 2
+
+
 def test_existing_marketplace_with_different_manifest_name_is_kept(run_module):
     result, command, _lookup = run_module(
         codex_marketplace,
