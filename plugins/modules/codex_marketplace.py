@@ -32,7 +32,8 @@ attributes:
       because check mode cannot verify that O(source) matches its configured
       source. If Codex is not installed or O(config_dir) does not exist,
       reports a change for O(state=present) and no change for O(state=absent)
-      without querying marketplace state.
+      without querying marketplace state. Check mode cannot see marketplaces
+      while Codex plugins are disabled (C(features.plugins)).
     support: full
   diff_mode:
     description: Diff mode is not supported.
@@ -51,8 +52,9 @@ options:
   name:
     description:
       - Marketplace name declared by its marketplace manifest.
-      - When O(source) declares a different name, a marketplace this module just
-        added is removed again and the module fails.
+      - When O(source) declares a different name, the module fails. A
+        marketplace this module just added is removed again, while an existing
+        marketplace with the declared name is kept.
       - A marketplace without a configured source, such as a built-in or
         discovered marketplace, cannot be managed with O(state=present).
     required: true
@@ -166,11 +168,12 @@ def marketplaces(module):
     )
 
 
+def select_marketplace(listed, name):
+    return next((marketplace for marketplace in listed if marketplace.get("name") == name), None)
+
+
 def find_marketplace(module):
-    return next(
-        (marketplace for marketplace in marketplaces(module) if marketplace.get("name") == module.params["name"]),
-        None,
-    )
+    return select_marketplace(marketplaces(module), module.params["name"])
 
 
 def add_marketplace(module):
@@ -202,9 +205,10 @@ def remove_marketplace(module, name, missing=None):
     return result
 
 
-def ensure_present(module, marketplace):
+def ensure_present(module, listed):
     name = module.params["name"]
     source = module.params["source"]
+    marketplace = select_marketplace(listed, name)
     if marketplace is not None and not marketplace.get("marketplaceSource"):
         module.fail_json(msg=f"Codex marketplace {name} has no configured source and cannot be managed from {source}.")
 
@@ -214,10 +218,14 @@ def ensure_present(module, marketplace):
     result = add_marketplace(module)
     added_name = result["marketplaceName"]
     if added_name != name:
+        msg = f"Codex marketplace source {source} declares marketplace {added_name}, not {name}."
         if not result["alreadyAdded"]:
+            if select_marketplace(listed, added_name) is not None:
+                module.fail_json(changed=True, msg=f"{msg} Codex replaced the existing marketplace {added_name}.")
+
             remove_marketplace(module, added_name)
 
-        module.fail_json(msg=f"Codex marketplace source {source} declares marketplace {added_name}, not {name}.")
+        module.fail_json(msg=msg)
 
     if result["alreadyAdded"] and marketplace is not None:
         return False, marketplace
@@ -282,7 +290,7 @@ def main():
         )
 
     if module.params["state"] == "present":
-        changed, marketplace = ensure_present(module, find_marketplace(module))
+        changed, marketplace = ensure_present(module, marketplaces(module))
     else:
         changed, marketplace = ensure_absent(module)
 
