@@ -165,12 +165,24 @@ def test_services_duplicates_are_removed(run_module, tmp_path):
     [
         "Error: Cask 'homebrew/cask/missing' is unavailable.\nThis command requires the tap homebrew/cask.\n",
         'Error: No available formula or cask with the name "missing".\n',
+        "Error: Cask 'missing' is unavailable: '/opt/homebrew/Library/Taps/u/homebrew-t/Casks/x.rb' does not exist.\n",
     ],
 )
 def test_unavailable_variants_are_omitted(run_module, stderr):
     result, command, _lookup = run_module(homebrew_cask_info, {"name": ["missing"]}, [(1, "", stderr)] * 2)
     assert result == {"changed": False, "casks": []}
     assert command.call_count == 2
+
+
+@pytest.mark.parametrize("reason", ["is not readable", "is not a file"])
+def test_unloadable_cask_path_fails(run_module, reason):
+    stderr = (
+        f"Error: Cask 'one' is unavailable: '/opt/homebrew/Library/Taps/user/homebrew-tap/Casks/one.rb' {reason}.\n"
+    )
+    result, command, _lookup = run_module(homebrew_cask_info, {"name": ["one"]}, [(1, "", stderr)])
+    assert result["failed"] is True
+    assert reason in result["msg"]
+    assert command.call_count == 1
 
 
 @pytest.mark.parametrize("plugin", [homebrew_info, homebrew_cask_info, homebrew_services_info])

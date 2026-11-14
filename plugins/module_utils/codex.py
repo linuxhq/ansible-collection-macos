@@ -85,8 +85,11 @@ def codex_run_json(module, args, operation, missing=None):
     return data
 
 
-def codex_list(module, args, key, operation):
-    data = codex_run_json(module, args, operation)
+def codex_list(module, args, key, operation, missing=None):
+    data = codex_run_json(module, args, operation, missing)
+    if data is None:
+        return None
+
     items = data.get(key)
 
     if not isinstance(items, list) or not all(isinstance(item, dict) for item in items):

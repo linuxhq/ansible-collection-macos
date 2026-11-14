@@ -103,6 +103,8 @@ LIST_ARGS = {
 
 NOT_CONFIGURED = (1, "", "Error: marketplace `example` is not configured or installed\n")
 
+DISCOVERED = {"name": "example", "root": "/home/test/.agents/plugins"}
+
 
 @pytest.mark.parametrize(
     "state,exists,check_mode,changed",
@@ -155,40 +157,20 @@ def test_absent_marketplace_removes_without_listing(run_module):
     assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "remove", "example", "--json"]
 
 
-def test_absent_marketplace_not_configured_is_unchanged(run_module):
+@pytest.mark.parametrize(
+    "check_mode,responses",
+    [
+        (False, [NOT_CONFIGURED]),
+        (True, [{"marketplaces": []}]),
+        (True, [{"marketplaces": [DISCOVERED]}]),
+    ],
+)
+def test_absent_marketplace_not_configured_or_without_source_is_unchanged(run_module, check_mode, responses):
     result, command, _lookup = run_module(
-        codex_marketplace, {"name": "example", "state": "absent"}, [NOT_CONFIGURED, {"marketplaces": []}]
+        codex_marketplace, {"name": "example", "state": "absent"}, responses, check_mode
     )
     assert result == {"changed": False, "marketplace": None}
-    assert command.call_count == 2
-    assert command.call_args.args[0] == ["/mock/bin/tool", *LIST_ARGS[codex_marketplace]]
-
-
-def test_absent_marketplace_without_source_fails(run_module):
-    result, command, _lookup = run_module(
-        codex_marketplace,
-        {"name": "example", "state": "absent"},
-        [NOT_CONFIGURED, {"marketplaces": [{"name": "example", "root": "/home/test"}]}],
-    )
-    assert result == {
-        "failed": True,
-        "msg": "Codex marketplace example has no configured source and cannot be removed.",
-    }
-    assert command.call_count == 2
-
-
-def test_absent_marketplace_without_source_fails_in_check_mode(run_module):
-    result, command, _lookup = run_module(
-        codex_marketplace,
-        {"name": "personal", "state": "absent"},
-        [{"marketplaces": [{"name": "personal", "root": "/home/test"}]}],
-        check_mode=True,
-    )
-    assert result == {
-        "failed": True,
-        "msg": "Codex marketplace personal has no configured source and cannot be removed.",
-    }
-    assert command.call_count == 1
+    command.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -222,9 +204,6 @@ def test_existing_marketplace_with_same_source_is_unchanged(run_module):
     assert result == {"changed": False, "marketplace": MARKETPLACE_RESULT}
     assert command.call_count == 2
     assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "add", SOURCE, "--json"]
-
-
-DISCOVERED = {"name": "example", "root": "/home/test/.agents/plugins"}
 
 
 @pytest.mark.parametrize(
@@ -412,8 +391,16 @@ def test_failed_postcondition(run_module, resource):
     assert command.call_count == 3
 
 
+BROKEN_MARKETPLACE = (
+    1,
+    "",
+    "Error: failed to load configured marketplace snapshot(s):\n- `example` at /missing: no supported manifest\n",
+)
+
+
+@pytest.mark.parametrize("listed", [{"installed": []}, BROKEN_MARKETPLACE])
 @pytest.mark.parametrize("check_mode", [False, True])
-def test_unlisted_plugin_with_cache_is_removed(run_module, codex_home, check_mode):
+def test_unlisted_plugin_with_cache_is_removed(run_module, codex_home, check_mode, listed):
     cache = codex_home / "plugins" / "cache" / "example" / "editor"
     (cache / "1.0.0").mkdir(parents=True)
 
@@ -422,7 +409,7 @@ def test_unlisted_plugin_with_cache_is_removed(run_module, codex_home, check_mod
         return {}
 
     params = {"name": "editor", "marketplace": "example", "state": "absent"}
-    result, command, _lookup = run_module(codex_plugin, params, [{"installed": []}, remove], check_mode)
+    result, command, _lookup = run_module(codex_plugin, params, [listed, remove], check_mode)
     assert result == {"changed": True, "plugin": None}
     assert cache.is_dir() is check_mode
     if check_mode:
@@ -441,11 +428,21 @@ def test_unlisted_plugin_cache_postcondition(run_module, codex_home):
     assert command.call_args_list[1].args[0] == ["/mock/bin/tool", "plugin", "remove", "editor@example", "--json"]
 
 
-def test_unlisted_plugin_without_cache_is_unchanged(run_module, codex_home):
+@pytest.mark.parametrize("listed", [{"installed": []}, BROKEN_MARKETPLACE])
+@pytest.mark.parametrize("check_mode", [False, True])
+def test_unlisted_plugin_without_cache_is_unchanged(run_module, codex_home, check_mode, listed):
     (codex_home / "plugins" / "cache" / "example" / "other").mkdir(parents=True)
     params = {"name": "editor", "marketplace": "example", "state": "absent"}
-    result, command, _lookup = run_module(codex_plugin, params, [{"installed": []}])
+    result, command, _lookup = run_module(codex_plugin, params, [listed], check_mode)
     assert result == {"changed": False, "plugin": None}
+    assert command.call_count == 1
+
+
+def test_present_plugin_in_broken_marketplace_fails(run_module, codex_home):
+    params = {"name": "editor", "marketplace": "example", "state": "present"}
+    result, command, _lookup = run_module(codex_plugin, params, [BROKEN_MARKETPLACE])
+    assert result["failed"] is True
+    assert result["msg"].startswith("Unable to gather Codex plugin information for marketplace example: Error: failed")
     assert command.call_count == 1
 
 
