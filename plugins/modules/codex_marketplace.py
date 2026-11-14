@@ -87,7 +87,7 @@ options:
     default: present
     type: str
 requirements:
-  - codex
+  - codex >= 0.139.0
 """
 
 EXAMPLES = r"""
@@ -233,12 +233,15 @@ def ensure_present(module, marketplace):
 
 
 def ensure_absent(module):
+    name = module.params["name"]
     if module.check_mode:
         marketplace = find_marketplace(module)
+        if marketplace is not None and not marketplace.get("marketplaceSource"):
+            module.fail_json(msg=f"Codex marketplace {name} has no configured source and cannot be removed.")
+
         return marketplace is not None, marketplace
 
     # Remove directly: listing fails while any configured marketplace is broken.
-    name = module.params["name"]
     if remove_marketplace(module, name, missing=f"marketplace `{name}` is not configured or installed") is not None:
         return True, None
 

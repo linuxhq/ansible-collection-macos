@@ -14,6 +14,13 @@ class ModuleResult(Exception):
         super().__init__(result.get("msg", "module exited"))
 
 
+@pytest.fixture(autouse=True)
+def codex_home(monkeypatch, tmp_path):
+    home = tmp_path / "codex-home"
+    monkeypatch.setenv("CODEX_HOME", str(home))
+    return home
+
+
 @pytest.fixture
 def run_module(monkeypatch):
     def run(plugin, params=None, responses=(), check_mode=False, executable="/mock/bin/tool"):
@@ -28,9 +35,16 @@ def run_module(monkeypatch):
             result["failed"] = True
             raise ModuleResult(result)
 
-        command = Mock(
-            side_effect=[(0, json.dumps(value), "") if not isinstance(value, tuple) else value for value in responses]
-        )
+        pending = list(responses)
+
+        def respond(args, **kwargs):
+            value = pending.pop(0)
+            if callable(value):
+                value = value(args)
+
+            return value if isinstance(value, tuple) else (0, json.dumps(value), "")
+
+        command = Mock(side_effect=respond)
         lookup = Mock(return_value=executable)
         monkeypatch.setattr(basic.AnsibleModule, "exit_json", finish)
         monkeypatch.setattr(basic.AnsibleModule, "fail_json", fail)

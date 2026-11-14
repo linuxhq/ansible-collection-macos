@@ -98,3 +98,23 @@ def test_result_conversion_is_recursive_and_does_not_mutate_input():
     assert codex.codex_result(original) == {"plugin_id": "editor@example", "nested_data": {"source_type": "git"}}
     assert original == {"pluginId": "editor@example", "nestedData": {"sourceType": "git"}}
     assert codex.codex_result(None) is None
+
+
+@pytest.mark.parametrize(
+    "config_dir,environment,expected",
+    [
+        ("~/custom", "/env/codex", "{home}/custom"),
+        (None, "/env/codex", "/env/codex"),
+        (None, "", "{home}/.codex"),
+        (None, None, "{home}/.codex"),
+    ],
+)
+def test_codex_home_resolution(monkeypatch, tmp_path, config_dir, environment, expected):
+    monkeypatch.setenv("HOME", str(tmp_path))
+    if environment is None:
+        monkeypatch.delenv("CODEX_HOME", raising=False)
+    else:
+        monkeypatch.setenv("CODEX_HOME", environment)
+
+    module = Mock(params={"config_dir": config_dir})
+    assert codex.codex_home(module) == expected.format(home=tmp_path)
