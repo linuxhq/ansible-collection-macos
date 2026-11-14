@@ -1,0 +1,8 @@
+---
+bugfixes:
+  - codex_marketplace and codex_plugin - in check mode, predict the change without running Codex when O(config_dir) does
+    not exist yet, instead of failing because Codex cannot resolve E(CODEX_HOME).
+  - codex_marketplace - name disabled Codex plugins (C(features.plugins)) as the likely cause when an added marketplace
+    is not listed by Codex.
+  - codex_marketplace - document that Codex replaces an existing local marketplace in place with a Git O(source) whose
+    manifest declares the same name.

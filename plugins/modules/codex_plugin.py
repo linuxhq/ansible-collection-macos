@@ -15,9 +15,9 @@ author:
 attributes:
   check_mode:
     description: Can run in check mode and return changed status prediction
-      without modifying the target. If Codex is not installed, reports a change
-      for O(state=present) and no change for O(state=absent) without querying
-      plugin state.
+      without modifying the target. If Codex is not installed or O(config_dir)
+      does not exist, reports a change for O(state=present) and no change for
+      O(state=absent) without querying plugin state.
     support: full
   diff_mode:
     description: Diff mode is not supported.
@@ -75,7 +75,8 @@ plugin:
   description:
     - Codex plugin after the requested state is applied.
     - Returns V(null) when the plugin is absent.
-    - Also returns V(null) in check mode when Codex is not installed.
+    - Also returns V(null) in check mode when Codex is not installed or
+      O(config_dir) does not exist.
   returned: always
   type: dict
   contains:
@@ -174,10 +175,10 @@ from ansible.module_utils.basic import AnsibleModule
 
 from ansible_collections.linuxhq.macos.plugins.module_utils.codex import (
     codex_argument_spec,
-    codex_bin,
     codex_list,
     codex_result,
     codex_run_json,
+    codex_unavailable,
 )
 
 
@@ -261,10 +262,11 @@ def main():
         supports_check_mode=True,
     )
 
-    if module.check_mode and codex_bin(module, required=False) is None:
+    unavailable = module.check_mode and codex_unavailable(module)
+    if unavailable:
         module.exit_json(
             changed=module.params["state"] == "present",
-            msg="Codex is not installed; plugin state cannot be determined in check mode.",
+            msg=f"{unavailable}; plugin state cannot be determined in check mode.",
             plugin=None,
         )
 
