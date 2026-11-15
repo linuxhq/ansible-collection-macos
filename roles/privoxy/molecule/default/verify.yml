@@ -94,4 +94,55 @@
           - not __privoxy_absent_stat.stat.exists
           - __privoxy_absent_launchd.services | length == 0
           - __privoxy_absent_launch_agents.results | selectattr('stat.exists') | list | length == 0
+
+    - name: Ensure privoxy package is installed without starting its service
+      tags:
+        - privoxy
+      community.general.homebrew:
+        name: privoxy
+        state: present
+        update_homebrew: false
+        upgrade_all: false
+
+    - name: Ensure privoxy service information is gathered before the unstarted removal
+      tags:
+        - privoxy
+      linuxhq.macos.homebrew_services_info:
+        name: privoxy
+      register: __privoxy_unstarted_services
+
+    - name: Ensure privoxy service is listed but not registered, loaded or running
+      tags:
+        - privoxy
+      ansible.builtin.assert:
+        that:
+          - __privoxy_unstarted_services.services | length == 1
+          - not __privoxy_unstarted_services.services[0].registered
+          - not __privoxy_unstarted_services.services[0].loaded
+          - not __privoxy_unstarted_services.services[0].running
+
+    - name: Ensure privoxy role is included with an absent state for an unstarted service
+      tags:
+        - privoxy
+      ansible.builtin.include_role:
+        name: privoxy
+      vars:
+        privoxy_state: absent
+
+    - name: Ensure privoxy package information is gathered after the unstarted removal
+      tags:
+        - privoxy
+      linuxhq.macos.homebrew_info:
+        name: privoxy
+      register: __privoxy_unstarted_formulae
+
+    - name: Ensure privoxy unstarted removal skipped the service stop and removed the package
+      tags:
+        - privoxy
+      ansible.builtin.assert:
+        that:
+          - __privoxy_stop_result is skipped
+          - __privoxy_stop_result is not changed
+          - __privoxy_unstarted_formulae.formulae | length == 1
+          - __privoxy_unstarted_formulae.formulae[0].installed | length == 0
 ...

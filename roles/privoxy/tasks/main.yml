@@ -15,6 +15,7 @@
   register: __privoxy_services
 
 # community.general.homebrew_services only stops a started service, leaving a crashed one registered.
+# An installed but never-started service still lists its keg plist, so stop only a service launchd knows.
 - name: Ensure privoxy service is stopped
   tags:
     - privoxy
@@ -27,9 +28,11 @@
     removes: "{{ __privoxy_services.services[0].file }}"
   environment:
     PATH: "/usr/local/bin:/opt/homebrew/bin:{{ ansible_facts.env.PATH }}"
+  register: __privoxy_stop_result
   when:
     - privoxy_state == 'absent'
     - __privoxy_services.services | length > 0
+    - __privoxy_services.services[0].registered or __privoxy_services.services[0].loaded or __privoxy_services.services[0].running
 
 - name: Ensure privoxy package is managed
   tags:
