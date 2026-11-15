@@ -14,12 +14,17 @@
     name: privoxy
   register: __privoxy_services
 
+# community.general.homebrew_services only stops a started service, leaving a crashed one registered.
 - name: Ensure privoxy service is stopped
   tags:
     - privoxy
-  community.general.homebrew_services:
-    name: privoxy
-    state: absent
+  ansible.builtin.command:
+    argv:
+      - /opt/homebrew/bin/brew
+      - services
+      - stop
+      - privoxy
+    removes: "{{ __privoxy_services.services[0].file }}"
   when:
     - privoxy_state == 'absent'
     - __privoxy_services.services | length > 0

@@ -1,0 +1,7 @@
+---
+bugfixes:
+  - codex_marketplace - in check mode, predict removal with O(state=absent) when the installed marketplace directory
+    C(.tmp/marketplaces/<name>) exists in the Codex home directory, matching the real run, which removes it even when
+    no marketplace is configured.
+  - privoxy role - stop a registered privoxy service with C(brew services stop) when C(privoxy_state=absent), so a
+    service that is not started, such as one that crashed, no longer leaves its launch agent and launchd job behind.
