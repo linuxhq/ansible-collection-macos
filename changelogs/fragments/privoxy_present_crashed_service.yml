@@ -1,5 +1,0 @@
----
-bugfixes:
-  - privoxy role - with C(privoxy_state=present), restart a privoxy service that launchd has loaded but that is not
-    running, such as one that crashed, instead of failing because C(brew services start) cannot bootstrap the loaded
-    launch agent.

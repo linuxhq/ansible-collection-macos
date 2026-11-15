@@ -1,9 +1,0 @@
----
-bugfixes:
-  - codex_marketplace - fail with the declared name when O(source) declares a marketplace name other than O(name),
-    instead of failing only because the marketplace is not found after adding it. A marketplace that the module newly
-    added under the declared name is removed again so the next run converges; an existing marketplace with that name,
-    which Codex replaces in place, or a marketplace that Codex does not list after adding it, is kept, and the failure
-    reports a change.
-  - codex_marketplace - when Codex adds a marketplace but does not list it, report the change and name disabled Codex
-    plugins (C(features.plugins)) as the likely cause.
