@@ -236,6 +236,32 @@ def test_absent_configured_marketplace_beside_discovered_marketplace_in_check_mo
     assert command.call_count == 1
 
 
+def unloadable(*names):
+    issues = "".join(
+        f"- `{name}` at /missing/{name}: marketplace root does not contain a supported manifest\n" for name in names
+    )
+    return 1, "", f"Error: failed to load marketplace(s):\n{issues}"
+
+
+@pytest.mark.parametrize("names", [["example"], ["other", "example"]])
+def test_absent_unloadable_marketplace_in_check_mode_predicts_removal(run_module, names):
+    result, command, _lookup = run_module(
+        codex_marketplace, {"name": "example", "state": "absent"}, [unloadable(*names)], check_mode=True
+    )
+    assert result == {"changed": True, "marketplace": None}
+    command.assert_called_once()
+
+
+@pytest.mark.parametrize("names", [["other"], ["example2"]])
+def test_absent_marketplace_in_check_mode_fails_when_another_is_unloadable(run_module, names):
+    result, command, _lookup = run_module(
+        codex_marketplace, {"name": "example", "state": "absent"}, [unloadable(*names)], check_mode=True
+    )
+    assert result["failed"] is True
+    assert result["msg"].startswith("Unable to gather Codex marketplace information: Error: failed to load")
+    command.assert_called_once()
+
+
 def test_existing_marketplace_with_different_source_fails(run_module):
     stderr = (
         "Error: marketplace 'example' is already added from a different source; remove it before adding this source\n"
