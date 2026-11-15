@@ -3,10 +3,12 @@
 
 import json
 import os
+import re
 
 from ansible.module_utils.common.dict_transformations import camel_dict_to_snake_dict
 
 CODEX_PATH_DEFAULT = "/usr/local/bin:/opt/homebrew/bin"
+CODEX_VERSION_MINIMUM = "0.153.0"
 
 
 def codex_argument_spec():
@@ -58,15 +60,36 @@ def codex_unavailable(module):
     return None
 
 
-def codex_run_json(module, args, operation, missing=None):
+def codex_run(module, args):
     environment = None
     if module.params["config_dir"]:
         environment = {
             "CODEX_HOME": os.path.expanduser(module.params["config_dir"]),
         }
 
-    command = [codex_bin(module)] + args
-    rc, stdout, stderr = module.run_command(command, environ_update=environment)
+    return module.run_command([codex_bin(module)] + args, environ_update=environment)
+
+
+def codex_version_check(module):
+    rc, stdout, stderr = codex_run(module, ["--version"])
+    if rc != 0:
+        detail = stderr.strip() or stdout.strip()
+        module.fail_json(msg=f"Unable to determine Codex version: {detail}")
+
+    output = stdout.strip()
+    match = re.fullmatch(r"codex-cli ((\d+)\.(\d+)\.(\d+)(-\S+)?)", output)
+    if match is None:
+        module.fail_json(msg=f"Unable to parse Codex version from codex --version output: {output}")
+
+    found = tuple(int(part) for part in match.group(2, 3, 4))
+    minimum = tuple(int(part) for part in CODEX_VERSION_MINIMUM.split("."))
+    # A pre-release precedes its release.
+    if found < minimum or (found == minimum and match.group(5)):
+        module.fail_json(msg=f"Codex {match.group(1)} is installed, but codex >= {CODEX_VERSION_MINIMUM} is required.")
+
+
+def codex_run_json(module, args, operation, missing=None):
+    rc, stdout, stderr = codex_run(module, args)
     if rc != 0:
         if missing is not None and missing in stderr:
             return None

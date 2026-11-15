@@ -24,7 +24,9 @@ def codex_home(monkeypatch, tmp_path):
 
 @pytest.fixture
 def run_module(monkeypatch):
-    def run(plugin, params=None, responses=(), check_mode=False, executable="/mock/bin/tool"):
+    def run(
+        plugin, params=None, responses=(), check_mode=False, executable="/mock/bin/tool", version="codex-cli 0.153.0\n"
+    ):
         arguments = dict(params or {})
         arguments["_ansible_check_mode"] = check_mode
         monkeypatch.setattr(basic, "_load_params", lambda: arguments)
@@ -39,6 +41,9 @@ def run_module(monkeypatch):
         pending = list(responses)
 
         def respond(args, **kwargs):
+            if args[1:] == ["--version"]:
+                return version if isinstance(version, tuple) else (0, version, "")
+
             value = pending.pop(0)
             if callable(value):
                 value = value(args)

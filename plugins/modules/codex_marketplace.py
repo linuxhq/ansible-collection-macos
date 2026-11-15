@@ -27,6 +27,8 @@ description:
   - With O(state=absent), reports no change without running Codex when the
     Codex home directory (O(config_dir), else E(CODEX_HOME), else
     C(~/.codex)) does not exist.
+  - Fails before querying or changing marketplace state when C(codex
+    --version) reports a version older than 0.153.0.
 author:
   - Taylor Kimball (@tkimball83)
 attributes:
@@ -172,6 +174,7 @@ from ansible_collections.linuxhq.macos.plugins.module_utils.codex import (
     codex_result,
     codex_run_json,
     codex_unavailable,
+    codex_version_check,
 )
 
 
@@ -278,11 +281,12 @@ def ensure_present(module, listed):
 
 def ensure_absent(module):
     name = module.params["name"]
-    if module.check_mode:
-        # Codex removes an installed marketplace directory even when no marketplace is configured or listed.
-        if os.path.exists(os.path.join(codex_home(module), ".tmp", "marketplaces", name)):
-            return True, None
+    # Codex removes an installed marketplace directory even when no marketplace is configured or listed.
+    if module.check_mode and os.path.exists(os.path.join(codex_home(module), ".tmp", "marketplaces", name)):
+        return True, None
 
+    codex_version_check(module)
+    if module.check_mode:
         # Listing fails while any marketplace is broken; removal still succeeds when Codex names this one.
         listed = marketplaces(module, missing=f"\n- `{name}` at ")
         if listed is None:
@@ -332,6 +336,7 @@ def main():
         module.exit_json(changed=not absent, msg=f"{unavailable}; {reason}.", marketplace=None)
 
     if module.params["state"] == "present":
+        codex_version_check(module)
         changed, marketplace = ensure_present(module, marketplaces(module))
     else:
         changed, marketplace = ensure_absent(module)
