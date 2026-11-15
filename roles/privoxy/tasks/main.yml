@@ -20,11 +20,13 @@
     - privoxy
   ansible.builtin.command:
     argv:
-      - /opt/homebrew/bin/brew
+      - brew
       - services
       - stop
       - privoxy
     removes: "{{ __privoxy_services.services[0].file }}"
+  environment:
+    PATH: "/usr/local/bin:/opt/homebrew/bin:{{ ansible_facts.env.PATH }}"
   when:
     - privoxy_state == 'absent'
     - __privoxy_services.services | length > 0
