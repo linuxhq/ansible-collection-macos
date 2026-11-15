@@ -28,14 +28,15 @@ def test_invalid_cli_response(run_module, response, message):
 
 
 def test_config_directory_is_passed_to_command(run_module, tmp_path):
-    config = str(tmp_path / "config with spaces")
+    config = tmp_path / "config with spaces"
+    config.mkdir()
     result, command, _lookup = run_module(
         codex_plugin,
-        {"name": "editor", "marketplace": "example", "state": "absent", "config_dir": config},
+        {"name": "editor", "marketplace": "example", "state": "absent", "config_dir": str(config)},
         [{"installed": []}],
     )
     assert result["changed"] is False
-    assert command.call_args.kwargs == {"environ_update": {"CODEX_HOME": config}}
+    assert command.call_args.kwargs == {"environ_update": {"CODEX_HOME": str(config)}}
 
 
 def test_explicit_executable(run_module, tmp_path):
