@@ -101,7 +101,7 @@ options:
     default: present
     type: str
 requirements:
-  - codex >= 0.139.0
+  - codex >= 0.153.0
 """
 
 EXAMPLES = r"""

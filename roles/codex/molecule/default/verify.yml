@@ -24,6 +24,15 @@
           - __codex_config_stat.stat.exists
           - __codex_executable_stat.stat.exists
 
+    - name: Ensure codex role is included with empty marketplaces and plugins
+      tags:
+        - codex
+      ansible.builtin.include_role:
+        name: codex
+      vars:
+        codex_marketplaces: []
+        codex_plugins: []
+
     - name: Ensure codex marketplace presence is gathered
       tags:
         - codex

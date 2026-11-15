@@ -2,8 +2,9 @@
 bugfixes:
   - codex_plugin - with O(state=absent), also remove a plugin that Codex no longer lists, such as one whose marketplace
     was removed, when its cache directory still exists in the Codex home directory.
-  - codex_marketplace and codex_plugin - document the minimum supported Codex version, 0.139.0, which first reports the
-    configured source of a marketplace.
+  - codex_marketplace and codex_plugin - document the minimum supported Codex version, 0.153.0, whose
+    C(codex plugin list --marketplace) first checks only the named marketplace's snapshot; reporting the configured
+    source of a marketplace needs 0.139.0.
 trivial:
   - privoxy - verify in the Molecule scenario that O(state=absent) stops the launchd service and removes its launch
     agent.
