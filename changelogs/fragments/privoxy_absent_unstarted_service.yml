@@ -1,0 +1,5 @@
+---
+bugfixes:
+  - privoxy role - with C(privoxy_state=absent), run C(brew services stop) only when the privoxy service is
+    registered, loaded or running, so removing an installed privoxy whose service was never started no longer
+    reports a change for a no-op stop.
