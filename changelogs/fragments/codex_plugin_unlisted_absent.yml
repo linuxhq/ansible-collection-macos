@@ -1,8 +1,0 @@
----
-bugfixes:
-  - codex_plugin - with O(state=absent), also remove a plugin that Codex no longer lists, such as one whose marketplace
-    was removed, or whose marketplace fails to load, when its cache directory C(plugins/cache/<marketplace>/<name>)
-    still exists in the Codex home directory, instead of reporting no change or failing to list plugins.
-trivial:
-  - privoxy role - verify in the Molecule scenario that C(privoxy_state=absent) stops the launchd service and removes
-    its launch agent.

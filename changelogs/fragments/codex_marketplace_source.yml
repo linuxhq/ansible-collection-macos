@@ -1,7 +1,0 @@
----
-bugfixes:
-  - codex_marketplace - pass the configured O(source) to Codex for an existing marketplace and fail when Codex reports
-    that the marketplace was added from a different source, instead of reporting no change.
-  - codex_marketplace - fail clearly when O(state=present) targets a marketplace without a configured source, such as a
-    built-in or discovered marketplace, instead of reporting no change. When Codex lists a discovered and a configured
-    marketplace with the same name, the configured marketplace is used.

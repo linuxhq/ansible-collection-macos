@@ -4,6 +4,52 @@ linuxhq.macos Release Notes
 
 .. contents:: Topics
 
+v1.1.8
+======
+
+Release Summary
+---------------
+
+Patch release fixing the Codex marketplace and plugin modules, the Homebrew and launchd info modules, and the privoxy role. Codex 0.153.0 or newer is now required.
+
+Breaking Changes / Porting Guide
+--------------------------------
+
+- codex_marketplace and codex_plugin - require codex >= 0.153.0. Both modules now check that C(codex --version) reports at least 0.153.0 and fail with the installed and required versions before querying or changing state.
+- homebrew_cask_info - return the C(casks) items reported by C(brew info --json=v2) unmodified. The cask token moves from C(name) to C(token), C(name) is now Homebrew's list of application names, and C(description) is replaced by C(desc).
+- homebrew_cask_info role - key C(_homebrew_cask_info_dict) by cask token, because C(name) is now a list of application names.
+- homebrew_info - return the C(formulae) items reported by C(brew info --json=v2) unmodified. The C(description) and C(version) keys are replaced by Homebrew's C(desc) and C(versions.stable), and C(installed) is a list of keg dictionaries instead of a list of version strings.
+- homebrew_services_info - return the C(services) items reported by C(brew services info --json) unmodified, including keys such as C(service_name), C(schedulable), C(loaded_file), and C(command).
+
+Bugfixes
+--------
+
+- codex_marketplace - document that O(ref) and O(sparse) must also match an existing marketplace, that Codex replaces an existing local marketplace in place with a Git O(source) whose manifest declares the same name, and that check mode cannot see marketplaces while Codex plugins are disabled (C(features.plugins)).
+- codex_marketplace - fail clearly when O(state=present) targets a marketplace without a configured source, such as a built-in or discovered marketplace, instead of reporting no change. When Codex lists a discovered and a configured marketplace with the same name, the configured marketplace is used.
+- codex_marketplace - fail with the declared name when O(source) declares a marketplace name other than O(name), instead of failing only because the marketplace is not found after adding it. A marketplace that the module newly added under the declared name is removed again so the next run converges; an existing marketplace with that name, which Codex replaces in place, or a marketplace that Codex does not list after adding it, is kept, and the failure reports a change.
+- codex_marketplace - pass the configured O(source) to Codex for an existing marketplace and fail when Codex reports that the marketplace was added from a different source, instead of reporting no change.
+- codex_marketplace - when Codex adds a marketplace but does not list it, report the change and name disabled Codex plugins (C(features.plugins)) as the likely cause.
+- codex_marketplace - with O(state=absent), remove the marketplace with C(codex plugin marketplace remove) without listing marketplaces first, so it can be removed while a configured marketplace fails to load, and an installed marketplace directory C(.tmp/marketplaces/<name>) left in the Codex home directory without a configured marketplace is removed as well. In check mode, predict the removal when that directory exists or when Codex fails to list marketplaces because O(name) fails to load, instead of failing or reporting no change.
+- codex_marketplace - with O(state=absent), treat a listed marketplace without a configured source, such as a built-in or discovered marketplace, as already absent and report no change, in check mode too, instead of failing or predicting a change.
+- codex_marketplace and codex_plugin - in check mode, return V(null) for a resource that O(state=absent) would remove, matching the real run, instead of the current resource.
+- codex_marketplace and codex_plugin - report no change for O(state=absent) in check mode when Codex is not installed.
+- codex_marketplace and codex_plugin - when the resolved Codex home directory (O(config_dir), E(CODEX_HOME), or C(~/.codex)) does not exist, report no change for O(state=absent) and, in check mode, predict a change for O(state=present), without running Codex, instead of failing because Codex cannot resolve E(CODEX_HOME) or letting Codex create the directory.
+- codex_plugin - document the C(marketplace_source) return value, the C(source) return values for Git and npm plugin sources, and that C(version) may be V(null).
+- codex_plugin - list plugins from O(marketplace) only instead of every marketplace and the remote plugin catalog, so another configured marketplace that fails to load no longer fails the task.
+- codex_plugin - with O(state=absent), also remove a plugin that Codex no longer lists, such as one whose marketplace was removed, or whose marketplace fails to load, when its cache directory C(plugins/cache/<marketplace>/<name>) still exists in the Codex home directory, instead of reporting no change or failing to list plugins.
+- homebrew_info, homebrew_cask_info, and homebrew_services_info - name the query and fall back to standard output in failure messages, and fail clearly when brew returns an unexpected structure.
+- homebrew_info, homebrew_cask_info, and homebrew_services_info - omit names that Homebrew does not know from the results instead of failing the whole query, including a cask name qualified with an installed tap that lacks it, such as C(hashicorp/tap/missing). Brew runs with E(HOMEBREW_NO_COLOR=1) and an empty E(GITHUB_ACTIONS) so unknown names are recognized when E(HOMEBREW_COLOR) is set and on GitHub Actions runners. A formula whose file Homebrew finds but cannot load, such as a tap formula that defines the wrong class, still fails the query.
+- homebrew_info, homebrew_cask_info, and homebrew_services_info - pass O(name) values to brew after C(--) so a name that begins with C(-), such as C(--installed), is treated as an unknown name instead of a brew option.
+- homebrew_info, homebrew_cask_info, and homebrew_services_info - return each formula, cask, or service once when O(name) repeats a name or names it more than once, such as by its fully qualified name.
+- homebrew_info, homebrew_cask_info, homebrew_services_info, and launchd_info roles - build the published dictionaries with the built-in C(map) filter instead of C(json_query), removing the controller dependency on C(jmespath) and failing clearly instead of misaligning keys when an item lacks its key.
+- homebrew_services_info - keep services that Homebrew reports as registered even when the reported service file does not exist for the querying user, such as services started with C(sudo).
+- homebrew_services_info - return an empty list when no installed formula has a service, instead of failing to parse the empty output of C(brew services info --json --all).
+- launchd_info - document that C(last_exit_status) is C(0) for a service that has not exited and a negated signal number for a service stopped by a signal.
+- launchd_info - fail with the unexpected C(launchctl list) line instead of a traceback when its PID or status column is not an integer.
+- launchd_info - fall back to standard output in the failure message when C(launchctl list) fails without error output.
+- privoxy role - with C(privoxy_state=absent), stop the privoxy service with C(brew services stop) when Homebrew reports it registered, loaded or running, so a service that is not started, such as one that crashed, no longer leaves its launch agent and launchd job behind, and stop hiding service lookup failures.
+- privoxy role - with C(privoxy_state=present), restart a privoxy service that launchd has loaded but that is not running, such as one that crashed, instead of failing because C(brew services start) cannot bootstrap the loaded launch agent.
+
 v1.1.7
 ======
 

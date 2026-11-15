@@ -1,6 +1,0 @@
----
-bugfixes:
-  - codex_marketplace and codex_plugin - when the resolved Codex home directory (O(config_dir), E(CODEX_HOME), or
-    C(~/.codex)) does not exist, report no change for O(state=absent) and, in check mode, predict a change for
-    O(state=present), without running Codex, instead of failing because Codex cannot resolve E(CODEX_HOME) or letting
-    Codex create the directory.
