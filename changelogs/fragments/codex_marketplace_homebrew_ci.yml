@@ -1,6 +1,0 @@
----
-bugfixes:
-  - codex_marketplace - check the Codex version before the check-mode O(state=absent) prediction for an installed
-    marketplace directory, so check mode fails like a real run when Codex is older than 0.153.0.
-  - homebrew_info, homebrew_cask_info, and homebrew_services_info - run brew with an empty E(GITHUB_ACTIONS) so
-    unknown names are still omitted on GitHub Actions runners, where brew prints errors as annotations.

@@ -1,6 +1,0 @@
----
-bugfixes:
-  - codex_marketplace - keep an existing marketplace that Codex replaced in place when O(source) declares a
-    marketplace name other than O(name), instead of removing it while rolling back.
-  - codex_marketplace - document that check mode cannot see marketplaces while Codex plugins are disabled
-    (C(features.plugins)).

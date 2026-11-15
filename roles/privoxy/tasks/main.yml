@@ -64,12 +64,13 @@
   when:
     - privoxy_state == 'absent'
 
+# brew services start fails to bootstrap a service launchd already loaded, such as one that crashed, so restart it.
 - name: Ensure privoxy service is started
   tags:
     - privoxy
   community.general.homebrew_services:
     name: privoxy
-    state: present
+    state: "{{ 'restarted' if __privoxy_services.services | selectattr('loaded') | rejectattr('running') | list else 'present' }}"
   when:
     - privoxy_state == 'present'
     - not ansible_check_mode
