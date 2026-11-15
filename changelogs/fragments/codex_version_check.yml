@@ -1,4 +1,4 @@
 ---
-minor_changes:
-  - codex_marketplace and codex_plugin - check that C(codex --version) reports at least the minimum supported Codex
-    version, 0.153.0, and fail with the installed and required versions before querying or changing state.
+breaking_changes:
+  - codex_marketplace and codex_plugin - require codex >= 0.153.0. Both modules now check that C(codex --version)
+    reports at least 0.153.0 and fail with the installed and required versions before querying or changing state.
