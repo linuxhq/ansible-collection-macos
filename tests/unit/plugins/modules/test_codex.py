@@ -262,6 +262,25 @@ def test_absent_marketplace_in_check_mode_fails_when_another_is_unloadable(run_m
     command.assert_called_once()
 
 
+@pytest.mark.parametrize("listed", [{"marketplaces": []}, {"marketplaces": [DISCOVERED]}, unloadable("other")])
+def test_absent_installed_marketplace_root_in_check_mode_predicts_removal(run_module, codex_home, listed):
+    (codex_home / ".tmp" / "marketplaces" / "example").mkdir(parents=True)
+    result, command, _lookup = run_module(
+        codex_marketplace, {"name": "example", "state": "absent"}, [listed], check_mode=True
+    )
+    assert result == {"changed": True, "marketplace": None}
+    command.assert_not_called()
+
+
+def test_absent_other_installed_marketplace_root_in_check_mode_is_unchanged(run_module, codex_home):
+    (codex_home / ".tmp" / "marketplaces" / "other").mkdir(parents=True)
+    result, command, _lookup = run_module(
+        codex_marketplace, {"name": "example", "state": "absent"}, [{"marketplaces": []}], check_mode=True
+    )
+    assert result == {"changed": False, "marketplace": None}
+    command.assert_called_once()
+
+
 def test_existing_marketplace_with_different_source_fails(run_module):
     stderr = (
         "Error: marketplace 'example' is already added from a different source; remove it before adding this source\n"

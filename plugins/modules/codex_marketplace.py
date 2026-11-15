@@ -38,8 +38,12 @@ attributes:
       (O(config_dir), else E(CODEX_HOME), else C(~/.codex)) does not exist,
       reports a change for O(state=present) and no change for O(state=absent)
       without querying marketplace state. With O(state=absent), reports a
-      change when Codex fails to list marketplaces because O(name) fails to
-      load, and fails when another marketplace fails to load. Check mode
+      change without listing marketplaces when the installed marketplace
+      directory C(.tmp/marketplaces/<name>) exists in the Codex home
+      directory, because Codex removes it even when no marketplace is
+      configured. Otherwise, with O(state=absent), reports a change when Codex
+      fails to list marketplaces because O(name) fails to load, and fails when
+      another marketplace fails to load. Check mode
       cannot see marketplaces while Codex plugins are disabled
       (C(features.plugins)).
     support: full
@@ -156,11 +160,14 @@ marketplace:
       type: str
 """
 
+import os
+
 from ansible.module_utils.basic import AnsibleModule
 
 from ansible_collections.linuxhq.macos.plugins.module_utils.codex import (
     codex_argument_spec,
     codex_bin,
+    codex_home,
     codex_list,
     codex_result,
     codex_run_json,
@@ -272,6 +279,10 @@ def ensure_present(module, listed):
 def ensure_absent(module):
     name = module.params["name"]
     if module.check_mode:
+        # Codex removes an installed marketplace directory even when no marketplace is configured or listed.
+        if os.path.exists(os.path.join(codex_home(module), ".tmp", "marketplaces", name)):
+            return True, None
+
         # Listing fails while any marketplace is broken; removal still succeeds when Codex names this one.
         listed = marketplaces(module, missing=f"\n- `{name}` at ")
         if listed is None:
