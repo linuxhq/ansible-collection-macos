@@ -18,6 +18,8 @@ description:
     C(~/.codex).
   - With O(state=absent), reports no change without running Codex when the
     Codex home directory does not exist.
+  - Fails before querying or changing plugin state when C(codex --version)
+    reports a version older than 0.153.0.
 author:
   - Taylor Kimball (@tkimball83)
 attributes:
@@ -192,6 +194,7 @@ from ansible_collections.linuxhq.macos.plugins.module_utils.codex import (
     codex_result,
     codex_run_json,
     codex_unavailable,
+    codex_version_check,
 )
 
 
@@ -317,6 +320,7 @@ def main():
         reason = "plugin state cannot be determined in check mode" if module.check_mode else "plugin is absent"
         module.exit_json(changed=not absent, msg=f"{unavailable}; {reason}.", plugin=None)
 
+    codex_version_check(module)
     if module.params["state"] == "present":
         changed, plugin = ensure_present(module, find_plugin(module))
     else:

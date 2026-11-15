@@ -24,7 +24,7 @@ def test_invalid_cli_response(run_module, response, message):
     result, command, _lookup = run_module(codex_plugin, {"name": "editor", "marketplace": "example"}, [response])
     assert result["failed"] is True
     assert message in result["msg"]
-    assert command.call_count == 1
+    assert command.call_count == 2
 
 
 def test_config_directory_is_passed_to_command(run_module, tmp_path):

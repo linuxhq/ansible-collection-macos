@@ -123,7 +123,7 @@ def test_idempotency_and_check_mode(run_module, resource, state, exists, check_m
     assert result["changed"] is changed
     assert result.get("failed") is None
     assert (result[result_key] is not None) is (exists and state == "present")
-    assert command.call_count == 1
+    assert command.call_count == 2
     assert command.call_args.args[0] == ["/mock/bin/tool", *LIST_ARGS[plugin]]
 
 
@@ -132,7 +132,7 @@ def test_absent_plugin_is_unchanged(run_module):
         codex_plugin, {"name": "editor", "marketplace": "example", "state": "absent"}, [{"installed": []}]
     )
     assert result == {"changed": False, "plugin": None}
-    assert command.call_count == 1
+    assert command.call_count == 2
 
 
 def test_plugin_list_is_scoped_to_marketplace(run_module):
@@ -153,7 +153,7 @@ def test_plugin_list_is_scoped_to_marketplace(run_module):
 def test_absent_marketplace_removes_without_listing(run_module):
     result, command, _lookup = run_module(codex_marketplace, {"name": "example", "state": "absent"}, [removed()])
     assert result == {"changed": True, "marketplace": None}
-    command.assert_called_once()
+    assert command.call_count == 2
     assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "remove", "example", "--json"]
 
 
@@ -170,7 +170,7 @@ def test_absent_marketplace_not_configured_or_without_source_is_unchanged(run_mo
         codex_marketplace, {"name": "example", "state": "absent"}, responses, check_mode
     )
     assert result == {"changed": False, "marketplace": None}
-    command.assert_called_once()
+    assert command.call_count == 2
 
 
 @pytest.mark.parametrize(
@@ -184,7 +184,7 @@ def test_absent_marketplace_not_configured_or_without_source_is_unchanged(run_mo
 def test_absent_marketplace_remove_failure(run_module, response, message):
     result, command, _lookup = run_module(codex_marketplace, {"name": "example", "state": "absent"}, [response])
     assert result == {"failed": True, "msg": message}
-    command.assert_called_once()
+    assert command.call_count == 2
 
 
 def test_existing_plugin_is_unchanged(run_module):
@@ -192,7 +192,7 @@ def test_existing_plugin_is_unchanged(run_module):
         codex_plugin, {"name": "editor", "marketplace": "example"}, [{"installed": [PLUGIN]}]
     )
     assert result == {"changed": False, "plugin": PLUGIN_RESULT}
-    assert command.call_count == 1
+    assert command.call_count == 2
 
 
 def test_existing_marketplace_with_same_source_is_unchanged(run_module):
@@ -202,7 +202,7 @@ def test_existing_marketplace_with_same_source_is_unchanged(run_module):
         [{"marketplaces": [MARKETPLACE]}, added(already_added=True)],
     )
     assert result == {"changed": False, "marketplace": MARKETPLACE_RESULT}
-    assert command.call_count == 2
+    assert command.call_count == 3
     assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "add", SOURCE, "--json"]
 
 
@@ -222,7 +222,7 @@ def test_configured_marketplace_beside_discovered_marketplace_is_managed(run_mod
         check_mode,
     )
     assert result == {"changed": changed, "marketplace": MARKETPLACE_RESULT}
-    assert command.call_count == 1 + len(responses)
+    assert command.call_count == 2 + len(responses)
 
 
 def test_absent_configured_marketplace_beside_discovered_marketplace_in_check_mode(run_module):
@@ -233,7 +233,7 @@ def test_absent_configured_marketplace_beside_discovered_marketplace_in_check_mo
         check_mode=True,
     )
     assert result == {"changed": True, "marketplace": None}
-    assert command.call_count == 1
+    assert command.call_count == 2
 
 
 def unloadable(*names):
@@ -249,7 +249,7 @@ def test_absent_unloadable_marketplace_in_check_mode_predicts_removal(run_module
         codex_marketplace, {"name": "example", "state": "absent"}, [unloadable(*names)], check_mode=True
     )
     assert result == {"changed": True, "marketplace": None}
-    command.assert_called_once()
+    assert command.call_count == 2
 
 
 @pytest.mark.parametrize("names", [["other"], ["example2"]])
@@ -259,7 +259,7 @@ def test_absent_marketplace_in_check_mode_fails_when_another_is_unloadable(run_m
     )
     assert result["failed"] is True
     assert result["msg"].startswith("Unable to gather Codex marketplace information: Error: failed to load")
-    command.assert_called_once()
+    assert command.call_count == 2
 
 
 @pytest.mark.parametrize("listed", [{"marketplaces": []}, {"marketplaces": [DISCOVERED]}, unloadable("other")])
@@ -278,7 +278,7 @@ def test_absent_other_installed_marketplace_root_in_check_mode_is_unchanged(run_
         codex_marketplace, {"name": "example", "state": "absent"}, [{"marketplaces": []}], check_mode=True
     )
     assert result == {"changed": False, "marketplace": None}
-    command.assert_called_once()
+    assert command.call_count == 2
 
 
 def test_existing_marketplace_with_different_source_fails(run_module):
@@ -295,7 +295,7 @@ def test_existing_marketplace_with_different_source_fails(run_module):
         "Unable to add Codex marketplace example from /other/source: Error: marketplace 'example' is already "
         "added from a different source; remove it before adding this source"
     )
-    assert command.call_count == 2
+    assert command.call_count == 3
 
 
 @pytest.mark.parametrize("check_mode", [False, True])
@@ -308,7 +308,7 @@ def test_existing_marketplace_without_source_fails(run_module, check_mode, exist
     )
     assert result["failed"] is True
     assert result["msg"] == (f"Codex marketplace example has no configured source and cannot be managed from {SOURCE}.")
-    assert command.call_count == 1
+    assert command.call_count == 2
 
 
 def test_new_marketplace_with_different_manifest_name_is_removed(run_module):
@@ -319,7 +319,7 @@ def test_new_marketplace_with_different_manifest_name_is_removed(run_module):
     )
     assert result["failed"] is True
     assert result["msg"] == f"Codex marketplace source {SOURCE} declares marketplace other, not example."
-    assert command.call_count == 4
+    assert command.call_count == 5
     assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "remove", "other", "--json"]
 
 
@@ -340,7 +340,7 @@ def test_replaced_marketplace_with_different_manifest_name_is_kept(run_module):
         f"Codex marketplace source {SOURCE} declares marketplace other, not example. "
         "Codex replaced the existing marketplace other."
     )
-    assert command.call_count == 2
+    assert command.call_count == 3
 
 
 def test_new_marketplace_beside_discovered_marketplace_is_removed(run_module):
@@ -353,7 +353,7 @@ def test_new_marketplace_beside_discovered_marketplace_is_removed(run_module):
     assert result["failed"] is True
     assert "changed" not in result
     assert result["msg"] == f"Codex marketplace source {SOURCE} declares marketplace other, not example."
-    assert command.call_count == 4
+    assert command.call_count == 5
     assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "remove", "other", "--json"]
 
 
@@ -368,7 +368,7 @@ def test_replaced_marketplace_beside_discovered_marketplace_is_kept(run_module):
     assert result["failed"] is True
     assert result["changed"] is True
     assert result["msg"].endswith("Codex replaced the existing marketplace other.")
-    assert command.call_count == 2
+    assert command.call_count == 3
 
 
 def test_unlisted_marketplace_with_different_manifest_name_is_kept(run_module):
@@ -383,7 +383,7 @@ def test_unlisted_marketplace_with_different_manifest_name_is_kept(run_module):
         "msg": f"Codex marketplace source {SOURCE} declares marketplace other, not example. Codex added marketplace "
         "other but does not list it, so it was not removed; Codex plugins may be disabled (features.plugins).",
     }
-    assert command.call_count == 3
+    assert command.call_count == 4
     assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "list", "--json"]
 
 
@@ -395,7 +395,7 @@ def test_existing_marketplace_with_different_manifest_name_is_kept(run_module):
     )
     assert result["failed"] is True
     assert "declares marketplace other, not example" in result["msg"]
-    assert command.call_count == 2
+    assert command.call_count == 3
 
 
 @pytest.mark.parametrize(
@@ -408,7 +408,7 @@ def test_unexpected_marketplace_add_result(run_module, response):
     )
     assert result["failed"] is True
     assert result["msg"] == f"Unexpected codex output while add Codex marketplace example from {SOURCE}."
-    assert command.call_count == 2
+    assert command.call_count == 3
 
 
 def test_mutation_refreshes_state(run_module, resource):
@@ -416,16 +416,16 @@ def test_mutation_refreshes_state(run_module, resource):
     responses = [{key: []}, add_result, {key: [item]}]
     result, command, _lookup = run_module(plugin, {**params, "state": "present"}, responses)
     assert result == {"changed": True, result_key: expected}
-    assert command.call_count == 3
-    assert command.call_args_list[1].args[0] == ["/mock/bin/tool", *prefix, "add", add_arg, "--json"]
+    assert command.call_count == 4
+    assert command.call_args_list[2].args[0] == ["/mock/bin/tool", *prefix, "add", add_arg, "--json"]
 
 
 def test_plugin_removal_refreshes_state(run_module):
     params = {"name": "editor", "marketplace": "example", "state": "absent"}
     result, command, _lookup = run_module(codex_plugin, params, [{"installed": [PLUGIN]}, {}, {"installed": []}])
     assert result == {"changed": True, "plugin": None}
-    assert command.call_count == 3
-    assert command.call_args_list[1].args[0] == ["/mock/bin/tool", "plugin", "remove", "editor@example", "--json"]
+    assert command.call_count == 4
+    assert command.call_args_list[2].args[0] == ["/mock/bin/tool", "plugin", "remove", "editor@example", "--json"]
 
 
 def test_failed_postcondition(run_module, resource):
@@ -433,7 +433,7 @@ def test_failed_postcondition(run_module, resource):
     result, command, _lookup = run_module(plugin, {**params, "state": "present"}, [{key: []}, add_result, {key: []}])
     assert result["failed"] is True
     assert "not found" in result["msg"] or "not listed" in result["msg"]
-    assert command.call_count == 3
+    assert command.call_count == 4
 
 
 BROKEN_MARKETPLACE = (
@@ -458,9 +458,9 @@ def test_unlisted_plugin_with_cache_is_removed(run_module, codex_home, check_mod
     assert result == {"changed": True, "plugin": None}
     assert cache.is_dir() is check_mode
     if check_mode:
-        assert command.call_count == 1
-    else:
         assert command.call_count == 2
+    else:
+        assert command.call_count == 3
         assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "remove", "editor@example", "--json"]
 
 
@@ -470,7 +470,7 @@ def test_unlisted_plugin_cache_postcondition(run_module, codex_home):
     params = {"name": "editor", "marketplace": "example", "state": "absent"}
     result, command, _lookup = run_module(codex_plugin, params, [{"installed": []}, {}])
     assert result == {"failed": True, "msg": f"Codex plugin editor@example remains in {cache} after removing it."}
-    assert command.call_args_list[1].args[0] == ["/mock/bin/tool", "plugin", "remove", "editor@example", "--json"]
+    assert command.call_args_list[2].args[0] == ["/mock/bin/tool", "plugin", "remove", "editor@example", "--json"]
 
 
 @pytest.mark.parametrize("listed", [{"installed": []}, BROKEN_MARKETPLACE])
@@ -480,7 +480,7 @@ def test_unlisted_plugin_without_cache_is_unchanged(run_module, codex_home, chec
     params = {"name": "editor", "marketplace": "example", "state": "absent"}
     result, command, _lookup = run_module(codex_plugin, params, [listed], check_mode)
     assert result == {"changed": False, "plugin": None}
-    assert command.call_count == 1
+    assert command.call_count == 2
 
 
 def test_present_plugin_in_broken_marketplace_fails(run_module, codex_home):
@@ -488,7 +488,7 @@ def test_present_plugin_in_broken_marketplace_fails(run_module, codex_home):
     result, command, _lookup = run_module(codex_plugin, params, [BROKEN_MARKETPLACE])
     assert result["failed"] is True
     assert result["msg"].startswith("Unable to gather Codex plugin information for marketplace example: Error: failed")
-    assert command.call_count == 1
+    assert command.call_count == 2
 
 
 def test_plugin_removal_postcondition(run_module):
@@ -496,7 +496,7 @@ def test_plugin_removal_postcondition(run_module):
     result, command, _lookup = run_module(codex_plugin, params, [{"installed": [PLUGIN]}, {}, {"installed": [PLUGIN]}])
     assert result["failed"] is True
     assert "remains" in result["msg"]
-    assert command.call_count == 3
+    assert command.call_count == 4
 
 
 @pytest.mark.parametrize("state", ["present", "absent"])
@@ -547,7 +547,7 @@ def test_missing_config_dir_present_runs_codex(run_module, resource, tmp_path):
     result, command, _lookup = run_module(plugin, {**params, "config_dir": config}, [error])
     assert result["failed"] is True
     assert "does not exist" in result["msg"]
-    assert command.call_count == 1
+    assert command.call_count == 2
 
 
 @pytest.mark.parametrize("environment", ["codex_home", "default"])
@@ -573,7 +573,7 @@ def test_existing_config_dir_in_check_mode_queries_state(run_module, resource, t
     plugin, params, key, _result_key, item, *_details = resource
     result, command, _lookup = run_module(plugin, {**params, "config_dir": str(tmp_path)}, [{key: [item]}], True)
     assert result["changed"] is False
-    assert command.call_count == 1
+    assert command.call_count == 2
     assert command.call_args.kwargs == {"environ_update": {"CODEX_HOME": str(tmp_path)}}
 
 
@@ -590,7 +590,7 @@ def test_marketplace_added_but_not_listed_names_plugins_feature(run_module, alre
         "msg": "Codex marketplace example was added but is not listed by Codex; Codex plugins may be disabled "
         "(features.plugins).",
     }
-    assert command.call_count == 3
+    assert command.call_count == 4
 
 
 def test_marketplace_options_preserve_argument_boundaries(run_module):
@@ -604,7 +604,7 @@ def test_marketplace_options_preserve_argument_boundaries(run_module):
         codex_marketplace, params, [{"marketplaces": []}, added(), {"marketplaces": [MARKETPLACE]}]
     )
     assert result["changed"] is True
-    assert command.call_args_list[1].args[0] == [
+    assert command.call_args_list[2].args[0] == [
         "/mock/bin/tool",
         "plugin",
         "marketplace",
@@ -644,4 +644,70 @@ def test_plugin_lookup_matches_marketplace(run_module):
     )
     assert result["changed"] is True
     assert result["plugin"] is None
-    assert command.call_count == 1
+    assert command.call_count == 2
+
+
+VERSION_ARGS = ["/mock/bin/tool", "--version"]
+
+# A Codex-running path per module, state, and mode, with its responses after the version check.
+VERSION_PATHS = [
+    (
+        codex_marketplace,
+        {"name": "example", "source": SOURCE},
+        False,
+        [{"marketplaces": [MARKETPLACE]}, added(already_added=True)],
+    ),
+    (codex_marketplace, {"name": "example", "source": SOURCE}, True, [{"marketplaces": [MARKETPLACE]}]),
+    (codex_marketplace, {"name": "example", "state": "absent"}, False, [NOT_CONFIGURED]),
+    (codex_marketplace, {"name": "example", "state": "absent"}, True, [{"marketplaces": []}]),
+    (codex_plugin, {"name": "editor", "marketplace": "example"}, False, [{"installed": [PLUGIN]}]),
+    (codex_plugin, {"name": "editor", "marketplace": "example"}, True, [{"installed": [PLUGIN]}]),
+    (codex_plugin, {"name": "editor", "marketplace": "example", "state": "absent"}, False, [{"installed": []}]),
+    (codex_plugin, {"name": "editor", "marketplace": "example", "state": "absent"}, True, [{"installed": []}]),
+]
+
+
+@pytest.mark.parametrize("plugin,params,check_mode,responses", VERSION_PATHS)
+@pytest.mark.parametrize("version", ["codex-cli 0.152.9\n", "codex-cli 0.153.0-alpha.6\n", "codex-cli 0.9.0\n"])
+def test_older_codex_fails_before_other_commands(run_module, plugin, params, check_mode, responses, version):
+    result, command, _lookup = run_module(plugin, params, responses, check_mode, version=version)
+    found = version.split()[1]
+    assert result == {"failed": True, "msg": f"Codex {found} is installed, but codex >= 0.153.0 is required."}
+    command.assert_called_once()
+    assert command.call_args.args[0] == VERSION_ARGS
+
+
+@pytest.mark.parametrize("plugin,params,check_mode,responses", VERSION_PATHS)
+@pytest.mark.parametrize(
+    "version", ["codex-cli 0.153.0\n", "codex-cli 0.153.1\n", "codex-cli 0.169.0-alpha.11.1\n", "codex-cli 1.0.0\n"]
+)
+def test_supported_codex_runs_commands(run_module, plugin, params, check_mode, responses, version):
+    result, command, _lookup = run_module(plugin, params, responses, check_mode, version=version)
+    assert result.get("failed") is None
+    assert command.call_count == 1 + len(responses)
+    assert command.call_args_list[0].args[0] == VERSION_ARGS
+
+
+@pytest.mark.parametrize(
+    "version,message",
+    [
+        ((0, "codex 0.163.0\n", ""), "Unable to parse Codex version from codex --version output: codex 0.163.0"),
+        ((0, "", ""), "Unable to parse Codex version from codex --version output: "),
+        ((0, "codex-cli 0.163\n", ""), "Unable to parse Codex version from codex --version output: codex-cli 0.163"),
+        ((1, "", "Error: unexpected argument\n"), "Unable to determine Codex version: Error: unexpected argument"),
+    ],
+)
+@pytest.mark.parametrize("plugin,params,check_mode,responses", VERSION_PATHS[::2])
+def test_unknown_codex_version_fails(run_module, plugin, params, check_mode, responses, version, message):
+    result, command, _lookup = run_module(plugin, params, responses, check_mode, version=version)
+    assert result == {"failed": True, "msg": message}
+    command.assert_called_once()
+    assert command.call_args.args[0] == VERSION_ARGS
+
+
+def test_version_check_uses_config_dir(run_module, tmp_path):
+    params = {"name": "editor", "marketplace": "example", "config_dir": str(tmp_path)}
+    result, command, _lookup = run_module(codex_plugin, params, version="codex-cli 0.152.0\n")
+    assert result["failed"] is True
+    assert command.call_args.args[0] == VERSION_ARGS
+    assert command.call_args.kwargs == {"environ_update": {"CODEX_HOME": str(tmp_path)}}
