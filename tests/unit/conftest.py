@@ -46,7 +46,7 @@ def run_module(monkeypatch):
 
             value = pending.pop(0)
             if callable(value):
-                value = value(args)
+                value = value(args, **kwargs)
 
             return value if isinstance(value, tuple) else (0, json.dumps(value), "")
 

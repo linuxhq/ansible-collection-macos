@@ -269,7 +269,18 @@ def test_absent_installed_marketplace_root_in_check_mode_predicts_removal(run_mo
         codex_marketplace, {"name": "example", "state": "absent"}, [listed], check_mode=True
     )
     assert result == {"changed": True, "marketplace": None}
-    command.assert_not_called()
+    command.assert_called_once()
+    assert command.call_args.args[0] == ["/mock/bin/tool", "--version"]
+
+
+def test_absent_installed_marketplace_root_in_check_mode_requires_supported_codex(run_module, codex_home):
+    (codex_home / ".tmp" / "marketplaces" / "example").mkdir(parents=True)
+    result, command, _lookup = run_module(
+        codex_marketplace, {"name": "example", "state": "absent"}, check_mode=True, version="codex-cli 0.152.0\n"
+    )
+    assert result == {"failed": True, "msg": "Codex 0.152.0 is installed, but codex >= 0.153.0 is required."}
+    command.assert_called_once()
+    assert command.call_args.args[0] == ["/mock/bin/tool", "--version"]
 
 
 def test_absent_other_installed_marketplace_root_in_check_mode_is_unchanged(run_module, codex_home):
@@ -449,7 +460,7 @@ def test_unlisted_plugin_with_cache_is_removed(run_module, codex_home, check_mod
     cache = codex_home / "plugins" / "cache" / "example" / "editor"
     (cache / "1.0.0").mkdir(parents=True)
 
-    def remove(args):
+    def remove(args, **_kwargs):
         shutil.rmtree(cache)
         return {}
 

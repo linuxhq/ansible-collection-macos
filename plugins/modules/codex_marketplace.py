@@ -285,7 +285,6 @@ def ensure_absent(module):
     if module.check_mode and os.path.exists(os.path.join(codex_home(module), ".tmp", "marketplaces", name)):
         return True, None
 
-    codex_version_check(module)
     if module.check_mode:
         # Listing fails while any marketplace is broken; removal still succeeds when Codex names this one.
         listed = marketplaces(module, missing=f"\n- `{name}` at ")
@@ -335,8 +334,8 @@ def main():
         )
         module.exit_json(changed=not absent, msg=f"{unavailable}; {reason}.", marketplace=None)
 
+    codex_version_check(module)
     if module.params["state"] == "present":
-        codex_version_check(module)
         changed, marketplace = ensure_present(module, marketplaces(module))
     else:
         changed, marketplace = ensure_absent(module)
