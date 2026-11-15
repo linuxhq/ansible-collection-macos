@@ -50,6 +50,59 @@
       retries: 30
       delay: 2
 
+    - name: Ensure privoxy role is included with a present state for a crashed service
+      tags:
+        - privoxy
+      ansible.builtin.include_role:
+        name: privoxy
+      vars:
+        privoxy_state: present
+
+    - name: Ensure privoxy handlers are flushed after the crashed service is converged
+      tags:
+        - privoxy
+      ansible.builtin.meta: flush_handlers
+
+    - name: Ensure privoxy service is running after the crashed service is converged
+      tags:
+        - privoxy
+      linuxhq.macos.homebrew_services_info:
+        name: privoxy
+      register: __privoxy_recovered_services
+      until:
+        - __privoxy_recovered_services.services | length == 1
+        - __privoxy_recovered_services.services[0].running
+      retries: 30
+      delay: 2
+
+    - name: Ensure privoxy configuration has an invalid listen address again
+      tags:
+        - privoxy
+      ansible.builtin.lineinfile:
+        line: listen-address 999.999.999.999:1
+        path: /opt/homebrew/etc/privoxy/config
+        state: present
+
+    - name: Ensure privoxy service is restarted with the invalid configuration again
+      tags:
+        - privoxy
+      community.general.homebrew_services:
+        name: privoxy
+        state: restarted
+
+    - name: Ensure privoxy service is registered but not started again
+      tags:
+        - privoxy
+      linuxhq.macos.homebrew_services_info:
+        name: privoxy
+      register: __privoxy_failed_services
+      until:
+        - __privoxy_failed_services.services | length == 1
+        - __privoxy_failed_services.services[0].registered
+        - __privoxy_failed_services.services[0].status not in ['started', 'scheduled']
+      retries: 30
+      delay: 2
+
     - name: Ensure privoxy role is included with an absent state
       tags:
         - privoxy

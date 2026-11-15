@@ -1,4 +1,0 @@
----
-bugfixes:
-  - codex_marketplace - in check mode, predict removal with O(state=absent) when Codex fails to list marketplaces
-    because the named marketplace fails to load, matching the real run, instead of failing.

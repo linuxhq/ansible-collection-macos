@@ -1,6 +1,0 @@
----
-bugfixes:
-  - codex_marketplace - with O(state=absent), treat a marketplace without a configured source, such as a built-in or
-    discovered marketplace, as already absent instead of failing, so a second run and check mode report no change.
-  - codex_plugin - with O(state=absent), remove a plugin whose marketplace fails to load when its cache directory
-    exists, instead of failing to list the marketplace's plugins.
