@@ -1,6 +1,7 @@
 """Homebrew query selection, unmodified results, unknown names, and failures."""
 
 import json
+import os
 
 import pytest
 
@@ -108,7 +109,26 @@ def test_color_is_disabled(run_module, plugin, output):
     unavailable = (1, "", UNAVAILABLE["formula"].format(name="missing"))
     result, command, _lookup = run_module(plugin, {"name": ["one", "missing"]}, [unavailable, output, unavailable])
     assert result["changed"] is False
-    assert [call.kwargs for call in command.call_args_list] == [{"environ_update": {"HOMEBREW_NO_COLOR": "1"}}] * 3
+    environ_update = {"HOMEBREW_NO_COLOR": "1", "GITHUB_ACTIONS": ""}
+    assert [call.kwargs for call in command.call_args_list] == [{"environ_update": environ_update}] * 3
+
+
+@pytest.mark.parametrize(
+    "plugin,output",
+    [(homebrew_info, {"formulae": []}), (homebrew_cask_info, {"casks": []}), (homebrew_services_info, [])],
+)
+def test_github_actions_annotations_are_disabled(run_module, monkeypatch, plugin, output):
+    monkeypatch.setenv("CI", "true")
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+
+    def unavailable(args, environ_update):
+        # Homebrew prints errors as GitHub Actions annotations while GITHUB_ACTIONS is non-empty.
+        prefix = "::error::" if {**os.environ, **environ_update}["GITHUB_ACTIONS"] else "Error: "
+        return 1, "", f'{prefix}No available formula with the name "missing".\n'
+
+    result, _command, _lookup = run_module(plugin, {"name": ["one", "missing"]}, [unavailable, output, unavailable])
+    assert result["changed"] is False
+    assert result.get("failed") is None
 
 
 @pytest.mark.parametrize("plugin,key,kind,item", PACKAGES)

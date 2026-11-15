@@ -36,8 +36,10 @@ def homebrew_operation(module, kind, default):
 
 
 def homebrew_output(module, args, operation, skip_unavailable=False):
-    # HOMEBREW_COLOR colors "Error:" even off a TTY, which hides HOMEBREW_UNAVAILABLE.
-    rc, stdout, stderr = module.run_command([homebrew_bin(module)] + args, environ_update={"HOMEBREW_NO_COLOR": "1"})
+    # HOMEBREW_COLOR colors "Error:" even off a TTY, and GITHUB_ACTIONS turns it into a "::error::"
+    # annotation; either hides HOMEBREW_UNAVAILABLE. Homebrew ignores an empty GITHUB_ACTIONS.
+    environ_update = {"HOMEBREW_NO_COLOR": "1", "GITHUB_ACTIONS": ""}
+    rc, stdout, stderr = module.run_command([homebrew_bin(module)] + args, environ_update=environ_update)
     if rc == 0:
         return stdout
 
