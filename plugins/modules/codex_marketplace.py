@@ -37,8 +37,11 @@ attributes:
       source. If Codex is not installed or the Codex home directory
       (O(config_dir), else E(CODEX_HOME), else C(~/.codex)) does not exist,
       reports a change for O(state=present) and no change for O(state=absent)
-      without querying marketplace state. Check mode cannot see marketplaces
-      while Codex plugins are disabled (C(features.plugins)).
+      without querying marketplace state. With O(state=absent), reports a
+      change when Codex fails to list marketplaces because O(name) fails to
+      load, and fails when another marketplace fails to load. Check mode
+      cannot see marketplaces while Codex plugins are disabled
+      (C(features.plugins)).
     support: full
   diff_mode:
     description: Diff mode is not supported.
@@ -165,12 +168,13 @@ from ansible_collections.linuxhq.macos.plugins.module_utils.codex import (
 )
 
 
-def marketplaces(module):
+def marketplaces(module, missing=None):
     return codex_list(
         module,
         ["plugin", "marketplace", "list", "--json"],
         "marketplaces",
         "gather Codex marketplace information",
+        missing,
     )
 
 
@@ -268,8 +272,13 @@ def ensure_present(module, listed):
 def ensure_absent(module):
     name = module.params["name"]
     if module.check_mode:
+        # Listing fails while any marketplace is broken; removal still succeeds when Codex names this one.
+        listed = marketplaces(module, missing=f"\n- `{name}` at ")
+        if listed is None:
+            return True, None
+
         # A listed marketplace without a configured source (built-in or discovered) is already absent.
-        marketplace = find_marketplace(module)
+        marketplace = select_marketplace(listed, name)
         return marketplace is not None and bool(marketplace.get("marketplaceSource")), None
 
     # Remove directly: listing fails while any configured marketplace is broken.
