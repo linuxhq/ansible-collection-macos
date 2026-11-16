@@ -1,11 +1,18 @@
 ---
+breaking_changes:
+  - codex_marketplace and codex_plugin - pass arguments to the Codex CLI literally. Environment variables such as
+    C($HOME), C(~), and C(~user/) in arguments are no longer expanded, so an O(name) or O(marketplace) built from them,
+    or a codex_marketplace O(source) such as C($HOME/marketplace) or C(~user/marketplace), must be written out in
+    full. Codex still expands a leading C(~/) in the O(source) of a local marketplace
+    (https://github.com/linuxhq/ansible-collection-macos/pull/80).
+  - homebrew_info, homebrew_cask_info, and homebrew_services_info - pass names to brew literally. Environment
+    variables such as C($HOME), C(~), and C(~user/) in names are no longer expanded
+    (https://github.com/linuxhq/ansible-collection-macos/pull/80).
 bugfixes:
-  - codex_marketplace and codex_plugin - pass arguments to the Codex CLI without expanding environment variables
-    or C(~), so a name such as C($USER) can no longer select a different marketplace or plugin. Codex still expands
-    a leading C(~/) in the codex_marketplace O(source) of a local marketplace, but C(~user/) and environment
-    variables are no longer expanded there (https://github.com/linuxhq/ansible-collection-macos/pull/80).
-  - homebrew_info, homebrew_cask_info, and homebrew_services_info - pass names to brew without expanding environment
-    variables or C(~), so a name such as C($USER) can no longer query a different formula, cask, or service
+  - codex_marketplace and codex_plugin - a name that contains an environment variable or C(~), such as C($USER), no
+    longer selects a different marketplace or plugin (https://github.com/linuxhq/ansible-collection-macos/pull/80).
+  - homebrew_info, homebrew_cask_info, and homebrew_services_info - a name that contains an environment variable or
+    C(~), such as C($USER), no longer queries a different formula, cask, or service
     (https://github.com/linuxhq/ansible-collection-macos/pull/80).
   - codex_plugin - with O(state=absent), remove a plugin that Codex no longer lists only when its cache directory
     matches the case of O(marketplace) and O(name) exactly. On a case-insensitive file system, a name that differed

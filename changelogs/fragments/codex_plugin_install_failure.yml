@@ -1,0 +1,4 @@
+---
+bugfixes:
+  - codex_plugin - when Codex installs a plugin but does not list it afterwards, report the change in the failure
+    (https://github.com/linuxhq/ansible-collection-macos/pull/81).
