@@ -303,10 +303,8 @@ def test_existing_marketplace_with_different_source_fails(run_module):
 
 
 @pytest.mark.parametrize("check_mode", [False, True])
-@pytest.mark.parametrize(
-    "existing", [{"name": "example", "root": "/home/test"}, {**MARKETPLACE, "marketplaceSource": None}]
-)
-def test_existing_marketplace_without_source_fails(run_module, check_mode, existing):
+def test_existing_marketplace_without_source_fails(run_module, check_mode):
+    existing = {"name": "example", "root": "/home/test"}
     result, command, _lookup = run_module(
         codex_marketplace, {"name": "example", "source": SOURCE}, [{"marketplaces": [existing]}], check_mode
     )

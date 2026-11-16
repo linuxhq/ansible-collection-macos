@@ -21,7 +21,8 @@ options:
   name:
     description:
       - Cask names to gather information about.
-      - When omitted, information about all installed casks is gathered.
+      - When omitted or empty, information about all installed casks is
+        gathered.
     elements: str
     type: list
   path:
@@ -66,7 +67,8 @@ casks:
       returned: always
       type: bool
     desc:
-      description: Short description of the cask.
+      description: Short description of the cask, or V(null) when the cask
+        has no description.
       returned: always
       type: str
     full_token:
@@ -89,7 +91,8 @@ casks:
       returned: always
       type: bool
     tap:
-      description: Tap the cask comes from.
+      description: Tap the cask comes from, or V(null) when the cask does
+        not come from a tap.
       returned: always
       type: str
     token:

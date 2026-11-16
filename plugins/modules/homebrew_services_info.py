@@ -11,11 +11,11 @@ description:
   - Gather service information from Homebrew.
   - With O(name), gather information about the given services.
   - Names that Homebrew does not know are omitted from the results.
-  - Without O(name), gather information about every Homebrew service.
+  - Without O(name), gather information about every Homebrew service. Only
+    installed formulae that define a service are considered.
   - Homebrew reports a synthesized definition for any known formula, so a
     service is returned only when Homebrew reports its service file as
-    registered or the reported service file exists. Services whose formula is
-    not installed or defines no service are omitted.
+    registered or the reported service file exists.
   - Service information is returned as reported by C(brew services info --json).
 author:
   - Taylor Kimball (@tkimball83)
@@ -23,7 +23,8 @@ options:
   name:
     description:
       - Service names to gather information about.
-      - When omitted, information about all Homebrew services is gathered.
+      - When omitted or empty, information about all Homebrew services is
+        gathered.
     elements: str
     type: list
   path:
