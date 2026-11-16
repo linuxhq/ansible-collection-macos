@@ -65,33 +65,17 @@ def homebrew_outputs(module, args, default_arg, operation):
     return [output for output in outputs if output is not None]
 
 
-def homebrew_json(module, stdout, operation):
-    try:
-        return json.loads(stdout)
-    except ValueError as error:
-        module.fail_json(msg=f"Unable to parse brew output while {operation}: {error}")
-
-
-def homebrew_items(module, items, operation):
-    if not isinstance(items, list) or not all(isinstance(item, dict) for item in items):
-        module.fail_json(msg=f"Unexpected brew output while {operation}.")
-
-    return items
-
-
 def homebrew_unique(items, key):
     # brew repeats an item for a repeated name or for aliases of one name.
     seen = set()
     unique = []
 
     for item in items:
-        identifier = item.get(key)
-        if isinstance(identifier, str):
-            if identifier in seen:
-                continue
+        identifier = item[key]
+        if identifier in seen:
+            continue
 
-            seen.add(identifier)
-
+        seen.add(identifier)
         unique.append(item)
 
     return unique
@@ -103,11 +87,7 @@ def homebrew_info(module, kind):
     items = []
 
     for stdout in homebrew_outputs(module, ["info", "--json=v2", f"--{kind}"], "--installed", operation):
-        data = homebrew_json(module, stdout, operation)
-        if not isinstance(data, dict):
-            module.fail_json(msg=f"Unexpected brew output while {operation}.")
-
-        items += homebrew_items(module, data.get(key), operation)
+        items += json.loads(stdout)[key]
 
     return homebrew_unique(items, "full_token" if kind == "cask" else "full_name")
 
@@ -118,9 +98,9 @@ def homebrew_services_info(module):
 
     for stdout in homebrew_outputs(module, ["services", "info", "--json"], "--all", operation):
         # brew prints nothing for --all when no installed formula has a service.
-        if not module.params["name"] and not stdout.strip():
+        if not stdout:
             continue
 
-        services += homebrew_items(module, homebrew_json(module, stdout, operation), operation)
+        services += json.loads(stdout)
 
     return homebrew_unique(services, "name")

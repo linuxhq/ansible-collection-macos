@@ -215,7 +215,7 @@ def plugin_id(module):
 def select_plugin(module, listed):
     identifier = plugin_id(module)
     return next(
-        (plugin for plugin in listed if plugin.get("pluginId") == identifier),
+        (plugin for plugin in listed if plugin["pluginId"] == identifier),
         None,
     )
 
@@ -239,7 +239,10 @@ def ensure_present(module, plugin):
     )
     plugin = find_plugin(module)
     if plugin is None:
-        module.fail_json(msg=f"Codex plugin {identifier} was not found after installing it.")
+        module.fail_json(
+            msg=f"Codex plugin {identifier} was not found after installing it; Codex plugins may be disabled "
+            "(features.plugins).",
+        )
 
     return True, plugin
 
@@ -267,9 +270,6 @@ def ensure_unlisted_absent(module):
         return True, None
 
     remove_plugin(module)
-    if os.path.isdir(cache):
-        module.fail_json(msg=f"Codex plugin {plugin_id(module)} remains in {cache} after removing it.")
-
     return True, None
 
 
@@ -284,10 +284,6 @@ def ensure_absent(module):
         return True, None
 
     remove_plugin(module)
-    plugin = find_plugin(module)
-    if plugin is not None:
-        module.fail_json(msg=f"Codex plugin {plugin_id(module)} remains after removing it.")
-
     return True, None
 
 

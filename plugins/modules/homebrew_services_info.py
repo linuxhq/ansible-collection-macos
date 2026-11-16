@@ -139,7 +139,7 @@ def services(module):
     return [
         service
         for service in homebrew_services_info(module)
-        if service.get("registered") is True or (service.get("file") and os.path.exists(service["file"]))
+        if service["registered"] or os.path.exists(service["file"])
     ]
 
 

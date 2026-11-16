@@ -97,28 +97,12 @@ def codex_run_json(module, args, operation, missing=None):
         detail = stderr.strip() or stdout.strip()
         module.fail_json(msg=f"Unable to {operation}: {detail}")
 
-    try:
-        data = json.loads(stdout)
-    except ValueError as error:
-        module.fail_json(msg=f"Unable to parse codex output while {operation}: {error}")
-
-    if not isinstance(data, dict):
-        module.fail_json(msg=f"Unexpected codex output while {operation}.")
-
-    return data
+    return json.loads(stdout)
 
 
 def codex_list(module, args, key, operation, missing=None):
     data = codex_run_json(module, args, operation, missing)
-    if data is None:
-        return None
-
-    items = data.get(key)
-
-    if not isinstance(items, list) or not all(isinstance(item, dict) for item in items):
-        module.fail_json(msg=f"Unexpected codex output while {operation}.")
-
-    return items
+    return None if data is None else data[key]
 
 
 def codex_result(item):

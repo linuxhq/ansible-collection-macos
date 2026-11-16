@@ -84,30 +84,20 @@ def info(module, launchctl_bin):
         detail = stderr.strip() or stdout.strip()
         module.fail_json(msg=f"Unable to gather launchd information: {detail}")
 
-    lines = stdout.splitlines()
-    if not lines or lines[0].split("\t") != ["PID", "Status", "Label"]:
-        module.fail_json(msg=f"Unexpected launchctl list header: {(lines or [''])[0]}")
-
     services = []
 
-    for line in lines[1:]:
-        if not line:
-            continue
-
-        columns = line.split("\t")
-        if len(columns) != 3:
-            module.fail_json(msg=f"Unexpected launchctl list line: {line}")
-
-        pid, status, label = columns
+    # The first line is the "PID\tStatus\tLabel" header.
+    for line in stdout.splitlines()[1:]:
+        pid, status, label = line.split("\t", 2)
         if module.params["name"] and label not in module.params["name"]:
             continue
 
         try:
-            last_exit_status = int(status) if status not in ("-", "") else None
-            pid = int(pid) if pid not in ("-", "") else None
+            last_exit_status = None if status == "-" else int(status)
         except ValueError:
             module.fail_json(msg=f"Unexpected launchctl list line: {line}")
 
+        pid = None if pid == "-" else int(pid)
         services.append(
             {
                 "label": label,

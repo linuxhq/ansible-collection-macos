@@ -1,6 +1,5 @@
 """Homebrew query selection, unmodified results, unknown names, and failures."""
 
-import json
 import os
 
 import pytest
@@ -245,7 +244,7 @@ def test_services_selection(run_module, tmp_path, names):
     result, command, _lookup = run_module(
         homebrew_services_info,
         {"name": names},
-        [[present, root, service("uninstalled", str(tmp_path / "missing")), {"name": "nofile"}]],
+        [[present, root, service("uninstalled", str(tmp_path / "missing"))]],
         check_mode=True,
     )
     assert result == {"changed": False, "services": [present, root]}
@@ -258,16 +257,9 @@ def test_services_selection(run_module, tmp_path, names):
     ]
 
 
-@pytest.mark.parametrize("stdout", ["", " \n"])
-def test_services_all_without_services(run_module, stdout):
-    result, _command, _lookup = run_module(homebrew_services_info, responses=[(0, stdout, "")])
+def test_services_all_without_services(run_module):
+    result, _command, _lookup = run_module(homebrew_services_info, responses=[(0, "", "")])
     assert result == {"changed": False, "services": []}
-
-
-def test_services_named_empty_output_fails(run_module):
-    result, _command, _lookup = run_module(homebrew_services_info, {"name": ["redis"]}, [(0, "", "")])
-    assert result["failed"] is True
-    assert "Unable to parse brew output while gather Homebrew service information for redis" in result["msg"]
 
 
 def test_services_unknown_names_are_omitted(run_module, tmp_path):
@@ -298,7 +290,6 @@ def test_services_unknown_names_are_omitted(run_module, tmp_path):
     [
         ((1, "", " brew error \n"), "Unable to {operation}: brew error"),
         ((1, " stdout detail \n", ""), "Unable to {operation}: stdout detail"),
-        ((0, "not json", ""), "Unable to parse brew output while {operation}: "),
     ],
 )
 def test_command_failures(run_module, plugin, names, operation, response, message):
@@ -306,24 +297,6 @@ def test_command_failures(run_module, plugin, names, operation, response, messag
     assert result["failed"] is True
     assert result["msg"].startswith(message.format(operation=operation))
     assert command.call_count == 1
-
-
-@pytest.mark.parametrize(
-    "plugin,output",
-    [
-        (homebrew_info, []),
-        (homebrew_info, {"formulae": None}),
-        (homebrew_info, {"formulae": [1]}),
-        (homebrew_info, {"casks": []}),
-        (homebrew_cask_info, {"casks": "iterm2"}),
-        (homebrew_services_info, {}),
-        (homebrew_services_info, [None]),
-    ],
-)
-def test_unexpected_structure(run_module, plugin, output):
-    result, _command, _lookup = run_module(plugin, responses=[(0, json.dumps(output), "")])
-    assert result["failed"] is True
-    assert result["msg"].startswith("Unexpected brew output while gather Homebrew ")
 
 
 @pytest.mark.parametrize("plugin", [homebrew_info, homebrew_cask_info, homebrew_services_info])
