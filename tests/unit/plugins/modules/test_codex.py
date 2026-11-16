@@ -173,17 +173,10 @@ def test_absent_marketplace_not_configured_or_without_source_is_unchanged(run_mo
     assert command.call_count == 2
 
 
-@pytest.mark.parametrize(
-    "response,message",
-    [
-        ((1, "", "Error: permission denied\n"), "Unable to remove Codex marketplace example: Error: permission denied"),
-        ({}, "Unexpected codex output while remove Codex marketplace example."),
-        (removed("other"), "Unexpected codex output while remove Codex marketplace example."),
-    ],
-)
-def test_absent_marketplace_remove_failure(run_module, response, message):
+def test_absent_marketplace_remove_failure(run_module):
+    response = (1, "", "Error: permission denied\n")
     result, command, _lookup = run_module(codex_marketplace, {"name": "example", "state": "absent"}, [response])
-    assert result == {"failed": True, "msg": message}
+    assert result == {"failed": True, "msg": "Unable to remove Codex marketplace example: Error: permission denied"}
     assert command.call_count == 2
 
 
@@ -409,19 +402,6 @@ def test_existing_marketplace_with_different_manifest_name_is_kept(run_module):
     assert command.call_count == 3
 
 
-@pytest.mark.parametrize(
-    "response",
-    [{}, {"marketplaceName": None, "alreadyAdded": False}, {"marketplaceName": "example", "alreadyAdded": "no"}],
-)
-def test_unexpected_marketplace_add_result(run_module, response):
-    result, command, _lookup = run_module(
-        codex_marketplace, {"name": "example", "source": SOURCE}, [{"marketplaces": []}, response]
-    )
-    assert result["failed"] is True
-    assert result["msg"] == f"Unexpected codex output while add Codex marketplace example from {SOURCE}."
-    assert command.call_count == 3
-
-
 def test_mutation_refreshes_state(run_module, resource):
     plugin, params, key, result_key, item, expected, prefix, add_arg, _remove_arg, add_result = resource
     responses = [{key: []}, add_result, {key: [item]}]
@@ -431,19 +411,22 @@ def test_mutation_refreshes_state(run_module, resource):
     assert command.call_args_list[2].args[0] == ["/mock/bin/tool", *prefix, "add", add_arg, "--json"]
 
 
-def test_plugin_removal_refreshes_state(run_module):
+def test_plugin_removal_does_not_list_again(run_module):
     params = {"name": "editor", "marketplace": "example", "state": "absent"}
-    result, command, _lookup = run_module(codex_plugin, params, [{"installed": [PLUGIN]}, {}, {"installed": []}])
+    result, command, _lookup = run_module(codex_plugin, params, [{"installed": [PLUGIN]}, {}])
     assert result == {"changed": True, "plugin": None}
-    assert command.call_count == 4
-    assert command.call_args_list[2].args[0] == ["/mock/bin/tool", "plugin", "remove", "editor@example", "--json"]
+    assert [call.args[0][1:] for call in command.call_args_list] == [
+        ["--version"],
+        LIST_ARGS[codex_plugin],
+        ["plugin", "remove", "editor@example", "--json"],
+    ]
 
 
 def test_failed_postcondition(run_module, resource):
     plugin, params, key, _result_key, _item, _expected, _prefix, _add, _remove, add_result = resource
     result, command, _lookup = run_module(plugin, {**params, "state": "present"}, [{key: []}, add_result, {key: []}])
     assert result["failed"] is True
-    assert "not found" in result["msg"] or "not listed" in result["msg"]
+    assert result["msg"].endswith("; Codex plugins may be disabled (features.plugins).")
     assert command.call_count == 4
 
 
@@ -475,15 +458,6 @@ def test_unlisted_plugin_with_cache_is_removed(run_module, codex_home, check_mod
         assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "remove", "editor@example", "--json"]
 
 
-def test_unlisted_plugin_cache_postcondition(run_module, codex_home):
-    cache = codex_home / "plugins" / "cache" / "example" / "editor"
-    cache.mkdir(parents=True)
-    params = {"name": "editor", "marketplace": "example", "state": "absent"}
-    result, command, _lookup = run_module(codex_plugin, params, [{"installed": []}, {}])
-    assert result == {"failed": True, "msg": f"Codex plugin editor@example remains in {cache} after removing it."}
-    assert command.call_args_list[2].args[0] == ["/mock/bin/tool", "plugin", "remove", "editor@example", "--json"]
-
-
 @pytest.mark.parametrize("listed", [{"installed": []}, BROKEN_MARKETPLACE])
 @pytest.mark.parametrize("check_mode", [False, True])
 def test_unlisted_plugin_without_cache_is_unchanged(run_module, codex_home, check_mode, listed):
@@ -500,14 +474,6 @@ def test_present_plugin_in_broken_marketplace_fails(run_module, codex_home):
     assert result["failed"] is True
     assert result["msg"].startswith("Unable to gather Codex plugin information for marketplace example: Error: failed")
     assert command.call_count == 2
-
-
-def test_plugin_removal_postcondition(run_module):
-    params = {"name": "editor", "marketplace": "example", "state": "absent"}
-    result, command, _lookup = run_module(codex_plugin, params, [{"installed": [PLUGIN]}, {}, {"installed": [PLUGIN]}])
-    assert result["failed"] is True
-    assert "remains" in result["msg"]
-    assert command.call_count == 4
 
 
 @pytest.mark.parametrize("state", ["present", "absent"])

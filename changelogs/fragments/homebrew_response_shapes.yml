@@ -1,0 +1,4 @@
+---
+minor_changes:
+  - homebrew_info, homebrew_cask_info, and homebrew_services_info - rely on the documented JSON output
+    of brew instead of checking its structure (https://github.com/linuxhq/ansible-collection-macos/pull/78).

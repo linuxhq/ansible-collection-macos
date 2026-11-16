@@ -190,7 +190,7 @@ def marketplaces(module, missing=None):
 
 def select_marketplace(listed, name):
     # Codex lists a discovered marketplace before a configured one with the same name.
-    matches = [marketplace for marketplace in listed if marketplace.get("name") == name]
+    matches = [marketplace for marketplace in listed if marketplace["name"] == name]
     return next(
         (marketplace for marketplace in matches if marketplace.get("marketplaceSource")), next(iter(matches), None)
     )
@@ -216,21 +216,16 @@ def add_marketplace(module):
 
     args.append("--json")
 
-    operation = f"add Codex marketplace {name} from {source}"
-    result = codex_run_json(module, args, operation)
-    if not isinstance(result.get("marketplaceName"), str) or not isinstance(result.get("alreadyAdded"), bool):
-        module.fail_json(msg=f"Unexpected codex output while {operation}.")
-
-    return result
+    return codex_run_json(module, args, f"add Codex marketplace {name} from {source}")
 
 
 def remove_marketplace(module, name, missing=None):
-    operation = f"remove Codex marketplace {name}"
-    result = codex_run_json(module, ["plugin", "marketplace", "remove", name, "--json"], operation, missing)
-    if result is not None and result.get("marketplaceName") != name:
-        module.fail_json(msg=f"Unexpected codex output while {operation}.")
-
-    return result
+    return codex_run_json(
+        module,
+        ["plugin", "marketplace", "remove", name, "--json"],
+        f"remove Codex marketplace {name}",
+        missing,
+    )
 
 
 def ensure_present(module, listed):

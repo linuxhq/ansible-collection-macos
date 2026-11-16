@@ -1,4 +1,4 @@
-"""Executable resolution and CLI response validation."""
+"""Executable resolution and CLI failure reporting."""
 
 from unittest.mock import Mock
 
@@ -13,14 +13,9 @@ from ansible_collections.linuxhq.macos.plugins.modules import codex_plugin
     [
         ((1, "fallback detail", " stderr detail \n"), "stderr detail"),
         ((1, " fallback detail \n", ""), "fallback detail"),
-        ((0, "not json", ""), "Unable to parse codex output"),
-        ((0, "[]", ""), "Unexpected codex output"),
-        ((0, '{"installed": null}', ""), "Unexpected codex output"),
-        ((0, '{"installed": [1]}', ""), "Unexpected codex output"),
-        ((0, "{}", ""), "Unexpected codex output"),
     ],
 )
-def test_invalid_cli_response(run_module, response, message):
+def test_cli_failure(run_module, response, message):
     result, command, _lookup = run_module(codex_plugin, {"name": "editor", "marketplace": "example"}, [response])
     assert result["failed"] is True
     assert message in result["msg"]

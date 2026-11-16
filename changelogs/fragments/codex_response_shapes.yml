@@ -1,0 +1,6 @@
+---
+minor_changes:
+  - codex_marketplace and codex_plugin - rely on the documented JSON output of the Codex CLI instead of
+    checking its structure, and trust a successful C(codex plugin remove) instead of listing the plugin
+    again. The failure when an installed plugin is not listed now notes that Codex plugins may be
+    disabled (C(features.plugins)) (https://github.com/linuxhq/ansible-collection-macos/pull/78).
