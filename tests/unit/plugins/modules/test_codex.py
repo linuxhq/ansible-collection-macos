@@ -1,5 +1,6 @@
 """State transitions and failure contracts for both Codex modules."""
 
+import os
 import shutil
 
 import pytest
@@ -148,6 +149,20 @@ def test_plugin_list_is_scoped_to_marketplace(run_module):
         "openai-curated",
         "--json",
     ]
+
+
+@pytest.mark.parametrize("name", ["$CODEX_PROBE", "~"])
+def test_marketplace_name_is_not_expanded(run_module, monkeypatch, name):
+    monkeypatch.setenv("CODEX_PROBE", "example")
+    received = []
+
+    def remove(args, **_kwargs):
+        received.append(args)
+        return removed()
+
+    result, _command, _lookup = run_module(codex_marketplace, {"name": name, "state": "absent"}, [remove])
+    assert result == {"changed": True, "marketplace": None}
+    assert received == [["/mock/bin/tool", "plugin", "marketplace", "remove", name, "--json"]]
 
 
 def test_absent_marketplace_removes_without_listing(run_module):
@@ -458,6 +473,30 @@ def test_unlisted_plugin_with_cache_is_removed(run_module, codex_home, check_mod
 
 @pytest.mark.parametrize("listed", [{"installed": []}, BROKEN_MARKETPLACE])
 @pytest.mark.parametrize("check_mode", [False, True])
+@pytest.mark.parametrize("name,marketplace", [("Editor", "example"), ("editor", "Example")])
+def test_unlisted_plugin_cache_matches_exact_case(
+    run_module, monkeypatch, codex_home, check_mode, listed, name, marketplace
+):
+    cache = codex_home / "plugins" / "cache"
+    (cache / "example" / "editor").mkdir(parents=True)
+    isdir = os.path.isdir
+
+    def case_insensitive_isdir(path):
+        # APFS, the macOS default, matches path names case-insensitively.
+        if not str(path).startswith(str(cache)):
+            return isdir(path)
+
+        return isdir(os.path.join(cache, os.path.relpath(path, cache).lower()))
+
+    monkeypatch.setattr(codex_plugin.os.path, "isdir", case_insensitive_isdir)
+    params = {"name": name, "marketplace": marketplace, "state": "absent"}
+    result, command, _lookup = run_module(codex_plugin, params, [listed], check_mode)
+    assert result == {"changed": False, "plugin": None}
+    assert command.call_count == 2
+
+
+@pytest.mark.parametrize("listed", [{"installed": []}, BROKEN_MARKETPLACE])
+@pytest.mark.parametrize("check_mode", [False, True])
 def test_unlisted_plugin_without_cache_is_unchanged(run_module, codex_home, check_mode, listed):
     (codex_home / "plugins" / "cache" / "example" / "other").mkdir(parents=True)
     params = {"name": "editor", "marketplace": "example", "state": "absent"}
@@ -549,7 +588,7 @@ def test_existing_config_dir_in_check_mode_queries_state(run_module, resource, t
     result, command, _lookup = run_module(plugin, {**params, "config_dir": str(tmp_path)}, [{key: [item]}], True)
     assert result["changed"] is False
     assert command.call_count == 2
-    assert command.call_args.kwargs == {"environ_update": {"CODEX_HOME": str(tmp_path)}}
+    assert command.call_args.kwargs == {"environ_update": {"CODEX_HOME": str(tmp_path)}, "expand_user_and_vars": False}
 
 
 @pytest.mark.parametrize("already_added", [True, False])
@@ -685,4 +724,4 @@ def test_version_check_uses_config_dir(run_module, tmp_path):
     result, command, _lookup = run_module(codex_plugin, params, version="codex-cli 0.152.0\n")
     assert result["failed"] is True
     assert command.call_args.args[0] == VERSION_ARGS
-    assert command.call_args.kwargs == {"environ_update": {"CODEX_HOME": str(tmp_path)}}
+    assert command.call_args.kwargs == {"environ_update": {"CODEX_HOME": str(tmp_path)}, "expand_user_and_vars": False}

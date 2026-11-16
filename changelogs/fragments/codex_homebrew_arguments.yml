@@ -1,0 +1,16 @@
+---
+bugfixes:
+  - codex_marketplace and codex_plugin - pass arguments to the Codex CLI without expanding environment variables
+    or C(~), so a name such as C($USER) can no longer select a different marketplace or plugin. Codex still expands
+    a leading C(~/) in the codex_marketplace O(source) of a local marketplace, but C(~user/) and environment
+    variables are no longer expanded there (https://github.com/linuxhq/ansible-collection-macos/pull/80).
+  - homebrew_info, homebrew_cask_info, and homebrew_services_info - pass names to brew without expanding environment
+    variables or C(~), so a name such as C($USER) can no longer query a different formula, cask, or service
+    (https://github.com/linuxhq/ansible-collection-macos/pull/80).
+  - codex_plugin - with O(state=absent), remove a plugin that Codex no longer lists only when its cache directory
+    matches the case of O(marketplace) and O(name) exactly. On a case-insensitive file system, a name that differed
+    only in case removed another installed plugin (https://github.com/linuxhq/ansible-collection-macos/pull/80).
+minor_changes:
+  - codex_marketplace and codex_plugin - run an existing O(executable) without first checking that it is an
+    executable file; the system rejects one that cannot run
+    (https://github.com/linuxhq/ansible-collection-macos/pull/80).

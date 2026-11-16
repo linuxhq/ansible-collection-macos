@@ -31,7 +31,7 @@ def test_config_directory_is_passed_to_command(run_module, tmp_path):
         [{"installed": []}],
     )
     assert result["changed"] is False
-    assert command.call_args.kwargs == {"environ_update": {"CODEX_HOME": str(config)}}
+    assert command.call_args.kwargs == {"environ_update": {"CODEX_HOME": str(config)}, "expand_user_and_vars": False}
 
 
 def test_explicit_executable(run_module, tmp_path):
@@ -47,20 +47,30 @@ def test_explicit_executable(run_module, tmp_path):
     lookup.assert_not_called()
 
 
-@pytest.mark.parametrize("kind", ["missing", "directory", "nonexecutable"])
-def test_invalid_explicit_executable(run_module, tmp_path, kind):
+def test_missing_explicit_executable(run_module, tmp_path):
     path = tmp_path / "codex"
-    if kind == "directory":
-        path.mkdir()
-    elif kind == "nonexecutable":
-        path.touch(mode=0o644)
-
     result, command, _lookup = run_module(
         codex_plugin, {"name": "editor", "marketplace": "example", "executable": str(path)}
     )
-    assert result["failed"] is True
-    assert "Unable to locate codex executable" in result["msg"]
+    assert result == {"failed": True, "msg": f"Unable to locate codex executable: {path}"}
     command.assert_not_called()
+
+
+@pytest.mark.parametrize("kind", ["directory", "nonexecutable"])
+def test_existing_explicit_executable_is_run(run_module, tmp_path, kind):
+    path = tmp_path / "codex"
+    if kind == "directory":
+        path.mkdir()
+    else:
+        path.touch(mode=0o644)
+
+    result, command, _lookup = run_module(
+        codex_plugin,
+        {"name": "editor", "marketplace": "example", "state": "absent", "executable": str(path)},
+        [{"installed": []}],
+    )
+    assert result["changed"] is False
+    assert command.call_args.args[0][0] == str(path)
 
 
 def test_missing_optional_explicit_executable(run_module, tmp_path):
@@ -80,15 +90,6 @@ def test_required_executable_lookup(run_module):
     command.assert_not_called()
 
 
-def test_expand_executable_home(monkeypatch):
-    module = Mock(params={"executable": "~/bin/codex"})
-    monkeypatch.setattr(codex.os.path, "expanduser", lambda value: "/home/test/bin/codex")
-    monkeypatch.setattr(codex.os.path, "isfile", lambda value: value == "/home/test/bin/codex")
-    monkeypatch.setattr(codex.os, "access", lambda value, mode: value == "/home/test/bin/codex")
-    assert codex.codex_bin(module) == "/home/test/bin/codex"
-    module.fail_json.assert_not_called()
-
-
 def test_result_conversion_is_recursive_and_does_not_mutate_input():
     original = {"pluginId": "editor@example", "nestedData": {"sourceType": "git"}}
     assert codex.codex_result(original) == {"plugin_id": "editor@example", "nested_data": {"source_type": "git"}}
@@ -99,7 +100,7 @@ def test_result_conversion_is_recursive_and_does_not_mutate_input():
 @pytest.mark.parametrize(
     "config_dir,environment,expected",
     [
-        ("~/custom", "/env/codex", "{home}/custom"),
+        ("{home}/custom", "/env/codex", "{home}/custom"),
         (None, "/env/codex", "/env/codex"),
         (None, "", "{home}/.codex"),
         (None, None, "{home}/.codex"),
@@ -112,5 +113,5 @@ def test_codex_home_resolution(monkeypatch, tmp_path, config_dir, environment, e
     else:
         monkeypatch.setenv("CODEX_HOME", environment)
 
-    module = Mock(params={"config_dir": config_dir})
+    module = Mock(params={"config_dir": config_dir and config_dir.format(home=tmp_path)})
     assert codex.codex_home(module) == expected.format(home=tmp_path)

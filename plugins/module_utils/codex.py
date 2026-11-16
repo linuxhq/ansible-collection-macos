@@ -22,14 +22,13 @@ def codex_bin(module, required=True):
     executable = module.params["executable"]
 
     if executable:
-        executable = os.path.expanduser(executable)
-        if not os.path.exists(executable) and not required:
-            return None
+        if os.path.exists(executable):
+            return executable
 
-        if not os.path.isfile(executable) or not os.access(executable, os.X_OK):
+        if required:
             module.fail_json(msg=f"Unable to locate codex executable: {executable}")
 
-        return executable
+        return None
 
     executable = module.get_bin_path(
         "codex",
@@ -44,7 +43,7 @@ def codex_bin(module, required=True):
 def codex_home(module):
     config_dir = module.params["config_dir"]
     if config_dir:
-        return os.path.expanduser(config_dir)
+        return config_dir
 
     return os.environ.get("CODEX_HOME") or os.path.expanduser("~/.codex")
 
@@ -63,11 +62,10 @@ def codex_unavailable(module):
 def codex_run(module, args):
     environment = None
     if module.params["config_dir"]:
-        environment = {
-            "CODEX_HOME": os.path.expanduser(module.params["config_dir"]),
-        }
+        environment = {"CODEX_HOME": module.params["config_dir"]}
 
-    return module.run_command([codex_bin(module)] + args, environ_update=environment)
+    # Ansible would otherwise expand "$VAR" and "~" in arguments into the name of another resource.
+    return module.run_command([codex_bin(module)] + args, environ_update=environment, expand_user_and_vars=False)
 
 
 def codex_version_check(module):

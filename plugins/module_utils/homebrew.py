@@ -39,7 +39,10 @@ def homebrew_output(module, args, operation, skip_unavailable=False):
     # HOMEBREW_COLOR colors "Error:" even off a TTY, and GITHUB_ACTIONS turns it into a "::error::"
     # annotation; either hides HOMEBREW_UNAVAILABLE. Homebrew ignores an empty GITHUB_ACTIONS.
     environ_update = {"HOMEBREW_NO_COLOR": "1", "GITHUB_ACTIONS": ""}
-    rc, stdout, stderr = module.run_command([homebrew_bin(module)] + args, environ_update=environ_update)
+    # Ansible would otherwise expand "$VAR" and "~" in arguments into the name of another formula or cask.
+    rc, stdout, stderr = module.run_command(
+        [homebrew_bin(module)] + args, environ_update=environ_update, expand_user_and_vars=False
+    )
     if rc == 0:
         return stdout
 
