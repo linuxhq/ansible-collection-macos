@@ -99,7 +99,7 @@ def resource(request):
 
 LIST_ARGS = {
     codex_marketplace: ["plugin", "marketplace", "list", "--json"],
-    codex_plugin: ["plugin", "list", "--marketplace", "example", "--json"],
+    codex_plugin: ["plugin", "list", "--marketplace=example", "--json"],
 }
 
 NOT_CONFIGURED = (1, "", "Error: marketplace `example` is not configured or installed\n")
@@ -145,8 +145,7 @@ def test_plugin_list_is_scoped_to_marketplace(run_module):
         "/mock/bin/tool",
         "plugin",
         "list",
-        "--marketplace",
-        "openai-curated",
+        "--marketplace=openai-curated",
         "--json",
     ]
 
@@ -162,14 +161,49 @@ def test_marketplace_name_is_not_expanded(run_module, monkeypatch, name):
 
     result, _command, _lookup = run_module(codex_marketplace, {"name": name, "state": "absent"}, [remove])
     assert result == {"changed": True, "marketplace": None}
-    assert received == [["/mock/bin/tool", "plugin", "marketplace", "remove", name, "--json"]]
+    assert received == [["/mock/bin/tool", "plugin", "marketplace", "remove", "--json", "--", name]]
+
+
+@pytest.mark.parametrize("value", ["-h", "--help"])
+def test_option_like_marketplace_values_follow_separator(run_module, value):
+    result, command, _lookup = run_module(codex_marketplace, {"name": value, "state": "absent"}, [removed(value)])
+    assert result == {"changed": True, "marketplace": None}
+    assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "remove", "--json", "--", value]
+
+    responses = [{"marketplaces": []}, added(), {"marketplaces": [MARKETPLACE]}]
+    result, command, _lookup = run_module(codex_marketplace, {"name": "example", "source": value}, responses)
+    assert result["changed"] is True
+    assert command.call_args_list[2].args[0] == [
+        "/mock/bin/tool",
+        "plugin",
+        "marketplace",
+        "add",
+        "--json",
+        "--",
+        value,
+    ]
+
+
+@pytest.mark.parametrize("name,marketplace", [("-h", "--help"), ("--help", "-x")])
+@pytest.mark.parametrize("state", ["present", "absent"])
+def test_option_like_plugin_values_are_not_options(run_module, name, marketplace, state):
+    identifier = f"{name}@{marketplace}"
+    plugin = {**PLUGIN, "pluginId": identifier, "name": name, "marketplaceName": marketplace}
+    listed = [{"installed": []}, {}, {"installed": [plugin]}] if state == "present" else [{"installed": [plugin]}, {}]
+    params = {"name": name, "marketplace": marketplace, "state": state}
+    result, command, _lookup = run_module(codex_plugin, params, listed)
+    assert result["changed"] is True
+    assert [call.args[0][1:] for call in command.call_args_list][1:3] == [
+        ["plugin", "list", f"--marketplace={marketplace}", "--json"],
+        ["plugin", "add" if state == "present" else "remove", "--json", "--", identifier],
+    ]
 
 
 def test_absent_marketplace_removes_without_listing(run_module):
     result, command, _lookup = run_module(codex_marketplace, {"name": "example", "state": "absent"}, [removed()])
     assert result == {"changed": True, "marketplace": None}
     assert command.call_count == 2
-    assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "remove", "example", "--json"]
+    assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "remove", "--json", "--", "example"]
 
 
 @pytest.mark.parametrize(
@@ -211,7 +245,7 @@ def test_existing_marketplace_with_same_source_is_unchanged(run_module):
     )
     assert result == {"changed": False, "marketplace": MARKETPLACE_RESULT}
     assert command.call_count == 3
-    assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "add", SOURCE, "--json"]
+    assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "add", "--json", "--", SOURCE]
 
 
 @pytest.mark.parametrize(
@@ -337,7 +371,7 @@ def test_new_marketplace_with_different_manifest_name_is_removed(run_module):
     assert result["failed"] is True
     assert result["msg"] == f"Codex marketplace source {SOURCE} declares marketplace other, not example."
     assert command.call_count == 5
-    assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "remove", "other", "--json"]
+    assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "remove", "--json", "--", "other"]
 
 
 def test_replaced_marketplace_with_different_manifest_name_is_kept(run_module):
@@ -371,7 +405,7 @@ def test_new_marketplace_beside_discovered_marketplace_is_removed(run_module):
     assert "changed" not in result
     assert result["msg"] == f"Codex marketplace source {SOURCE} declares marketplace other, not example."
     assert command.call_count == 5
-    assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "remove", "other", "--json"]
+    assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "remove", "--json", "--", "other"]
 
 
 def test_replaced_marketplace_beside_discovered_marketplace_is_kept(run_module):
@@ -421,7 +455,7 @@ def test_mutation_refreshes_state(run_module, resource):
     result, command, _lookup = run_module(plugin, {**params, "state": "present"}, responses)
     assert result == {"changed": True, result_key: expected}
     assert command.call_count == 4
-    assert command.call_args_list[2].args[0] == ["/mock/bin/tool", *prefix, "add", add_arg, "--json"]
+    assert command.call_args_list[2].args[0] == ["/mock/bin/tool", *prefix, "add", "--json", "--", add_arg]
 
 
 def test_plugin_removal_does_not_list_again(run_module):
@@ -431,7 +465,7 @@ def test_plugin_removal_does_not_list_again(run_module):
     assert [call.args[0][1:] for call in command.call_args_list] == [
         ["--version"],
         LIST_ARGS[codex_plugin],
-        ["plugin", "remove", "editor@example", "--json"],
+        ["plugin", "remove", "--json", "--", "editor@example"],
     ]
 
 
@@ -473,7 +507,7 @@ def test_unlisted_plugin_with_cache_is_removed(run_module, codex_home, check_mod
         assert command.call_count == 2
     else:
         assert command.call_count == 3
-        assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "remove", "editor@example", "--json"]
+        assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "remove", "--json", "--", "editor@example"]
 
 
 @pytest.mark.parametrize("listed", [{"installed": []}, BROKEN_MARKETPLACE])
@@ -628,14 +662,15 @@ def test_marketplace_options_preserve_argument_boundaries(run_module):
         "plugin",
         "marketplace",
         "add",
-        "/repo with spaces",
+        "--json",
         "--ref",
         "release branch",
         "--sparse",
         "plugins/editor",
         "--sparse",
         "plugins/with space",
-        "--json",
+        "--",
+        "/repo with spaces",
     ]
 
 

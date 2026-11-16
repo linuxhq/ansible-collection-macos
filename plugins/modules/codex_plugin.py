@@ -201,7 +201,7 @@ from ansible_collections.linuxhq.macos.plugins.module_utils.codex import (
 def plugins(module, missing=None):
     return codex_list(
         module,
-        ["plugin", "list", "--marketplace", module.params["marketplace"], "--json"],
+        ["plugin", "list", f"--marketplace={module.params['marketplace']}", "--json"],
         "installed",
         f"gather Codex plugin information for marketplace {module.params['marketplace']}",
         missing,
@@ -234,7 +234,7 @@ def ensure_present(module, plugin):
     identifier = plugin_id(module)
     codex_run_json(
         module,
-        ["plugin", "add", identifier, "--json"],
+        ["plugin", "add", "--json", "--", identifier],
         f"install Codex plugin {identifier}",
     )
     plugin = find_plugin(module)
@@ -259,7 +259,7 @@ def remove_plugin(module):
     identifier = plugin_id(module)
     codex_run_json(
         module,
-        ["plugin", "remove", identifier, "--json"],
+        ["plugin", "remove", "--json", "--", identifier],
         f"remove Codex plugin {identifier}",
     )
 
