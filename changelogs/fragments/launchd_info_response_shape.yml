@@ -2,4 +2,4 @@
 minor_changes:
   - launchd_info - parse C(launchctl list) output by its tab-separated columns without checking its header,
     blank lines, or column count, and keep any tab in a label as part of the label
-    (https://github.com/linuxhq/ansible-collection-macos/pull/PR).
+    (https://github.com/linuxhq/ansible-collection-macos/pull/78).
