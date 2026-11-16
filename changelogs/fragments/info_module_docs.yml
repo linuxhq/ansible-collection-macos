@@ -1,0 +1,4 @@
+---
+trivial:
+  - launchd_info, homebrew_info, homebrew_cask_info, and homebrew_services_info - correct the documented launchd
+    domain, empty O(name) behavior, service selection, and nullable return values.

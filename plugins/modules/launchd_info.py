@@ -12,14 +12,16 @@ description:
   - With O(name), gather information about the given service labels; labels
     that are not loaded are omitted from the results.
   - Without O(name), gather information about every loaded service.
-  - Results reflect the launchd session domain of the connecting user.
+  - Results reflect the launchd domain of the user the module runs as, which
+    is the become user when privilege escalation is used.
 author:
   - Taylor Kimball (@tkimball83)
 options:
   name:
     description:
       - Service labels to gather information about.
-      - When omitted, information about all loaded services is gathered.
+      - When omitted or empty, information about all loaded services is
+        gathered.
     elements: str
     type: list
 requirements:

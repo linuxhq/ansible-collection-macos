@@ -21,7 +21,8 @@ options:
   name:
     description:
       - Formula names to gather information about.
-      - When omitted, information about all installed formulae is gathered.
+      - When omitted or empty, information about all installed formulae is
+        gathered.
     elements: str
     type: list
   path:
@@ -66,7 +67,8 @@ formulae:
       returned: always
       type: bool
     desc:
-      description: Short description of the formula.
+      description: Short description of the formula, or V(null) when the
+        formula has no description.
       returned: always
       type: str
     full_name:
@@ -103,7 +105,8 @@ formulae:
       returned: always
       type: bool
     tap:
-      description: Tap the formula comes from.
+      description: Tap the formula comes from, or V(null) when the formula
+        does not come from a tap.
       returned: always
       type: str
     versions:
@@ -120,7 +123,8 @@ formulae:
           returned: always
           type: str
         stable:
-          description: Latest stable version.
+          description: Latest stable version, or V(null) when the formula has
+            no stable version.
           returned: always
           type: str
 """
