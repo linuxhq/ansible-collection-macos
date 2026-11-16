@@ -439,7 +439,12 @@ def test_failed_postcondition(run_module, resource):
     plugin, params, key, _result_key, _item, _expected, _prefix, _add, _remove, add_result = resource
     result, command, _lookup = run_module(plugin, {**params, "state": "present"}, [{key: []}, add_result, {key: []}])
     assert result["failed"] is True
-    assert result["msg"].endswith("; Codex plugins may be disabled (features.plugins).")
+    assert result["changed"] is True
+    if plugin is codex_plugin:
+        assert result["msg"] == "Codex plugin editor@example was not found after installing it."
+    else:
+        assert result["msg"].endswith("; Codex plugins may be disabled (features.plugins).")
+
     assert command.call_count == 4
 
 

@@ -239,10 +239,7 @@ def ensure_present(module, plugin):
     )
     plugin = find_plugin(module)
     if plugin is None:
-        module.fail_json(
-            msg=f"Codex plugin {identifier} was not found after installing it; Codex plugins may be disabled "
-            "(features.plugins).",
-        )
+        module.fail_json(changed=True, msg=f"Codex plugin {identifier} was not found after installing it.")
 
     return True, plugin
 
