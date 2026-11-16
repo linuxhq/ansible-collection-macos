@@ -13,7 +13,7 @@ description:
   - With O(state=absent), a plugin that Codex no longer lists, such as one
     whose marketplace was removed or fails to load, is still removed when its
     cache directory C(plugins/cache/<marketplace>/<name>) exists in the Codex
-    home directory.
+    home directory with the exact case of O(marketplace) and O(name).
     The Codex home directory is O(config_dir), else E(CODEX_HOME), else
     C(~/.codex).
   - With O(state=absent), reports no change without running Codex when the
@@ -247,8 +247,15 @@ def ensure_present(module, plugin):
     return True, plugin
 
 
-def plugin_cache(module):
-    return os.path.join(codex_home(module), "plugins", "cache", module.params["marketplace"], module.params["name"])
+def cached(parent, name):
+    # APFS matches names case-insensitively, so Codex would remove a plugin whose name differs only in case.
+    return os.path.isdir(os.path.join(parent, name)) and name in os.listdir(parent)
+
+
+def plugin_cached(module):
+    cache = os.path.join(codex_home(module), "plugins", "cache")
+    marketplace = module.params["marketplace"]
+    return cached(cache, marketplace) and cached(os.path.join(cache, marketplace), module.params["name"])
 
 
 def remove_plugin(module):
@@ -262,8 +269,7 @@ def remove_plugin(module):
 
 def ensure_unlisted_absent(module):
     # Codex stops listing a plugin once its marketplace is removed, but keeps it installed.
-    cache = plugin_cache(module)
-    if not os.path.isdir(cache):
+    if not plugin_cached(module):
         return False, None
 
     if module.check_mode:

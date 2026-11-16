@@ -109,7 +109,9 @@ def test_color_is_disabled(run_module, plugin, output):
     result, command, _lookup = run_module(plugin, {"name": ["one", "missing"]}, [unavailable, output, unavailable])
     assert result["changed"] is False
     environ_update = {"HOMEBREW_NO_COLOR": "1", "GITHUB_ACTIONS": ""}
-    assert [call.kwargs for call in command.call_args_list] == [{"environ_update": environ_update}] * 3
+    assert [call.kwargs for call in command.call_args_list] == [
+        {"environ_update": environ_update, "expand_user_and_vars": False}
+    ] * 3
 
 
 @pytest.mark.parametrize(
@@ -120,7 +122,7 @@ def test_github_actions_annotations_are_disabled(run_module, monkeypatch, plugin
     monkeypatch.setenv("CI", "true")
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
 
-    def unavailable(args, environ_update):
+    def unavailable(args, environ_update, **_kwargs):
         # Homebrew prints errors as GitHub Actions annotations while GITHUB_ACTIONS is non-empty.
         prefix = "::error::" if {**os.environ, **environ_update}["GITHUB_ACTIONS"] else "Error: "
         return 1, "", f'{prefix}No available formula with the name "missing".\n'
@@ -304,3 +306,31 @@ def test_missing_brew(run_module, plugin):
     result, command, _lookup = run_module(plugin, executable=None)
     assert result == {"failed": True, "msg": "Unable to locate brew executable."}
     command.assert_not_called()
+
+
+@pytest.mark.parametrize("plugin,key,kind,_item", PACKAGES)
+@pytest.mark.parametrize("name", ["$HOMEBREW_PROBE", "~"])
+def test_package_names_are_not_expanded(run_module, monkeypatch, plugin, key, kind, _item, name):
+    monkeypatch.setenv("HOMEBREW_PROBE", "wget")
+    received = []
+
+    def query(args, **_kwargs):
+        received.append(args)
+        return {key: []}
+
+    result, _command, _lookup = run_module(plugin, {"name": [name]}, [query])
+    assert result == {"changed": False, key: []}
+    assert received == [["/mock/bin/tool", "info", "--json=v2", f"--{kind}", "--", name]]
+
+
+def test_service_names_are_not_expanded(run_module, monkeypatch):
+    monkeypatch.setenv("HOMEBREW_PROBE", "wget")
+    received = []
+
+    def query(args, **_kwargs):
+        received.append(args)
+        return []
+
+    result, _command, _lookup = run_module(homebrew_services_info, {"name": ["$HOMEBREW_PROBE"]}, [query])
+    assert result == {"changed": False, "services": []}
+    assert received == [["/mock/bin/tool", "services", "info", "--json", "--", "$HOMEBREW_PROBE"]]

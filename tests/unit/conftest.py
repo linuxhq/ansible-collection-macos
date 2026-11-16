@@ -1,6 +1,7 @@
 """Run real Ansible argument validation while isolating external commands."""
 
 import json
+import os
 from unittest.mock import Mock
 
 import pytest
@@ -41,6 +42,10 @@ def run_module(monkeypatch):
         pending = list(responses)
 
         def respond(args, **kwargs):
+            if kwargs.get("expand_user_and_vars", True):
+                # AnsibleModule.run_command expands "$VAR" and "~" in every argument unless told not to.
+                args = [os.path.expanduser(os.path.expandvars(arg)) for arg in args]
+
             if args[1:] == ["--version"]:
                 return version if isinstance(version, tuple) else (0, version, "")
 

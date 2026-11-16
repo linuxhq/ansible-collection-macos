@@ -82,6 +82,8 @@ options:
   source:
     description:
       - Local path, GitHub repository, HTTPS Git URL, or SSH Git URL.
+      - Passed to Codex as given. Codex expands a leading C(~/) in a local
+        path; environment variables and C(~user/) are not expanded.
       - Required when O(state=present).
       - Must match the configured source of an existing marketplace, unless a
         Git source replaces a local marketplace.
