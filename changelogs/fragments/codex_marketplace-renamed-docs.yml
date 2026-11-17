@@ -1,4 +1,0 @@
----
-trivial:
-  - codex_marketplace - document that a marketplace whose manifest name changed must be removed
-    with O(state=absent) and the name it was originally configured with.
