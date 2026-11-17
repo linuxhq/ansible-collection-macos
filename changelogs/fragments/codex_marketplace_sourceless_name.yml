@@ -1,9 +1,0 @@
----
-bugfixes:
-  - codex_marketplace - with O(state=present), add a marketplace whose name is also used by a built-in or discovered
-    marketplace instead of failing because that marketplace has no configured source. Codex adds a configured
-    marketplace beside a discovered one and rejects a reserved built-in name, so O(state=present) after
-    O(state=absent) now converges (https://github.com/linuxhq/ansible-collection-macos/pull/86).
-trivial:
-  - codex_marketplace - document that O(state=present) lists all marketplaces first and fails while any marketplace
-    fails to load (https://github.com/linuxhq/ansible-collection-macos/pull/86).
