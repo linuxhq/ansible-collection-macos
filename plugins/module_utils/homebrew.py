@@ -6,11 +6,12 @@ import re
 
 HOMEBREW_PATH_DEFAULT = "/usr/local/bin:/opt/homebrew/bin:/home/linuxbrew/.linuxbrew/bin"
 
-# Errors Homebrew raises for a formula or cask name it does not know. A formula file that Homebrew
-# finds but cannot load reports the same first line, followed by "In formula file:".
+# Errors Homebrew raises for a formula or cask name it does not know, including a cask name it
+# rejects as invalid. A formula file that Homebrew finds but cannot load reports the same first
+# line, followed by "In formula file:".
 HOMEBREW_UNAVAILABLE = re.compile(
     r"^Error: (?:No available formula(?: or cask)? with the name \"[^\n]*$(?!\nIn formula file:)"
-    r"|Cask '.+' is unavailable(?:\.$|: No Cask with this name exists\.|: '.+' does not exist\.$))",
+    r"|Cask '.+' is unavailable(?:\.$|: (?:No Cask with this name exists|Invalid cask name)\.|: '.+' does not exist\.$))",
     re.MULTILINE,
 )
 
