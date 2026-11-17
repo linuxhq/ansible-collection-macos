@@ -225,7 +225,11 @@ def test_absent_marketplace_not_configured_or_without_source_is_unchanged(run_mo
 def test_absent_marketplace_remove_failure(run_module):
     response = (1, "", "Error: permission denied\n")
     result, command, _lookup = run_module(codex_marketplace, {"name": "example", "state": "absent"}, [response])
-    assert result == {"failed": True, "msg": "Unable to remove Codex marketplace example: Error: permission denied"}
+    assert result == {
+        "changed": False,
+        "failed": True,
+        "msg": "Unable to remove Codex marketplace example: Error: permission denied",
+    }
     assert command.call_count == 2
 
 
@@ -378,6 +382,7 @@ def test_marketplace_without_source_rejected_by_codex_fails(run_module):
         [{"marketplaces": [builtin]}, (1, "", stderr)],
     )
     assert result == {
+        "changed": False,
         "failed": True,
         "msg": f"Unable to add Codex marketplace openai-curated from {SOURCE}: Error: marketplace `openai-curated` "
         "is reserved and cannot be added from this source",
@@ -504,6 +509,52 @@ def test_failed_postcondition(run_module, resource):
         assert result["msg"].endswith("; Codex plugins may be disabled (features.plugins).")
 
     assert command.call_count == 4
+
+
+LIST_FAILURE = (1, "", "Error: permission denied\n")
+
+
+def test_list_failure_after_add_reports_changed(run_module, resource):
+    plugin, params, key, _result_key, _item, _expected, _prefix, _add, _remove, add_result = resource
+    result, command, _lookup = run_module(plugin, {**params, "state": "present"}, [{key: []}, add_result, LIST_FAILURE])
+    assert result["failed"] is True
+    assert result["changed"] is True
+    assert result["msg"].startswith("Unable to gather Codex ")
+    assert command.call_count == 4
+
+
+def test_list_failure_after_already_added_marketplace_is_unchanged(run_module):
+    result, command, _lookup = run_module(
+        codex_marketplace,
+        {"name": "example", "source": SOURCE},
+        [{"marketplaces": [DISCOVERED]}, added(already_added=True), LIST_FAILURE],
+    )
+    assert result == {
+        "changed": False,
+        "failed": True,
+        "msg": "Unable to gather Codex marketplace information: Error: permission denied",
+    }
+    assert command.call_count == 4
+
+
+@pytest.mark.parametrize(
+    "responses",
+    [
+        [LIST_FAILURE],
+        [{"marketplaces": [{**MARKETPLACE, "name": "other"}]}, LIST_FAILURE],
+    ],
+    ids=["list", "remove"],
+)
+def test_failure_after_adding_marketplace_with_different_manifest_name_reports_changed(run_module, responses):
+    result, command, _lookup = run_module(
+        codex_marketplace,
+        {"name": "example", "source": SOURCE},
+        [{"marketplaces": []}, added("other"), *responses],
+    )
+    assert result["failed"] is True
+    assert result["changed"] is True
+    assert result["msg"].endswith(": Error: permission denied")
+    assert command.call_count == 3 + len(responses)
 
 
 BROKEN_MARKETPLACE = (

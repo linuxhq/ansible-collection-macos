@@ -86,20 +86,20 @@ def codex_version_check(module):
         module.fail_json(msg=f"Codex {match.group(1)} is installed, but codex >= {CODEX_VERSION_MINIMUM} is required.")
 
 
-def codex_run_json(module, args, operation, missing=None):
+def codex_run_json(module, args, operation, missing=None, changed=False):
     rc, stdout, stderr = codex_run(module, args)
     if rc != 0:
         if missing is not None and missing in stderr:
             return None
 
         detail = stderr.strip() or stdout.strip()
-        module.fail_json(msg=f"Unable to {operation}: {detail}")
+        module.fail_json(changed=changed, msg=f"Unable to {operation}: {detail}")
 
     return json.loads(stdout)
 
 
-def codex_list(module, args, key, operation, missing=None):
-    data = codex_run_json(module, args, operation, missing)
+def codex_list(module, args, key, operation, missing=None, changed=False):
+    data = codex_run_json(module, args, operation, missing, changed)
     return None if data is None else data[key]
 
 

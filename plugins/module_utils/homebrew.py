@@ -11,7 +11,7 @@ HOMEBREW_PATH_DEFAULT = "/usr/local/bin:/opt/homebrew/bin:/home/linuxbrew/.linux
 # line, followed by "In formula file:".
 HOMEBREW_UNAVAILABLE = re.compile(
     r"^Error: (?:No available formula(?: or cask)? with the name \"[^\n]*$(?!\nIn formula file:)"
-    r"|Cask '.+' is unavailable(?:\.$|: (?:No Cask with this name exists|Invalid cask name)\.|: '.+' does not exist\.$))",
+    r"|Cask '.*' is unavailable(?:\.$|: (?:No Cask with this name exists|Invalid cask name)\.|: '.+' does not exist\.$))",
     re.MULTILINE,
 )
 
