@@ -101,7 +101,6 @@ Standards for Python modules, lookup plugins, and filter plugins under
 - Validate input only to prevent a crash, a partial change, a run that
   never converges, or an action on the wrong resource; let the provider
   reject everything else.
-- Do not add validation for unverified provider behavior.
 - Model each valid alternate identifier with relationship validators.
 
 #### State and check mode
