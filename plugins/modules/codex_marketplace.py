@@ -76,7 +76,11 @@ options:
     type: path
   name:
     description:
-      - Marketplace name declared by its marketplace manifest.
+      - Marketplace name declared by its marketplace manifest, which is the
+        name Codex lists.
+      - Codex keeps a configured marketplace under the name it had when
+        added. After its manifest name changes, remove it with O(state=absent)
+        and the originally configured name.
       - When O(source) declares a different name, the module fails. A
         marketplace this module just added is removed again when Codex lists
         it, while an existing marketplace with the declared name is kept.
