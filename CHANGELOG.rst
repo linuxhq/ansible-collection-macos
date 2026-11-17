@@ -4,6 +4,17 @@ linuxhq.macos Release Notes
 
 .. contents:: Topics
 
+v1.1.10
+=======
+
+Bugfixes
+--------
+
+- codex_marketplace - report C(changed=true) when listing or removing marketplaces fails after Codex added a marketplace in the same run.
+- codex_plugin - report C(changed=true) when listing plugins fails after Codex installed the plugin in the same run.
+- homebrew_cask_info - omit an empty cask name, which Homebrew rejects as invalid, instead of failing, as documented and as M(linuxhq.macos.homebrew_info) and M(linuxhq.macos.homebrew_services_info) already do.
+- homebrew_cask_info - omit names that Homebrew rejects as invalid cask names, such as names that contain a space or too many slashes, instead of failing, as documented and as M(linuxhq.macos.homebrew_info) and M(linuxhq.macos.homebrew_services_info) already do.
+
 v1.1.9
 ======
 

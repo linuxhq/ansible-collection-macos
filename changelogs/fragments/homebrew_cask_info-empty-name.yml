@@ -1,5 +1,0 @@
----
-bugfixes:
-  - homebrew_cask_info - omit an empty cask name, which Homebrew rejects as invalid, instead of
-    failing, as documented and as M(linuxhq.macos.homebrew_info) and
-    M(linuxhq.macos.homebrew_services_info) already do.
