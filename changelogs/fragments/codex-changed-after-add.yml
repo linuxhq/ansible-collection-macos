@@ -1,0 +1,6 @@
+---
+bugfixes:
+  - codex_marketplace - report C(changed=true) when listing or removing marketplaces fails after
+    Codex added a marketplace in the same run.
+  - codex_plugin - report C(changed=true) when listing plugins fails after Codex installed the
+    plugin in the same run.

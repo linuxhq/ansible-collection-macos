@@ -189,13 +189,14 @@ from ansible_collections.linuxhq.macos.plugins.module_utils.codex import (
 )
 
 
-def marketplaces(module, missing=None):
+def marketplaces(module, missing=None, changed=False):
     return codex_list(
         module,
         ["plugin", "marketplace", "list", "--json"],
         "marketplaces",
         "gather Codex marketplace information",
         missing,
+        changed,
     )
 
 
@@ -207,12 +208,12 @@ def select_marketplace(listed, name):
     )
 
 
-def find_listed(module, name):
-    return select_marketplace(marketplaces(module), name)
+def find_listed(module, name, changed=False):
+    return select_marketplace(marketplaces(module, changed=changed), name)
 
 
-def find_marketplace(module):
-    return find_listed(module, module.params["name"])
+def find_marketplace(module, changed=False):
+    return find_listed(module, module.params["name"], changed)
 
 
 def add_marketplace(module):
@@ -231,12 +232,13 @@ def add_marketplace(module):
     return codex_run_json(module, args, f"add Codex marketplace {name} from {source}")
 
 
-def remove_marketplace(module, name, missing=None):
+def remove_marketplace(module, name, missing=None, changed=False):
     return codex_run_json(
         module,
         ["plugin", "marketplace", "remove", "--json", "--", name],
         f"remove Codex marketplace {name}",
         missing,
+        changed,
     )
 
 
@@ -262,21 +264,21 @@ def ensure_present(module, listed):
                 module.fail_json(changed=True, msg=f"{msg} Codex replaced the existing marketplace {added_name}.")
 
             # An unlisted marketplace may be an existing one Codex replaced while plugins are disabled.
-            if find_listed(module, added_name) is None:
+            if find_listed(module, added_name, changed=True) is None:
                 module.fail_json(
                     changed=True,
                     msg=f"{msg} Codex added marketplace {added_name} but does not list it, so it was not removed; "
                     "Codex plugins may be disabled (features.plugins).",
                 )
 
-            remove_marketplace(module, added_name)
+            remove_marketplace(module, added_name, changed=True)
 
         module.fail_json(msg=msg)
 
     if result["alreadyAdded"] and marketplace is not None:
         return False, marketplace
 
-    marketplace = find_marketplace(module)
+    marketplace = find_marketplace(module, changed=not result["alreadyAdded"])
     if marketplace is None:
         module.fail_json(
             changed=not result["alreadyAdded"],

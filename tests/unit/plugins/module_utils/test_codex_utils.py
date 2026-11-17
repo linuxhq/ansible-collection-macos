@@ -22,6 +22,17 @@ def test_cli_failure(run_module, response, message):
     assert command.call_count == 2
 
 
+@pytest.mark.parametrize("changed", [False, True])
+def test_cli_failure_reports_changed(monkeypatch, changed):
+    monkeypatch.setattr(codex, "codex_run", lambda _module, _args: (1, "", "Error: boom\n"))
+    module = Mock()
+    module.fail_json.side_effect = SystemExit
+    with pytest.raises(SystemExit):
+        codex.codex_list(module, ["plugin", "list", "--json"], "installed", "list plugins", changed=changed)
+
+    module.fail_json.assert_called_once_with(changed=changed, msg="Unable to list plugins: Error: boom")
+
+
 def test_config_directory_is_passed_to_command(run_module, tmp_path):
     config = tmp_path / "config with spaces"
     config.mkdir()

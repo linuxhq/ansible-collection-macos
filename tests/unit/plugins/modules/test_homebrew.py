@@ -190,6 +190,7 @@ def test_services_duplicates_are_removed(run_module, tmp_path):
         "Error: Cask 'it's' is unavailable: No Cask with this name exists.\n",
         "Error: Cask 'foo bar' is unavailable: Invalid cask name.\n",
         "Error: Cask 'a/b/c/d' is unavailable: Invalid cask name.\n",
+        "Error: Cask '' is unavailable: Invalid cask name.\n",
     ],
 )
 def test_unavailable_variants_are_omitted(run_module, stderr):
