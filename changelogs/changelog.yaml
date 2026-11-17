@@ -379,3 +379,64 @@ releases:
     - privoxy_present_crashed_service.yml
     - v1.1.8.yml
     release_date: '2026-11-15'
+  1.1.9:
+    changes:
+      breaking_changes:
+      - codex_marketplace and codex_plugin - pass arguments to the Codex CLI literally.
+        Environment variables such as C($HOME) and the home-directory prefixes C(~)
+        and C(~user/) in arguments are no longer expanded, so an O(name) or O(marketplace)
+        built from them, or a codex_marketplace O(source) such as C($HOME/marketplace)
+        or C(~user/marketplace), must be written out in full. Codex still expands
+        a leading C(~/) in the O(source) of a local marketplace (https://github.com/linuxhq/ansible-collection-macos/pull/80).
+      - homebrew_info, homebrew_cask_info, and homebrew_services_info - pass names
+        to brew literally. Environment variables such as C($HOME) and the home-directory
+        prefixes C(~) and C(~user/) in names are no longer expanded (https://github.com/linuxhq/ansible-collection-macos/pull/80).
+      bugfixes:
+      - codex_marketplace - with O(state=present), add a marketplace whose name is
+        also used by a built-in or discovered marketplace instead of failing because
+        that marketplace has no configured source. Codex adds a configured marketplace
+        beside a discovered one and rejects a reserved built-in name, so O(state=present)
+        after O(state=absent) now converges (https://github.com/linuxhq/ansible-collection-macos/pull/86).
+      - codex_marketplace and codex_plugin - a name that contains an environment variable
+        or starts with C(~), such as C($USER), no longer selects a different marketplace
+        or plugin (https://github.com/linuxhq/ansible-collection-macos/pull/80).
+      - codex_marketplace and codex_plugin - pass O(name), O(marketplace), and the
+        codex_marketplace O(source) to the Codex CLI as values even when they start
+        with C(-). Codex parsed a value such as C(--help) as an option, so the module
+        failed with a traceback or never converged (https://github.com/linuxhq/ansible-collection-macos/pull/82).
+      - codex_plugin - when Codex installs a plugin but does not list it afterwards,
+        report the change in the failure (https://github.com/linuxhq/ansible-collection-macos/pull/81).
+      - codex_plugin - with O(state=absent), remove a plugin that Codex no longer
+        lists only when its cache directory matches the case of O(marketplace) and
+        O(name) exactly. On a case-insensitive file system, a name that differed only
+        in case removed another installed plugin (https://github.com/linuxhq/ansible-collection-macos/pull/80).
+      - homebrew_cask_info - omit an unavailable cask whose name contains C('), such
+        as C(it's), instead of failing. Homebrew prints the name unescaped, so the
+        module did not recognize the error (https://github.com/linuxhq/ansible-collection-macos/pull/86).
+      - homebrew_info, homebrew_cask_info, and homebrew_services_info - a name that
+        contains an environment variable or starts with C(~), such as C($USER), no
+        longer queries a different formula, cask, or service (https://github.com/linuxhq/ansible-collection-macos/pull/80).
+      minor_changes:
+      - codex_marketplace and codex_plugin - rely on the JSON output of the Codex
+        CLI instead of checking its structure, and trust a successful C(codex plugin
+        remove) instead of listing the plugin again or checking that its cache directory
+        was removed (https://github.com/linuxhq/ansible-collection-macos/pull/78).
+      - codex_marketplace and codex_plugin - run an existing O(executable) without
+        first checking that it is an executable file; the system rejects one that
+        cannot run (https://github.com/linuxhq/ansible-collection-macos/pull/80).
+      - homebrew_info, homebrew_cask_info, and homebrew_services_info - rely on the
+        JSON output of brew instead of checking its structure (https://github.com/linuxhq/ansible-collection-macos/pull/78).
+      - launchd_info - parse C(launchctl list) output by its tab-separated columns
+        without checking its header, blank lines, or column count, and keep any tab
+        in a label as part of the label (https://github.com/linuxhq/ansible-collection-macos/pull/78).
+    fragments:
+    - codex_homebrew_arguments.yml
+    - codex_marketplace_sourceless_name.yml
+    - codex_option_like_values.yml
+    - codex_plugin_install_failure.yml
+    - codex_response_shapes.yml
+    - homebrew_cask_quoted_name.yml
+    - homebrew_response_shapes.yml
+    - info_module_docs.yml
+    - launchd_info_response_shape.yml
+    release_date: '2026-11-16'
