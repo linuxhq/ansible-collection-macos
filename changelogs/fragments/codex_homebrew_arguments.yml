@@ -9,10 +9,11 @@ breaking_changes:
     variables such as C($HOME) and the home-directory prefixes C(~) and C(~user/) in names are no longer expanded
     (https://github.com/linuxhq/ansible-collection-macos/pull/80).
 bugfixes:
-  - codex_marketplace and codex_plugin - a name that contains an environment variable or C(~), such as C($USER), no
-    longer selects a different marketplace or plugin (https://github.com/linuxhq/ansible-collection-macos/pull/80).
+  - codex_marketplace and codex_plugin - a name that contains an environment variable or starts with C(~), such as
+    C($USER), no longer selects a different marketplace or plugin
+    (https://github.com/linuxhq/ansible-collection-macos/pull/80).
   - homebrew_info, homebrew_cask_info, and homebrew_services_info - a name that contains an environment variable or
-    C(~), such as C($USER), no longer queries a different formula, cask, or service
+    starts with C(~), such as C($USER), no longer queries a different formula, cask, or service
     (https://github.com/linuxhq/ansible-collection-macos/pull/80).
   - codex_plugin - with O(state=absent), remove a plugin that Codex no longer lists only when its cache directory
     matches the case of O(marketplace) and O(name) exactly. On a case-insensitive file system, a name that differed
