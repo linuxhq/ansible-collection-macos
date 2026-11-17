@@ -1,0 +1,5 @@
+---
+bugfixes:
+  - homebrew_cask_info - omit an unavailable cask whose name contains C('), such as C(it's), instead of failing.
+    Homebrew prints the name unescaped, so the module did not recognize the error
+    (https://github.com/linuxhq/ansible-collection-macos/pull/86).

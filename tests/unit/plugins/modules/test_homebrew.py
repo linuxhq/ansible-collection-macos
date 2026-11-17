@@ -187,6 +187,7 @@ def test_services_duplicates_are_removed(run_module, tmp_path):
         "Error: Cask 'homebrew/cask/missing' is unavailable.\nThis command requires the tap homebrew/cask.\n",
         'Error: No available formula or cask with the name "missing".\n',
         "Error: Cask 'missing' is unavailable: '/opt/homebrew/Library/Taps/u/homebrew-t/Casks/x.rb' does not exist.\n",
+        "Error: Cask 'it's' is unavailable: No Cask with this name exists.\n",
     ],
 )
 def test_unavailable_variants_are_omitted(run_module, stderr):
