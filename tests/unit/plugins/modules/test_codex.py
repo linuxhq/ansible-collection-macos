@@ -351,15 +351,39 @@ def test_existing_marketplace_with_different_source_fails(run_module):
     assert command.call_count == 3
 
 
-@pytest.mark.parametrize("check_mode", [False, True])
-def test_existing_marketplace_without_source_fails(run_module, check_mode):
-    existing = {"name": "example", "root": "/home/test"}
+@pytest.mark.parametrize(
+    "check_mode,responses,marketplace",
+    [
+        (True, [], None),
+        (False, [added(), {"marketplaces": [DISCOVERED, MARKETPLACE]}], MARKETPLACE_RESULT),
+    ],
+)
+def test_marketplace_without_source_is_added_beside(run_module, check_mode, responses, marketplace):
     result, command, _lookup = run_module(
-        codex_marketplace, {"name": "example", "source": SOURCE}, [{"marketplaces": [existing]}], check_mode
+        codex_marketplace,
+        {"name": "example", "source": SOURCE},
+        [{"marketplaces": [DISCOVERED]}, *responses],
+        check_mode,
     )
-    assert result["failed"] is True
-    assert result["msg"] == (f"Codex marketplace example has no configured source and cannot be managed from {SOURCE}.")
-    assert command.call_count == 2
+    assert result == {"changed": True, "marketplace": marketplace}
+    assert command.call_count == 2 + len(responses)
+
+
+def test_marketplace_without_source_rejected_by_codex_fails(run_module):
+    builtin = {"name": "openai-curated", "root": "/home/test/.codex/.tmp/plugins"}
+    stderr = "Error: marketplace `openai-curated` is reserved and cannot be added from this source\n"
+    result, command, _lookup = run_module(
+        codex_marketplace,
+        {"name": "openai-curated", "source": SOURCE},
+        [{"marketplaces": [builtin]}, (1, "", stderr)],
+    )
+    assert result == {
+        "failed": True,
+        "msg": f"Unable to add Codex marketplace openai-curated from {SOURCE}: Error: marketplace `openai-curated` "
+        "is reserved and cannot be added from this source",
+    }
+    assert command.call_count == 3
+    assert command.call_args.args[0] == ["/mock/bin/tool", "plugin", "marketplace", "add", "--json", "--", SOURCE]
 
 
 def test_new_marketplace_with_different_manifest_name_is_removed(run_module):

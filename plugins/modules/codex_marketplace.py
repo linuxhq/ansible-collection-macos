@@ -10,9 +10,17 @@ version_added: "1.1.0"
 description:
   - Add and remove Codex plugin marketplace sources.
   - Marketplace state is managed through the Codex CLI.
+  - With O(state=present), all marketplaces are listed first with C(codex
+    plugin marketplace list), so the module fails while any configured or
+    discovered marketplace fails to load. Remove a broken configured
+    marketplace with O(state=absent), which does not list marketplaces first.
   - With O(state=present), an existing marketplace is passed to C(codex plugin
     marketplace add) again, and Codex decides whether O(source), O(ref), and
     O(sparse) match the configured marketplace.
+  - With O(state=present), a marketplace without a configured source, such as
+    a built-in or discovered marketplace, is not treated as present. O(source)
+    is passed to C(codex plugin marketplace add), and Codex either adds a
+    configured marketplace beside it or rejects the name.
   - Codex replaces an existing local marketplace in place with a Git
     O(source) whose manifest declares the same name.
   - Codex rejects any other change to the O(source), O(ref), or O(sparse) of
@@ -34,10 +42,13 @@ author:
 attributes:
   check_mode:
     description: Can run in check mode and return changed status prediction
-      without modifying the target. An existing marketplace is reported unchanged
-      because check mode cannot verify that O(source) matches its configured
-      source. If Codex is not installed or the Codex home directory
-      (O(config_dir), else E(CODEX_HOME), else C(~/.codex)) does not exist,
+      without modifying the target. An existing configured marketplace is
+      reported unchanged because check mode cannot verify that O(source)
+      matches its configured source. With O(state=present), a marketplace
+      without a configured source, such as a built-in or discovered
+      marketplace, is reported as a change. If Codex is not installed or the
+      Codex home directory (O(config_dir), else E(CODEX_HOME), else
+      C(~/.codex)) does not exist,
       reports a change for O(state=present) and no change for O(state=absent)
       without querying marketplace state. With O(state=absent), reports a
       change without listing marketplaces when the installed marketplace
@@ -69,8 +80,6 @@ options:
       - When O(source) declares a different name, the module fails. A
         marketplace this module just added is removed again when Codex lists
         it, while an existing marketplace with the declared name is kept.
-      - A marketplace without a configured source, such as a built-in or
-        discovered marketplace, cannot be managed with O(state=present).
     required: true
     type: str
   ref:
@@ -235,8 +244,9 @@ def ensure_present(module, listed):
     name = module.params["name"]
     source = module.params["source"]
     marketplace = select_marketplace(listed, name)
+    # Codex adds a configured marketplace beside a built-in or discovered one with the same name, or rejects it.
     if marketplace is not None and not marketplace.get("marketplaceSource"):
-        module.fail_json(msg=f"Codex marketplace {name} has no configured source and cannot be managed from {source}.")
+        marketplace = None
 
     if module.check_mode:
         return marketplace is None, marketplace
