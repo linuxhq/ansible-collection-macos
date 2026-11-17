@@ -209,14 +209,15 @@ def find_marketplace(module):
 def add_marketplace(module):
     name = module.params["name"]
     source = module.params["source"]
-    args = ["plugin", "marketplace", "add", source]
+    args = ["plugin", "marketplace", "add", "--json"]
     if module.params["ref"]:
         args += ["--ref", module.params["ref"]]
 
     for sparse_path in module.params["sparse"] or []:
         args += ["--sparse", sparse_path]
 
-    args.append("--json")
+    # Codex would parse a source that starts with "-" as an option.
+    args += ["--", source]
 
     return codex_run_json(module, args, f"add Codex marketplace {name} from {source}")
 
@@ -224,7 +225,7 @@ def add_marketplace(module):
 def remove_marketplace(module, name, missing=None):
     return codex_run_json(
         module,
-        ["plugin", "marketplace", "remove", name, "--json"],
+        ["plugin", "marketplace", "remove", "--json", "--", name],
         f"remove Codex marketplace {name}",
         missing,
     )
